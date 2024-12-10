@@ -47,6 +47,7 @@ continue:
     sta $4014                ; The OAM DMA copy starts when we write to $4014.
 
     jsr clear_background_tile ; temporary function to test clearing backgriund tiles
+	jsr check_background_collision
 
 	ldx #0
 	stx PPU_SPRRAM_ADDRESS
