@@ -1,0 +1,94 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; 7  bit  0
+; ---- ----
+; VPHB SINN
+; |||| ||||
+; |||| ||++- Base nametable address
+; |||| ||    (0 = $2000; 1 = $2400; 2 = $2800; 3 = $2C00)
+; |||| |+--- VRAM address increment per CPU read/write of PPUDATA
+; |||| |     (0: add 1, going across; 1: add 32, going down)
+; |||| +---- Sprite pattern table address for 8x8 sprites
+; ||||       (0: $0000; 1: $1000; ignored in 8x16 mode)
+; |||+------ Background pattern table address (0: $0000; 1: $1000)
+; ||+------- Sprite size (0: 8x8 pixels; 1: 8x16 pixels – see PPU OAM#Byte 1)
+; |+-------- PPU master/slave select
+; |          (0: read backdrop from EXT pins; 1: output color on EXT pins)
+; +--------- Vblank NMI enable (0: off, 1: on)
+
+.proc nmi
+	; save registers
+	pha
+	txa
+	pha
+	tya
+	pha
+
+	; Check whether we're ready to render, skip to end if not
+	lda nmi_ready
+	bne :+
+	jmp end
+:
+
+	cmp #NMI_SIG_RENDERING_OFF 	; Command to turn off next V-Blank
+	bne continue 			; If nmi_ready != 2, we can render.
+
+	; nmi_ready == 2, clear PPU_MASK
+	lda #0
+	sta PPU_MASK
+	ldx #NMI_SIG_CLEAR
+	stx nmi_ready
+	jmp end
+
+continue:
+    lda #$02                 ; Every frame, we copy spite data starting at $02**.
+    sta $4014                ; The OAM DMA copy starts when we write to $4014.
+
+    jsr clear_background_tile ; temporary function to test clearing backgriund tiles
+
+	ldx #0
+	stx PPU_SPRRAM_ADDRESS
+	lda #>oam
+	sta SPRITE_DMA
+
+	; Set PPU address to $3F00. This process is a bit strange,
+	; you write the upper and lower byte to this same pointer sequentially.
+	lda #>PPU_ADDR_PALETTE
+	sta PPU_VRAM_ADDRESS2
+	stx PPU_VRAM_ADDRESS2
+
+	lda PPU_STATUS
+	lda #%10010000                         ;there's also a PPU_CONTROL in main.65 in the vblank wait change that one as well
+	sta PPU_CONTROL
+
+	; Reset scroll
+	lda #$00
+	sta PPU_VRAM_ADDRESS1
+	sta PPU_VRAM_ADDRESS1
+
+	ldx #0 		; Using the X register as the loop index.
+transfer_loop:
+	lda palette, x
+	sta PPU_VRAM_IO
+	inx
+	cpx #32		; sizeof(palette)
+	bcc transfer_loop
+
+	; Enable rendering
+	lda #%00011110
+	sta PPU_MASK
+
+	ldx #NMI_SIG_CLEAR
+	stx nmi_ready
+
+end:
+	; pop registers
+	pla
+	tay
+	pla
+	tax
+	pla
+	rti
+.endproc

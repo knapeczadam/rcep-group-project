@@ -1,0 +1,14 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.include "constants.inc"
+
+.include "macros.inc"
+
+.include "segments/header.s65"
+.include "segments/zp.s65"
+.include "segments/oam.s65"
+.include "segments/bss.s65"
+.include "segments/rodata.s65"
+.include "segments/code.s65"
+.include "segments/vectors.s65"

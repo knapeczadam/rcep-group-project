@@ -1,0 +1,19 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; The NES 2.0 header
+;; https://www.nesdev.org/wiki/INES
+;; https://www.nesdev.org/wiki/NES_2.0
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.segment "HEADER"
+.byte $4E, $45, $53, $1A               ; 0-3: Identification String. Must be "NES<EOF>"
+.byte $02                              ;   4: Size of PRG-ROM in 16 KB units                                                       | 2 * 16 KB = 32 KB
+.byte $00                              ;   5: Size of CHR-ROM in  8 KB units                                                       | value 0 means the board uses CHR-RAM
+.byte %00000001                        ;   6: Mapper number, Alternative nametables, Trainer, Battery, Hard-wired nametable layout | 1: horizontal arrangement ("mirrored vertically")
+.byte %00001000                        ;   7: Mapper number, NES 2.0 identifier, Console type                                      | NES 2.0 identifier (bit 3) is set
+.byte $00                              ;   8: Mapper MSB/Submapper                                                                 | 
+.byte $00                              ;   9: PRG-ROM/CHR-ROM size MSB                                                             | 
+.byte $00                              ;  10: PRG-RAM/EEPROM size                                                                  | 
+.byte $07                              ;  11: CHR-RAM size                                                                         | 7: 8 KB
+.byte $01                              ;  12: CPU/PPU Timing                                                                       | 1: RP2C07 ("Licensed PAL NES") 
+.byte $00                              ;  13: Vs. System Type/Extended Console Type                                                | 
+.byte $00                              ;  14: Miscellaneous ROMs                                                                   | 
+.byte $01                              ;  15: Default Expansion Device                                                             | 1: Standard Controllers

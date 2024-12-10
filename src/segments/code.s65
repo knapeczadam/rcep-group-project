@@ -1,0 +1,184 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.segment "CODE"
+
+.include "code/shooting.s65"
+.include "code/upscaling.s65"
+
+.include "code/nmi.s65"
+.include "code/reset.s65"
+.include "code/irq.s65"
+
+.proc ppu_signal
+	sta nmi_ready
+
+loop:
+	lda nmi_ready
+	bne loop
+
+	rts
+.endproc
+
+.proc ppu_update
+	lda #NMI_SIG_RENDERING_ON
+	
+	jmp ppu_signal
+.endproc
+
+.proc ppu_off
+	lda #NMI_SIG_RENDERING_OFF
+
+	jmp ppu_signal
+.endproc
+
+.proc clear_nametable
+	lda PPU_STATUS
+
+	; Set PPU address to first nametable address
+	lda #>PPU_ADDR_NT_0
+	sta PPU_VRAM_ADDRESS2
+	lda #<PPU_ADDR_NT_0
+	sta PPU_VRAM_ADDRESS2
+
+	; Clear the name table
+	lda #0
+	ldy #30
+row_loop:
+	ldx #32
+
+col_loop:
+	sta PPU_VRAM_IO
+	dex
+	bne col_loop
+
+	dey
+	bne row_loop
+
+	; Clear attribute table
+	ldx #64
+loop:
+	sta PPU_VRAM_IO
+	dex
+	bne loop
+
+	rts
+.endproc
+
+.proc main
+	ldx #0
+
+paletteloop:
+	lda default_palette, x
+	sta palette, x
+	inx
+	cpx #32
+	bcc paletteloop
+
+	jsr clear_nametable
+
+	lda PPU_STATUS
+	lda #>PPU_ADDR_NT_0
+	sta PPU_VRAM_ADDRESS2
+	lda #<PPU_ADDR_NT_0
+	sta PPU_VRAM_ADDRESS2
+
+	ldx #0
+	ldy #0			; Character index on curent line
+text_loop:
+	lda welcome_txt, x
+	inx
+	cmp #NEWLINE
+	beq while_prepare	; Check if newline, if so, start newline logic.
+	sta PPU_VRAM_IO
+	iny			; ++currentLineChar;
+	jmp :+
+
+while_prepare:
+	lda #' '		; Load space into A for writing
+	; while (Y++ < MAX_LINE_CHARS - 1) write(' ');
+while:
+	cpy #MAX_LINE_CHARS
+	bcs exit_while		; Break out of while loop if Y >= MAX_LINE_CHARS - 1
+	sta PPU_VRAM_IO
+	iny
+	jmp while
+
+exit_while:
+	ldy #0			; Clear the current line character index
+:
+	cmp #NULL_TERM		; stop at null terminator
+	beq :+
+	jmp text_loop
+:
+	
+	; Temporary code to show the upscaled Letter
+	; lda PPU_STATUS
+	; lda #$07              
+	; sta PPU_VRAM_ADDRESS2                 ; Write high byte to PPU address register
+	; lda #$60              
+	; sta PPU_VRAM_ADDRESS2                 ; Write low byte to PPU address register
+
+    ldx #240                                ; Just padding
+padding:
+	lda #$00
+	sta PPU_VRAM_IO
+	dex
+	cpx #0
+	beq :+
+	jmp padding
+:
+
+	lda #$78
+	sta PPU_VRAM_IO
+
+	lda #$7A
+	sta PPU_VRAM_IO
+
+    lda #$78
+	sta PPU_VRAM_IO
+
+	lda #$7A
+	sta PPU_VRAM_IO
+
+    ldx #28                                ; Just padding
+more_padding:
+	lda #$00
+	sta PPU_VRAM_IO
+	dex
+	cpx #0
+	beq :+
+	jmp more_padding
+:
+
+    lda #$79
+	sta PPU_VRAM_IO
+
+	lda #$7B
+	sta PPU_VRAM_IO
+
+    lda #$79
+	sta PPU_VRAM_IO
+
+	lda #$7B
+	sta PPU_VRAM_IO
+
+    ; End temp Code for upscale
+
+	jsr ppu_update
+
+main_loop:
+	lda nmi_ready
+	; cmp #0 unnecessary because lda already sets this flag based on the value
+	bne main_loop
+
+ 	jsr gamepad_poll ; read the gamepad
+    jsr move_bullet
+    jsr find_bg_tile_position
+
+	lda #1
+	sta nmi_ready
+	jmp main_loop
+.endproc
+
+; .out .sprintf("%d", * - irq)

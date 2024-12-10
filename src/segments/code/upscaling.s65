@@ -1,0 +1,309 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+.proc copy_tiles_chr
+  lda #<tiles_chr                       ; load the source address into a pointer in zero page
+  sta temp16bit_ptr
+  lda #>tiles_chr
+  sta temp16bit_ptr+1
+
+  ldy #0                                ; starting index into the first page
+  sty PPU_MASK                          ; Turn off rendering just in case
+  sty PPU_VRAM_ADDRESS2                 ; Set the destination address high byte
+  sty PPU_VRAM_ADDRESS2                 ; Set the destination address low byte
+  ldx #32                               ; number of 256-byte pages to copy
+loop:
+  lda (temp16bit_ptr),y                 ; copy one byte
+  sta PPU_VRAM_IO
+  iny
+  bne loop                              ; repeat until we finish the page
+  inc temp16bit_ptr+1                   ; go to the next page
+  dex
+  bne loop                              ; repeat until we've copied enough pages
+  rts
+.endproc
+
+.proc copy_lowercase_text
+; This copies the lower case letters to the Second Pattern Table (actually it copies the two lines containing the letters because math is hard :cry:)
+  lda #<tiles_chr                       ; load the source address into a pointer in zero page
+  sta temp16bit_ptr
+  lda #>tiles_chr
+  clc                                   ; Clear the carry for addition
+  adc #$04                              ; Add 4 so we start on the 4th row
+  sta temp16bit_ptr+1
+  
+  lda #0
+  sta PPU_MASK                          ; Turn off rendering just in case
+  lda #$14                              ; High byte address for the second pattern table of the position for the letter A (#$10 + high nibble of "A" (#$41))
+  sta PPU_VRAM_ADDRESS2                 ; Set the destination address high byte
+  lda #$00                              ; Low byte address for the second pattern table of the position for the letter A (#$00 + low nibble of "A" (#$41) (low nibble is #$10 this is important because one tiles stores 16bytes so if we want to start at A we need to add 16 not 1))
+  sta PPU_VRAM_ADDRESS2                 ; Set the destination address low byte
+  
+  ldy #0                                
+  ldx #2                                ; Number of rows to copy
+loop:
+  lda (temp16bit_ptr),y                 ; Copy one byte
+  sta PPU_VRAM_IO                       ; Store it in the patter table at the previously given address
+  iny                                   ; Increase Y
+  ; cpy #$FF                              ; Compare it 255 otherwise it will only be equal to zero on 255 + 1 copying one extra byte of data. Which would not be a problem if we copied the whole table
+  bne loop                              ; If Y != 255 then repeat
+  inc temp16bit_ptr+1                   ; Go to the next row
+  dex                                   ; Decrease the row count
+  bne loop                              ; If X = 0 then we copied all the rows we want
+  rts                                   ; return
+.endproc
+
+.proc get_tile_position
+  tay                                   ; Save the value for later
+  lsr a                                 ; Shift right to move the high nibble into the low nibble position
+  lsr a                                 ; Repeat
+  lsr a                                 ; Repeat
+  lsr a                                 ; Now the high nibble is in the lower 4 bits
+  tax                                   ; Transfer the accumulator (high nibble) to the X register  
+  tya                                   ; Reload the original value into the accumulator
+  and #$0F                              ; Mask out the high nibble to keep only the low nibble
+  asl a                                 ; Same thing but other way around
+  asl a
+  asl a
+  asl a
+  tay                                   ; Transfer the accumulator (low nibble) to the Y register
+  rts
+.endproc
+
+.proc upscale_text_data
+  ; Input: A in the accumulator (e.g., 0x6A = 0110 1010)
+  ; Output: creates two bytes from the left nibble and right nible => 0011 1100 and 1100 1100
+  ; Stores both bytes into temporary ZP respectively in y and y + 32
+  ; Also duplicates the bytes vertically so stored in ZP respectively y+1 and y+1 + 32
+
+  sta byte_holder                       ; Store the byte we will modify
+  sed                                   ; Set the D flag
+  dex                                   ; Decrease X because X starts at 16 but we want values between 0-15
+
+; Weird stuff to map Y to the correct offset in ZP 
+; If you seperate the 8x8 tiles into 4 2x2. top left = 1, top right = 2, bottom left = 3, bottom right = 4 (can also be seen as 4 chunks of 4 bytes of data)
+; I want to put into ZP the tiles in order 1 - 3 - 2 - 4, because it's easier to do math later
+  stx $01                               ; Store X in temporary location
+  lda $01                               ; Copy X to A for manipulation
+  lsr                                   ; Divide A by 4 (get the group number in bits 0–1)
+  lsr                                   ; (each lsr shifts 1 bit right)
+  tay                                   ; Store group number in Y
+  lda group_table,y                     ; Look up base offset for the group
+  tay                                   ; Store the base offset in Y
+  lda $01                               ; Reload X into A
+  and #%00000011                        ; Keep the two lsb to get the value of the offset in base 4 (0–3)
+  sta $01                               ; Store it for later use (Don't need X anymore)
+  tya                                   ; Transfer Y to A for the substraction
+  sec                                   ; Set Carry
+  sbc $01                               ; Substract Y from A where Y is the the offset in base 4 and A is the Offset of the group table
+  asl                                   ; Shift Left to double it because we want to duplicate vertically and write to y+1 so a vale of 1 should not write to y = 1 but y = 2 so that you dont overwite the y+1 from previous iteration
+  tay                                   ; Transfer A to Y for use at the end
+
+;can move this down to flag_is_clear since i check at the end anyways just dont remove the jmp:+ because we still need to skip that part the first time around
+begin:
+  php                                   ; Push the status register onto the stack
+  pla                                   ; Pull it back into the accumulator
+  and #%00001000                        ; Mask out the D flag
+  beq flag_is_clear                     ; Branch if the D flag is not set
+  lda byte_holder                       ; Load the byte we need to manipulate
+  and #$F0                              ; Mask out the low nibble, keeping only the high nibble for this loop iteration
+  jmp :+                                ; Skip over the flag_is_clear
+flag_is_clear:
+  tya                                   ; Transfer Y to A for addition
+  clc                                   ; Clear Carry
+  adc #$20                              ; Add an offset of 32 for chunk 2 and 4 to A
+  tay                                   ; Transfer A back to Y
+
+  lda byte_holder                       ; Load the byte we need to manipulate
+  and #$0F                              ; Mask out the high nibble, keeping only the low nibble for this loop iteration
+:
+
+  sta temp_8_bit_holder                 ; Store the nibble for later use
+  clc                                   ; Clear carry we will use it to know what value each bit in the nibble has
+  lda #$00                              ; Load zero into the accumulator
+  sta temp_byte                         ; Store zero directly into `temp_byte`, temp_byte will be the final modified byte so we reset it here (though it might not be needed since we wright all 8 bits to it)
+
+  ldx #4                                ; Using X to iterate over the nibble's 4 bits
+loop:
+  lsr temp_byte                         ; Right shift to set a zero in msb
+  lsr temp_byte                         ; Right shift again to set another zero in msb (we rotate from memory here because lsr and asl change the carry with msb/lsb)
+
+  php                                   ; Push the status register onto the stack
+  pla                                   ; Pull it back into the accumulator
+  and #%00001000                        ; Mask out the D flag
+  beq second_check_d_flag_clear         ; Branch if the D flag is not set
+  lda temp_8_bit_holder                 ; Load the nibble
+  rol                                   ; Rotate left to put msb in Carry flag (case left nibble)
+  jmp :+                                ; Skip over the flag clear
+second_check_d_flag_clear:
+  lda temp_8_bit_holder                 ; Load the nibble
+  ror                                   ; Rotate right instead to put lsb in Carry flag (case right nibble)
+:
+
+  sta temp_8_bit_holder                 ; Store rotated nibble back in temp
+  lda temp_byte                         ; Load the byte we will modify
+  bcc :+                                ; If lsb/msb is 0 skip over because we already added two zeroes in temp_byte with lsr
+  ora #$C0                              ; Replace the two zeroes with ones -> 0000 0000 || 1100 0000 to temp_byte
+:
+
+  sta temp_byte                         ; Store the change
+  dex                                   ; Decrease X
+  cpx #$00                              ; Set/Clear zero flag
+  bne loop                              ; if not Zero loop back for the other bits of the nibble
+  
+  php                                   ; Push the status register onto the stack
+  pla                                   ; Pull it back into the accumulator
+  and #%00001000                        ; Mask out the D flag
+  beq do_not_invert                     ; Skip if the D flag is not set
+                                        ; Invert the byte
+  lda #$00                              ; Start with a cleared accumulator for the result
+  sta temp_8_bit_holder                 ; temp_8_bit_holder storage for the reversed bits
+  ldx #$08                              ; Set up loop counter for 8 bits
+
+reverse_loop:
+  asl temp_byte                         ; Shift the leftmost bit of input_byte into the carry
+  ror temp_8_bit_holder                 ; Rotate the carry bit into the result (temp_8_bit_holder)
+  dex                                   ; Decrement the loop counter
+  bne reverse_loop                      ; Repeat until all 8 bits are processed
+  lda temp_8_bit_holder                 ; Load the reversed byte back into A
+  jmp :+                                ; Skip over the empty byte
+do_not_invert:
+  lda temp_byte                         ; Load the byte
+:
+  sta temp_64_byte_storage,y            ; Nibble as been turned into a byte we now store it in ZP + offset Y
+  sta temp_64_byte_storage+1,y          ; Store a copy of it so that we also have a vertical duplication and not just horizontal
+
+  php                                   ; Push the status register onto the stack
+  pla                                   ; Pull it back into the accumulator
+  and #%00001000                        ; Mask out the D flag
+  beq third_check_d_flag_clear          ; Branch if the D flag is not set
+  cld                                   ; If we did the Left nibble clear D flag and repeat for the right nibble
+  jmp begin                             ; Loop back for the other nibble
+third_check_d_flag_clear:
+
+  rts                                   ; Return from Subroutine
+.endproc
+
+.proc temp_map_new_VRAM_address
+; Set the target PPU VRAM address, we currently calculate the mapping as such lower case stay the same so uppcase letter are like so: #$60 + (tile value - #$41) x 4
+; That way we start above the lower case text and account for the the 4tiles they each take
+;*********************************************************************************************
+; NEED TO ADD A CHECK FOR NON-ALPHABET TILES, THIS MAPPER ONLY COMPATIBLE FOR UPSCALED LETTERS
+;*********************************************************************************************
+  lda temp_address_holder               ; Load the original address of the tile
+  sec                                   ; Ensure carry is set for subtraction
+  sbc #$41                              ; Subtract #$41 from the tile value
+  asl                                   ; Multiply by 2 (shift left once)
+  asl                                   ; Multiply by 4 (shift left again)
+  clc                                   ; Clear carry for addition
+  adc #$60                              ; Add #$60 to the result
+
+  ; Extract and rearrange the nibbles
+  tay                                   ; Store the result temporarily in Y
+  and #$F0                              ; Isolate the high nibble
+  lsr                                   ; Shift the high nibble to the low nibble position
+  lsr                                   ; Repeat
+  lsr                                   ; Repeat
+  lsr                                   ; Repeat
+  ora #$10                              ; Combine with #$10 to write to the high byte of PPU address
+  sta PPU_VRAM_ADDRESS2                 ; Write high byte to PPU address register
+
+  tya                                   ; Reload the full result from Y
+  and #$0F                              ; Isolate the low nibble
+  asl                                   ; Shift low nibble to the high nibble position
+  asl                                   ; Repeat
+  asl                                   ; Repeat
+  asl                                   ; Repeat
+  sta PPU_VRAM_ADDRESS2                 ; Write low byte to PPU address register
+
+  ldx #$40                              ; How many bits we need to transfer from ZP to VRAM
+  ldy #$00                              ; Offset
+loop:  
+  lda temp_64_byte_storage,y            ; Load the upscaled info from ZP into accumulator
+  sta PPU_VRAM_IO                       ; Write it to the VRAM (this one is will automatically increment which is why the weird chunk division was done, because I don't know how to change the exact byte I want in VRAM without the automatic inrement)
+  iny                                   ; Increment offset
+  dex                                   ; Decrease X
+  cpx #$00                              ; Check if X == 0
+  bne loop                              ; If not keep looping
+
+  rts                                   ; Return from Subroutine
+.endproc
+
+.proc test_create_upscale
+
+  ; lda #$47                              ; Load the value $59 into the accumulator this will be replaced by reading whatever text we want
+  sta temp_address_holder               ; Store the address of the tile for mapping later
+  jsr get_tile_position                 ; Jump to subroutine to Get X and Y of the tile
+
+  ; Load the source address of tiles_chr into a temporary pointer in zero-page
+  lda #<tiles_chr                       ; Load low byte of tiles_chr address
+  sta temp16bit_ptr                     ; Store it in temp16bit_ptr
+  lda #>tiles_chr                       ; Load high byte of tiles_chr address
+  sta temp16bit_ptr+1                   ; Store it in temp16bit_ptr+1
+
+set_tile_row:                           ; Move the pointer to point to the correct Y location (simple for loop)
+  cpx #$00                              ; if x == 0
+  beq :+                                ; exit loop
+  inc temp16bit_ptr+1                   ; else increase pointer column
+  dex                                   ; Decrease X
+  jmp set_tile_row                      ; Loop Back
+:
+
+ 
+  ; Copy 16 bytes 
+  ; 16bytes is the total information in a tile
+  ; 8x8 pixels is 64 pixels, each pixel is two bits of information, total is 128 bits which is 16 bytes
+  ; I'm not sure what the bits represents exactly as the two bits per pixel tell which color in the palette table to take
+  ; However the first byte (byte 0) does not contain the info of 4 pixels but rather half the info of the first 8 pixels
+  ; The 9th byte (byte 8) contains the second half of the first 8 pixels
+  ; Copying the 9th byte into memory using the latch will put set it automatically as the second half information of the pixel. 
+  ; If you iterate step by step over the loop you will notice that the "shape" is copied first with the previous second half information overlaying
+  ; And starting at byte 8 it will overlap the "shape" and now give it the second half of the information. which gives it the proper "color"
+  ldx #$10                              
+copy_loop:
+  ; Push X and Y to the stack
+  txa                                   ; Transfer X to A
+  pha                                   ; Push A onto the stack
+  tya                                   ; Transfer Y to A
+  pha                                   ; Push A onto the stack 
+
+  lda (temp16bit_ptr),y                 ; Load a byte from tiles_chr using indirect Y addressing (adjusting the X position of the tile, don't forget tile one starts at bit 16 not 1)
+  jsr upscale_text_data                 ; Jump to subroutine duplicating and expanding the bytes
+
+  ; Pull Y and X back from the stack
+  pla                                   ; Pull A from the stack (was Y)
+  tay                                   ; Transfer A to Y
+  pla                                   ; Pull A from the stack (was X)
+  tax                                   ; Transfer A to X
+
+  iny                                   ; Increment Y to move to the next byte
+  dex                                   ; Decrement X (number of bytes remaining to copy)
+  bne copy_loop                         ; Repeat until X reaches zero
+
+  jsr temp_map_new_VRAM_address         ; Now write the info from ZP to VRAM
+
+  rts                                   ; Return from the subroutine
+.endproc
+
+.proc write_data_to_chr
+; Loop thorugh all 26 letters copy then and upscale them
+  ldx #0                                ; Initialize X to iterate over the 26 letters
+:
+  stx $01                               ; Load X in ZP for addition
+  txa                                   ; Transfer X to A to push on stack
+  pha                                   ; Push A on the stack 
+  clc                                   ; Clear carry for addition
+  lda #$41                              ; Load first letter location "A"
+  adc $01                               ; Add X to the result
+  jsr test_create_upscale               ; Upscale the letter
+  pla                                   ; Get X back from the stack
+  tax                                   ; Transfer it to X
+  inx                                   ; Increase X
+  cpx #$1A                              ; Is X = 26?
+  bne :-                                ; If not loop back
+
+  jsr copy_lowercase_text               ; Copy the lower case letters to the table
+
+  rts
+.endproc

@@ -1,0 +1,220 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Sprite Attribute Byte:
+;-----------------------
+; 76543210
+; |||   ||
+; |||   ++- Color Palette of sprite. Choose which set of 4 from the 16 colors to use
+; |||
+; ||+------ Priority (0: in front of background; 1: behind background)
+; |+------- Flip sprite horizontally
+; +-------- Flip sprite vertically
+
+bullet_data:
+;      Y   tile#   attribs     X
+.byte $50,  $04,  %00000000,  $50           ; OAM sprite 1 at (x: 16, y: 16)
+
+;; TODO SET UP VARIABLES FOR THE POSITIONS
+.proc gamepad_poll
+	lda gamepad                            ; Load current state of gamepad to check button press/released
+	pha                                    ; Push it on the stack
+
+	; strobe the gamepad to latch current button state
+	lda #1
+	sta JOYPAD1
+	lda #0
+	sta JOYPAD1
+
+	ldx #8                                 ; Read 8 bytes from the interface at $4016 (yes bytes not bits the controller returns a whole byte based on the bit of the current button)
+loop:
+	pha                                    ; Push to the stack the values we are reading
+	lda JOYPAD1                            ; Get the value of the current button we're checking
+	and #%00000011                         ; Only keep the low two bits (the rest is noise but do we need to mask it?)                   
+	cmp #%00000001                         ; Compare the lsb it contains the information of the current button we're checking
+	pla                                    ; Load back the values for the rotation
+	ror                                    ; rotate carry into gamepad variable
+	dex                                    ; --x
+	bne loop                               ; If x != 0 loop back
+
+	sta gamepad                            ; Store the values into gamepad
+	pla                                    ; Load values of gamepad from previous frame
+	sta temp_byte                          ; temp storage
+	eor gamepad                            ; old_gamepad XOR gamepad
+	and temp_byte                          ; (old_gamepad XOR gamepad) AND old_gamepad
+	sta gamepad_released                   ; Store the released buttons
+
+	rts                                    ; return
+.endproc
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Subroutine to load Bullet Sprite into OAM-RAM starting at $0200
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.proc load_bullet
+    ldx #0
+LoopSprite:
+    lda bullet_data,x                       ; We fetch bytes from the SpriteData lookup table
+    sta $0200,x                             ; We store the bytes starting at OAM address $0200
+    inx                                     ; ++x
+    cpx #4
+    bne LoopSprite                          ; Loop 4 times (1 hardware sprite, 4 bytes each)
+    rts
+.endproc
+
+; this code currently only moves the first sprite in the oam. Since there's only one sprite its fine for now but will need to either keep track of which sprite is where if we add more
+.proc move_bullet 
+    lda bullet_info                          ; Load the current bullet_info byte
+    and #%11111100                           ; Clear bits 0 and 1 for idle state default
+    sta bullet_info                          ; Store the updated value back to bullet_info
+
+    lda gamepad                              ; Load gamepad state
+    and #PAD_L                               ; Check agains Left button
+ 	beq NOT_GAMEPAD_LEFT                     ; If not skip
+ 		lda oam + 3                          ; Get current X of first sprite
+ 		cmp #0                               ; Check if sprite is already at position 0
+ 		beq NOT_GAMEPAD_LEFT                 ; If so then don't move left
+ 		sec                                  ; Set carry
+ 		sbc #1                               ; Substract 1
+ 		sta oam + 3                          ; Store X - 1 to X
+        
+        lda bullet_info                      ; Load the current bullet_info byte
+        and #%11111100                       ; Clear bits 0 and 1
+        ora #%00000011                       ; Combine with the direction for left 11
+        sta bullet_info                      ; Store the updated value back to bullet_info
+
+NOT_GAMEPAD_LEFT:
+ 	lda gamepad                              ; Load gamepad state
+ 	and #PAD_R                               ; Check agains Right button
+ 	beq NOT_GAMEPAD_RIGHT                    ; If not skip
+ 		lda oam + 3                          ; Get current X of first sprite
+ 		cmp #248                             ; Check if sprite is already at position 248 (256 - 8)
+ 		beq NOT_GAMEPAD_RIGHT                ; If so then don't move right
+ 		clc                                  ; Clear carry
+ 		adc #1                               ; Add 1
+ 		sta oam + 3                          ; Store X + 1 to X
+
+        lda bullet_info                      ; Load the current bullet_info byte
+        and #%11111100                       ; Clear bits 0 and 1
+        ora #%00000001                       ; Combine with the direction for right 01
+        sta bullet_info                      ; Store the updated value back to bullet_info
+
+NOT_GAMEPAD_RIGHT:
+	lda gamepad                              ; Load gamepad state
+	and #PAD_U                               ; Check agains UP button
+	beq NOT_GAMEPAD_UP                       ; If not skip   
+		lda oam                              ; Get current Y of the first sprite      
+		cmp #0                               ; Check if Y is already 0
+		beq NOT_GAMEPAD_UP                   ; If so don't move up
+		sec                                  ; Set carry   
+		sbc #1                               ; Substract 1
+		sta oam                              ; Store Y - 1 to Y
+
+        lda bullet_info                      ; Load the current bullet_info byte
+        and #%11111100                       ; Clear bits 0 and 1 
+        ; ora #%00000000                     ; Don't need to combine Up is 00
+        sta bullet_info                      ; Store the updated value back to bullet_info
+
+NOT_GAMEPAD_UP:
+	lda gamepad                              ; Load gamepad state
+	and #PAD_D                               ; Check agains DOWN button
+	beq NOT_GAMEPAD_DOWN                     ; If not skip   
+		lda oam                              ; Get current Y of the first sprite      
+		cmp #232                             ; Check if Y is 232 because maximum Y (240 - 8, since sprite height is 8px)
+		beq NOT_GAMEPAD_DOWN                 ; If so don't move down
+		clc                                  ; Clear carry   
+		adc #1                               ; Add 1
+		sta oam                              ; Store Y + 1 to Y
+
+        lda bullet_info                      ; Load the current bullet_info byte
+        and #%11111100                       ; Clear bits 0 and 1
+        ora #%00000010                       ; Combine with the direction for down 10
+        sta bullet_info                      ; Store the updated value back to bullet_info
+
+NOT_GAMEPAD_DOWN:                       
+
+    rts                                      ; return
+.endproc
+
+.proc find_bg_tile_position
+; Step 1: Calculate column index
+    lda oam + 3                             ; Get X position of first sprite
+    lsr a                                   ; Divide by 2 (shift right once)
+    lsr a                                   ; Divide by 4
+    lsr a                                   ; Divide by 8 (now A = column index)
+	sta temp_byte                           ; Temporarily store the column index for addition later
+
+	; Check if the sprite movement is right or left, if so we want to add or remove one to the tile position we want
+	lda bullet_info                         ; Load the sprite info
+    and #%00000011                          ; Mask out all but the two LSBs
+    cmp #%00000001                          ; Check if the two LSBs are 01 (RIGHT)
+    beq add_one                             ; If so, jump to add one to X
+    cmp #%00000011                          ; Check if the two LSBs are 11 (LEFT)
+    beq subtract_one                        ; If so, jump to subtract one to X
+    jmp skip                                ; Otherwise, skip adjustment
+add_one:
+    inc temp_byte                           ; ++X
+    jmp skip                                ; Skip over
+subtract_one:
+    dec temp_byte                           ; --X
+skip:
+
+; Step 2: Calculate row index
+    lda oam                                 ; Get Y position of first sprite
+    lsr a                                   ; Divide by 2 (shift right once)
+    lsr a                                   ; Divide by 4
+    lsr a                                   ; Divide by 8 (now A = row index)
+    tay                                     ; Transfer to Y for later multiplication
+                
+	lda bullet_info                         ; Load the sprite info
+    and #%00000011                          ; Mask out all but the two LSBs
+    cmp #%00000010                          ; Check if the two LSBs are 01 (DOWN)
+    beq add_to_Y                            ; If so, jump to add one to Y
+    cmp #%00000000                          ; Check if the two LSBs are 11 (UP)
+    beq subtract_from_Y                     ; If so, jump to subtract one to Y
+    jmp end                                 ; Otherwise, skip adjustment
+add_to_Y:
+    iny                                     ; ++Y
+    jmp end                                 ; Skip over
+subtract_from_Y:
+    dey                                     ; --Y
+end: ; Need to check for edge cases, currently it's wrapping around
+
+; Step 3: Compute tile position = row (Y) × 32 + column (temp_byte)
+    ldx #$20                                ; Clear X (setting it to nametable high byte location)
+    lda #00                                 ; Clear A
+	cpy #00                                 ; if Y == 0
+	beq :+                                  ; Don't multiply
+multiply_loop:                              ; Else loop multiply
+    clc                                     ; Clear Carry
+	adc #32                                 ; Add 32
+	bne :+                                  ; Check if zero flag is set
+    inx                                     ; ++X
+	:
+	dey                                     ; --Y    
+	beq:+                                   ; if Y == 0 we're done
+	jmp find_bg_tile_position::multiply_loop
+:
+
+    clc                                     ; Clear Carry
+	adc temp_byte                           ; Add X (temp_byte)
+	;; TODO add to X the correct nametable location, currently defaulting to $2000
+	stx background_tile_ptr                 ; store X as the highbyte of the ptr
+	sta background_tile_ptr + 1             ; Store A as the lowbyte of the ptr
+	; tax                                     ; Store result in X
+
+  rts                                       ; return
+.endproc
+
+.proc clear_background_tile
+; Define the target nametable address
+    lda background_tile_ptr                 ; High byte of the address
+    sta PPU_VRAM_ADDRESS2                   ; Write high byte to PPU_ADDRESS
+    lda background_tile_ptr+1               ; Low byte of the address
+    sta PPU_VRAM_ADDRESS2                   ; Write low byte to PPU_ADDRESS
+
+; Write the tile index (e.g., tile $03)
+    lda #$00              ; Tile index to write
+    sta PPU_VRAM_IO                         ; Write to PPU_DATA
+
+	rts
+.endproc
