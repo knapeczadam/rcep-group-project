@@ -1,5 +1,5 @@
 .proc gamepad_poll
-	lda gamepad                            ; Load current state of gamepad to check button press/released
+	lda var_gamepad                        ; Load current state of var_gamepad to check button press/released
 	pha                                    ; Push it on the stack
 
 	; strobe the gamepad to latch current button state
@@ -15,16 +15,16 @@ loop:
 	and #%00000011                         ; Only keep the low two bits (the rest is noise but do we need to mask it?)                   
 	cmp #%00000001                         ; Compare the lsb it contains the information of the current button we're checking
 	pla                                    ; Load back the values for the rotation
-	ror                                    ; rotate carry into gamepad variable
+	ror                                    ; rotate carry into var_gamepad variable
 	dex                                    ; --x
 	bne loop                               ; If x != 0 loop back
 
-	sta gamepad                            ; Store the values into gamepad
-	pla                                    ; Load values of gamepad from previous frame
-	sta temp_byte                          ; temp storage
-	eor gamepad                            ; old_gamepad XOR gamepad
-	and temp_byte                          ; (old_gamepad XOR gamepad) AND old_gamepad
-	sta gamepad_released                   ; Store the released buttons
+	sta var_gamepad                        ; Store the values into var_gamepad
+	pla                                    ; Load values of var_gamepad from previous frame
+	sta temp_00                            ; temp storage
+	eor var_gamepad                        ; old_gamepad XOR var_gamepad
+	and temp_00                            ; (old_gamepad XOR var_gamepad) AND old_gamepad
+	sta var_gamepad_released                   ; Store the released buttons
 
 	rts                                    ; return
 .endproc

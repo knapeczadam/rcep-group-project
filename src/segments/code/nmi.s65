@@ -27,26 +27,25 @@
 	pha
 
 	; Check whether we're ready to render, skip to end if not
-	lda nmi_ready
+	lda var_nmi_ready
 	bne :+
 	jmp end
 :
 
 	cmp #NMI_SIG_RENDERING_OFF 	; Command to turn off next V-Blank
-	bne continue 			; If nmi_ready != 2, we can render.
+	bne continue 			; If var_nmi_ready != 2, we can render.
 
-	; nmi_ready == 2, clear PPU_MASK
+	; var_nmi_ready == 2, clear PPU_MASK
 	lda #0
 	sta PPU_MASK
 	ldx #NMI_SIG_CLEAR
-	stx nmi_ready
+	stx var_nmi_ready
 	jmp end
 
 continue:
     lda #$02                 ; Every frame, we copy spite data starting at $02**.
     sta $4014                ; The OAM DMA copy starts when we write to $4014.
 
-    jsr clear_background_tile ; temporary function to test clearing backgriund tiles
 	jsr check_background_collision
 
 	ldx #0
@@ -82,7 +81,7 @@ transfer_loop:
 	sta PPU_MASK
 
 	ldx #NMI_SIG_CLEAR
-	stx nmi_ready
+	stx var_nmi_ready
 
 end:
 	; pop registers

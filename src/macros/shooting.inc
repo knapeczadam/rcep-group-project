@@ -6,10 +6,10 @@
     sbc #1                               ; Substract 1
     sta oam + 3                          ; Store X - 1 to X
     
-    lda bullet_info                      ; Load the current bullet_info byte
+    lda var_bullets_arr                      ; Load the current var_bullets_arr byte
     and #%11111100                       ; Clear bits 0 and 1
     ora #%00000011                       ; Combine with the direction for left 11
-    sta bullet_info                      ; Store the updated value back to bullet_info
+    sta var_bullets_arr                      ; Store the updated value back to var_bullets_arr
 .endmacro
 
 .macro MOVE_RIGHT
@@ -20,10 +20,10 @@
     adc #1                               ; Add 1
     sta oam + 3                          ; Store X + 1 to X
 
-    lda bullet_info                      ; Load the current bullet_info byte
+    lda var_bullets_arr                      ; Load the current var_bullets_arr byte
     and #%11111100                       ; Clear bits 0 and 1
     ora #%00000001                       ; Combine with the direction for right 01
-    sta bullet_info                      ; Store the updated value back to bullet_info
+    sta var_bullets_arr                      ; Store the updated value back to var_bullets_arr
 .endmacro
 
 .macro MOVE_UP
@@ -34,10 +34,10 @@
     sbc #1                               ; Substract 1
     sta oam                              ; Store Y - 1 to Y
 
-    lda bullet_info                      ; Load the current bullet_info byte
+    lda var_bullets_arr                      ; Load the current var_bullets_arr byte
     and #%11111100                       ; Clear bits 0 and 1 
     ; ora #%00000000                     ; Don't need to combine Up is 00
-    sta bullet_info                      ; Store the updated value back to bullet_info
+    sta var_bullets_arr                      ; Store the updated value back to var_bullets_arr
 .endmacro
 
 .macro MOVE_DOWN
@@ -48,17 +48,17 @@
     adc #1                               ; Add 1
     sta oam                              ; Store Y + 1 to Y
 
-    lda bullet_info                      ; Load the current bullet_info byte
+    lda var_bullets_arr                      ; Load the current var_bullets_arr byte
     and #%11111100                       ; Clear bits 0 and 1
     ora #%00000010                       ; Combine with the direction for down 10
-    sta bullet_info                      ; Store the updated value back to bullet_info
+    sta var_bullets_arr                      ; Store the updated value back to var_bullets_arr
 .endmacro
 
 .macro SHOOT_BULLET
     lda oam                             ; Get Y position (dont really need to do this here can be done later)
-    sta d_y                             ; Store it
+    sta temp_00                         ; Store it
     lda oam + 3                         ; Get X position
-    sta d_x                             ; Store it
+    sta temp_01                         ; Store it
 
 ; Loop through the bullets (for now starting at 1 instead of 0)
     ldx #00                             ; Reset X
@@ -66,14 +66,14 @@ label:
     inx                                 ; ++x
     cpx #6                              ; If x == 6 we checked all 6 bullets
     beq end                             ; Skip ahead (If I do my math correctly we shouldn't be able to shoot more than 6 bullets anyways)
-    lda bullet_info, x                  ; Load the value at bullet_info, x
+    lda var_bullets_arr, x                  ; Load the value at var_bullets_arr, x
     and #%00000100                      ; Mask out all bits except bit 2
     bne label                           ; If bit 2 is 1 (result is 1), branch (means bullet is already active we dont want to touch it)
 
 ; If bullet is not active (also dont just overrite it just flip the bit because direction shouldnt be overwriteen)
 ; I'm also adding a default move right mopvement but we can get parent movement and update accordingly
     lda #5                              ; Flip bit 2
-    sta bullet_info, x                  ; Activate the bullet
+    sta var_bullets_arr, x                  ; Activate the bullet
 
 ; Change its position
 ; positionY = oam + x * 4
@@ -92,9 +92,9 @@ multiply_loop:                          ;
 end_multiply:
     tax                                 ; Store A back into X so that X = X * 4
 
-    lda d_y                             ; Load back Y position
+    lda temp_00                         ; Load back Y position
     sta oam, x                          ; Set Y position of active bullet
-    lda d_x                             ; Load back X position
+    lda temp_01                         ; Load back X position
     sta oam+3,x                         ; Set X position of active bullet
 end:
 .endmacro

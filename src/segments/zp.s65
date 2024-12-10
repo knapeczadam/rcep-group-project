@@ -3,22 +3,20 @@
 ;===================================================================================================
 .segment "ZEROPAGE"
 
-nmi_ready:            .res 1
-gamepad:              .res 1
-gamepad_released:     .res 1	        ; stores gamepad values released this frame
-d_x:                  .res 1
-d_y:                  .res 1
-temp16bit_ptr:        .res 2
-background_tile_ptr:  .res 2
-temp_8_bit_holder:    .res 1
-temp_byte:            .res 1
-temp_64_byte_storage: .res 64
-byte_holder:          .res 1
-temp_address_holder:  .res 1
-flip_flop:            .res 1
+; var_ for non reusable variables
+; temp_ for reusable variables
+; _ptr for 2bytes
+; _long for non pointers 2bytes
+; _arr for 2+ bytes, if allocating temporary array -> temp_LENGTH_arr
 
-bullet_info:          .res 6 ; we can shoot up to 6 bullets
-; bullet_info Byte:
+
+var_nmi_ready:              .res 1
+var_gamepad:                .res 1
+var_gamepad_released:       .res 1	        ; stores gamepad values released this frame
+var_flip_flop:              .res 1
+var_last_frame_count:       .res 1
+var_bullets_arr:          .res 6 ; we can shoot up to 6 bullets
+; var_bullets_arr Byte:
 ;-----------------------
 ; 76543210
 ; ||||||||
@@ -29,3 +27,10 @@ bullet_info:          .res 6 ; we can shoot up to 6 bullets
 ; ||+------ 
 ; |+------- 
 ; +-------- Did a collision occur? 0 == False / 1 == True 
+
+temp_00_ptr:                .res 2
+temp_00:                    .res 1
+temp_01:                    .res 1
+temp_02:                    .res 1
+temp_03:                    .res 1
+temp_64_arr:                .res 64

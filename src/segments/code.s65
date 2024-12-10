@@ -14,10 +14,10 @@
 .include "code/gamepad.s65"
 
 .proc ppu_signal
-	sta nmi_ready
+	sta var_nmi_ready
 
 loop:
-	lda nmi_ready
+	lda var_nmi_ready
 	bne loop
 
 	rts
@@ -173,13 +173,12 @@ more_padding:
 	jsr ppu_update
 
 main_loop:
-	lda nmi_ready
+	lda var_nmi_ready
 	; cmp #0 unnecessary because lda already sets this flag based on the value
 	bne main_loop
 
  	jsr gamepad_poll ; read the gamepad
     jsr move_bullet
-    jsr find_bg_tile_position
 	jsr update_bullets
 
     SELECT_SONG SONG_1
@@ -187,7 +186,7 @@ main_loop:
     jsr famistudio_update
 
 	lda #1
-	sta nmi_ready
+	sta var_nmi_ready
 	jmp main_loop
 .endproc
 

@@ -23,8 +23,8 @@ bullet_data:
 	ldy #0                                  ; Reset Y
 loop_sprite:
     lda bullet_data,x                       ; We fetch bytes from the SpriteData lookup table
-    sta temp_8_bit_holder                   ; Store the value for now
-    stx temp_byte                           ; Store X
+    sta temp_00                   			; Store the value for now
+    stx temp_01                           	; Store X
     txa                                     ;
     pha                                     ; Push A on stack
     tya                                     ; 
@@ -41,13 +41,13 @@ multiply_loop:                              ; Else loop multiply
 	jmp multiply_loop
 :
     clc                                     ; Clear Carry
-    adc temp_byte                           ; Add X back to Y * 4
+    adc temp_01                           	; Add X back to Y * 4
     tax                                     ; Assign X + Y * 4 back to X => X = X + Y * 4
 
     pla                                     ;
     tay                                     ; Restore Y
 
-    lda temp_8_bit_holder                   ; Reload the value we want to store
+    lda temp_00                   			; Reload the value we want to store
     sta $0200,x                             ; We store the bytes starting at OAM address $0200 with offset X
 
     PLA                                     ; 
@@ -68,9 +68,9 @@ multiply_loop:                              ; Else loop multiply
 ; The function will move the sprite based on given input.
 ;===================================================================================================
 .proc move_bullet 
-    lda bullet_info                          ; Load the current bullet_info byte
+    lda var_bullets_arr                          ; Load the current var_bullets_arr byte
     and #%11111100                           ; Clear bits 0 and 1 for idle state default
-    sta bullet_info                          ; Store the updated value back to bullet_info
+    sta var_bullets_arr                          ; Store the updated value back to var_bullets_arr
 
     ON_BUTTON_PRESSED PAD_L, MOVE_LEFT
     ON_BUTTON_PRESSED PAD_R, MOVE_RIGHT
@@ -87,24 +87,24 @@ multiply_loop:                              ; Else loop multiply
 ;===================================================================================================
 .proc find_bg_tile_position
 ; Step 1: Calculate column index
-    lda oam + 3, x                      ; Get X position of first sprite
+    lda oam + 3, x                      	; Get X position of first sprite
 	clc 
-	adc #4								; Set check to center pixel X axis
-    lsr a                               ; Divide by 2 (shift right once)
-    lsr a                               ; Divide by 4
-    lsr a                               ; Divide by 8 (now A = column index)
-	sta temp_byte      					; Temporarily store the column index for addition later
+	adc #4									; Set check to center pixel X axis
+    lsr a                               	; Divide by 2 (shift right once)
+    lsr a                               	; Divide by 4
+    lsr a                               	; Divide by 8 (now A = column index)
+	sta temp_00      						; Temporarily store the column index for addition later
 
 ; Step 2: Calculate row index
-    lda oam, x                          ; Get Y position of first sprite
+    lda oam, x                          	; Get Y position of first sprite
 	clc 
-	adc #4								; Set check to center pixel Y axis
-    lsr a                               ; Divide by 2 (shift right once)
-    lsr a                               ; Divide by 4
-    lsr a                               ; Divide by 8 (now A = row index)
-    tay                                 ; Transfer to Y for later multiplication
+	adc #4									; Set check to center pixel Y axis
+    lsr a                               	; Divide by 2 (shift right once)
+    lsr a                               	; Divide by 4
+    lsr a                               	; Divide by 8 (now A = row index)
+    tay                                 	; Transfer to Y for later multiplication
 
-; Step 3: Compute tile position = row (Y) × 32 + column (temp_byte)
+; Step 3: Compute tile position = row (Y) × 32 + column (temp_00)
     ldx #$20                                ; Clear X (setting it to nametable high byte location)
     lda #00                                 ; Clear A
 	cpy #00                                 ; if Y == 0
@@ -121,10 +121,10 @@ multiply_loop:                              ; Else loop multiply
 :
 
     clc                                     ; Clear Carry
-	adc temp_byte                           ; Add X (temp_byte)
+	adc temp_00                           	; Add X (temp_00)
 	;; TODO add to X the correct nametable location (if we switch nametables), currently defaulting to $2000
-	stx background_tile_ptr                 ; store X as the highbyte of the ptr
-	sta background_tile_ptr + 1             ; Store A as the lowbyte of the ptr
+	stx temp_00_ptr                 		; store X as the highbyte of the ptr
+	sta temp_00_ptr + 1             		; Store A as the lowbyte of the ptr
 
   rts                                       ; return
 .endproc
@@ -140,7 +140,7 @@ label:
     inx                                 ; ++x
     cpx #6                              ; If x == 6 we checked all 6 bullets
     beq done                            ; Skip ahead
-    lda bullet_info, x                  ; Load the value at bullet_info, x
+    lda var_bullets_arr, x                  ; Load the value at var_bullets_arr, x
     and #%00000100                      ; Mask out all bits except bit 2
     beq label                           ; If bit 2 is 0 (result is 0), branch (means bullet is not active we dont need to update)
 
@@ -159,12 +159,12 @@ label:
 	pla									; Get X back from the stack
 	tay									; Put X in Y
 	pha									; Push it back on the stack if we need it later
-    lda bullet_info, y                  ; Load the value at bullet_info, x
+    lda var_bullets_arr, y                  ; Load the value at var_bullets_arr, x
     and #%10000000                      ; Check Collision Bit
 	beq :+								; If no collision go to moving the bullet
-	lda bullet_info, y                  ; Load the value at bullet_info, x
+	lda var_bullets_arr, y                  ; Load the value at var_bullets_arr, x
     and #%01111011                      ; Flip the active bit, set to inactive and reset collision as well
-	sta bullet_info, y                  ; Store it back at bullet_info, x
+	sta var_bullets_arr, y                  ; Store it back at var_bullets_arr, x
 	lda #$F0							; Reset the Y coord to be out of screen
 	sta oam,x							; 
 	pla									; We're jumping back so pull back X
@@ -201,9 +201,9 @@ done:
 	cmp #255           					; Check if sprite is out of screen
 	bne :+                				; If not skip ahead
 	
-	lda bullet_info, y                  ; Load the value at bullet_info, x (Y has the value of X)
+	lda var_bullets_arr, y                  ; Load the value at var_bullets_arr, x (Y has the value of X)
     and #%01111011                      ; Flip the active bit, set to inactive and reset collision as well
-	sta bullet_info, y                  ; Store it back at bullet_info, x
+	sta var_bullets_arr, y                  ; Store it back at var_bullets_arr, x
 	lda #$F0							; Reset the Y coord to be out of screen (just in case)
 	sta oam,x							; 
 :
@@ -225,7 +225,7 @@ label:
     inx                                 ; ++x
     cpx #6                              ; If x == 6 we checked all 6 bullets
     beq done                            ; Skip ahead
-    lda bullet_info, x                  ; Load the value at bullet_info, x
+    lda var_bullets_arr, x                  ; Load the value at var_bullets_arr, x
     and #%00000100                      ; Mask out all bits except bit 2
     beq label                           ; If bit 2 is 0 (result is 0), branch (means bullet is not active we dont need to update)
 
@@ -252,17 +252,17 @@ done:
 ;===================================================================================================
 .proc clear_background_tile
 ; Define the target nametable address
-	SET_PPU_VRAM_ADRESS background_tile_ptr
+	SET_PPU_VRAM_ADRESS temp_00_ptr
 
 	lda PPU_VRAM_IO						; Load the tile
 	lda PPU_VRAM_IO						; Load it again, I think because each tile is 2bytes and we need to check the second byte. regardless it would often load 0 if I load it only once
 	and #$FF							; Check if the Tile is empty 
 	beq :+								; If it is do nothing so jump to end
-	lda bullet_info, x                  ; Load the value at bullet_info, x
+	lda var_bullets_arr, x                  ; Load the value at var_bullets_arr, x
     ora #%10000000                      ; Mark bullet as collided
-	sta bullet_info, x					; 
+	sta var_bullets_arr, x					; 
 
-	SET_PPU_VRAM_ADRESS background_tile_ptr
+	SET_PPU_VRAM_ADRESS temp_00_ptr
 
 	lda #$00							; 
 	sta PPU_VRAM_IO						; Delete the background tile that was collided
@@ -276,7 +276,7 @@ done:
 ; Legacy code to reuse or throw away later.
 ;===================================================================================================
 ; 	; Check if the sprite movement is right or left, if so we want to add or remove one to the tile position we want
-; 	lda bullet_info                         ; Load the sprite info
+; 	lda var_bullets_arr                         ; Load the sprite info
 ;     and #%00000011                          ; Mask out all but the two LSBs
 ;     cmp #%00000001                          ; Check if the two LSBs are 01 (RIGHT)
 ;     beq add_one                             ; If so, jump to add one to X
@@ -284,14 +284,14 @@ done:
 ;     beq subtract_one                        ; If so, jump to subtract one to X
 ;     jmp skip                                ; Otherwise, skip adjustment
 ; add_one:
-;     inc temp_byte                           ; ++X
+;     inc temp_00                           ; ++X
 ;     jmp skip                                ; Skip over
 ; subtract_one:
-;     dec temp_byte                           ; --X
+;     dec temp_00                           ; --X
 ; skip:
 
 
-; 	lda bullet_info                         ; Load the sprite info
+; 	lda var_bullets_arr                         ; Load the sprite info
 ;     and #%00000011                          ; Mask out all but the two LSBs
 ;     cmp #%00000010                          ; Check if the two LSBs are 01 (DOWN)
 ;     beq add_to_Y                            ; If so, jump to add one to Y
@@ -308,9 +308,9 @@ done:
 ;; Can reuse this for transitions
 ; .proc clear_background_tile
 ; ; Define the target nametable address
-;     lda background_tile_ptr                 ; High byte of the address
+;     lda temp_00_ptr                 ; High byte of the address
 ;     sta PPU_VRAM_ADDRESS2                   ; Write high byte to PPU_ADDRESS
-;     lda background_tile_ptr+1               ; Low byte of the address
+;     lda temp_00_ptr+1               ; Low byte of the address
 ;     sta PPU_VRAM_ADDRESS2                   ; Write low byte to PPU_ADDRESS
 
 ; ; Write the tile index (e.g., tile $03)
