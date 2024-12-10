@@ -21,4 +21,3 @@
     macro                              ; Execute the macro
 :
 .endmacro
-.endmacro
