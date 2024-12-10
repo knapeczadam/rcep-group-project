@@ -3,20 +3,21 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 .segment "ZEROPAGE"
 
-nmi_ready:	    .res 1
-gamepad:	    .res 1
-gamepad_released: 	.res 1	        ; stores gamepad values released this frame
-d_x:		    .res 1
-d_y:		    .res 1
-temp16bit_ptr:  .res 2
+nmi_ready:            .res 1
+gamepad:              .res 1
+gamepad_released:     .res 1	        ; stores gamepad values released this frame
+d_x:                  .res 1
+d_y:                  .res 1
+temp16bit_ptr:        .res 2
 background_tile_ptr:  .res 2
-temp_8_bit_holder: .res 1
-temp_byte: .res 1
-temp_64_byte_storage :.res 64
-byte_holder: .res 1
-temp_address_holder: .res 1
+temp_8_bit_holder:    .res 1
+temp_byte:            .res 1
+temp_64_byte_storage: .res 64
+byte_holder:          .res 1
+temp_address_holder:  .res 1
+flip_flop:            .res 1
 
-bullet_info: .res 6 ; we can shoot up to 6 bullets
+bullet_info:          .res 6 ; we can shoot up to 6 bullets
 ; bullet_info Byte:
 ;-----------------------
 ; 76543210

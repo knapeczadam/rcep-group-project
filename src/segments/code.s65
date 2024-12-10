@@ -3,6 +3,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 .segment "CODE"
 
+.include "code/sound.s65"
+
 .include "code/shooting.s65"
 .include "code/upscaling.s65"
 
@@ -67,6 +69,8 @@ loop:
 .endproc
 
 .proc main
+    INIT_SOUND_ENGINE
+
 	ldx #0
 
 paletteloop:
@@ -177,6 +181,9 @@ main_loop:
     jsr move_bullet
     jsr find_bg_tile_position
 	jsr update_bullets
+
+    ON_BUTTON_RELEASED PAD_B, TOGGLE_MUSIC
+    jsr famistudio_update
 
 	lda #1
 	sta nmi_ready

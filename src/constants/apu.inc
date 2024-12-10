@@ -2,4 +2,14 @@
 ;; Define APU Registers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 APU_DM_CONTROL = $4010
-APU_CLOCK      = $4015
+APU_FLAGS      = $4015
+
+APU_SQ1_ENV    = $4000
+APU_SQ1_SWEEP  = $4001
+APU_SQ1_LO     = $4002
+APU_SQ1_HI     = $4003
+
+APU_SQ2_ENV    = $4004
+APU_SQ2_SWEEP  = $4005
+APU_SQ2_LO     = $4006
+APU_SQ2_HI     = $4007
