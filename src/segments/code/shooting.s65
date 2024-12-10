@@ -72,76 +72,12 @@ multiply_loop:                              ; Else loop multiply
     and #%11111100                           ; Clear bits 0 and 1 for idle state default
     sta bullet_info                          ; Store the updated value back to bullet_info
 
-    lda gamepad                              ; Load gamepad state
-    and #PAD_L                               ; Check agains Left button
- 	beq NOT_GAMEPAD_LEFT                     ; If not skip
- 		lda oam + 3                          ; Get current X of first sprite
- 		cmp #0                               ; Check if sprite is already at position 0
- 		beq NOT_GAMEPAD_LEFT                 ; If so then don't move left
- 		sec                                  ; Set carry
- 		sbc #1                               ; Substract 1
- 		sta oam + 3                          ; Store X - 1 to X
-        
-        lda bullet_info                      ; Load the current bullet_info byte
-        and #%11111100                       ; Clear bits 0 and 1
-        ora #%00000011                       ; Combine with the direction for left 11
-        sta bullet_info                      ; Store the updated value back to bullet_info
+    ON_BUTTON_PRESSED PAD_L, MOVE_LEFT
+    ON_BUTTON_PRESSED PAD_R, MOVE_RIGHT
+    ON_BUTTON_PRESSED PAD_U, MOVE_UP
+    ON_BUTTON_PRESSED PAD_D, MOVE_DOWN
 
-NOT_GAMEPAD_LEFT:
- 	lda gamepad                              ; Load gamepad state
- 	and #PAD_R                               ; Check agains Right button
- 	beq NOT_GAMEPAD_RIGHT                    ; If not skip
- 		lda oam + 3                          ; Get current X of first sprite
- 		cmp #248                             ; Check if sprite is already at position 248 (256 - 8)
- 		beq NOT_GAMEPAD_RIGHT                ; If so then don't move right
- 		clc                                  ; Clear carry
- 		adc #1                               ; Add 1
- 		sta oam + 3                          ; Store X + 1 to X
-
-        lda bullet_info                      ; Load the current bullet_info byte
-        and #%11111100                       ; Clear bits 0 and 1
-        ora #%00000001                       ; Combine with the direction for right 01
-        sta bullet_info                      ; Store the updated value back to bullet_info
-
-NOT_GAMEPAD_RIGHT:
-	lda gamepad                              ; Load gamepad state
-	and #PAD_U                               ; Check agains UP button
-	beq NOT_GAMEPAD_UP                       ; If not skip   
-		lda oam                              ; Get current Y of the first sprite      
-		cmp #0                               ; Check if Y is already 0
-		beq NOT_GAMEPAD_UP                   ; If so don't move up
-		sec                                  ; Set carry   
-		sbc #1                               ; Substract 1
-		sta oam                              ; Store Y - 1 to Y
-
-        lda bullet_info                      ; Load the current bullet_info byte
-        and #%11111100                       ; Clear bits 0 and 1 
-        ; ora #%00000000                     ; Don't need to combine Up is 00
-        sta bullet_info                      ; Store the updated value back to bullet_info
-
-NOT_GAMEPAD_UP:
-	lda gamepad                              ; Load gamepad state
-	and #PAD_D                               ; Check agains DOWN button
-	beq NOT_GAMEPAD_DOWN                     ; If not skip   
-		lda oam                              ; Get current Y of the first sprite      
-		cmp #232                             ; Check if Y is 232 because maximum Y (240 - 8, since sprite height is 8px)
-		beq NOT_GAMEPAD_DOWN                 ; If so don't move down
-		clc                                  ; Clear carry   
-		adc #1                               ; Add 1
-		sta oam                              ; Store Y + 1 to Y
-
-        lda bullet_info                      ; Load the current bullet_info byte
-        and #%11111100                       ; Clear bits 0 and 1
-        ora #%00000010                       ; Combine with the direction for down 10
-        sta bullet_info                      ; Store the updated value back to bullet_info
-
-NOT_GAMEPAD_DOWN:                       
-	lda gamepad_released
-	and #PAD_A
-	beq NOT_GAMEPAD_A
-		jsr shoot_bullet
-
-NOT_GAMEPAD_A:
+    ON_BUTTON_RELEASED PAD_A, SHOOT_BULLET
 
     rts                                      ; return
 .endproc
@@ -230,51 +166,6 @@ multiply_loop:                              ; Else loop multiply
 
 ; 	rts
 ; .endproc
-
-.proc shoot_bullet
-    lda oam                             ; Get Y position (dont really need to do this here can be done later)
-    sta d_y                             ; Store it
-    lda oam + 3                         ; Get X position
-    sta d_x                             ; Store it
-
-; Loop through the bullets (for now starting at 1 instead of 0)
-    ldx #00                             ; Reset X
-label:
-    inx                                 ; ++x
-    cpx #6                              ; If x == 6 we checked all 6 bullets
-    beq :+                              ; Skip ahead (If I do my math correctly we shouldn't be able to shoot more than 6 bullets anyways)
-    lda bullet_info, x                  ; Load the value at bullet_info, x
-    and #%00000100                      ; Mask out all bits except bit 2
-    bne label                           ; If bit 2 is 1 (result is 1), branch (means bullet is already active we dont want to touch it)
-
-; If bullet is not active (also dont just overrite it just flip the bit because direction shouldnt be overwriteen)
-    lda #4                              ; Flip bit 2
-    sta bullet_info, x                  ; Activate the bullet
-
-; Change its position
-; positionY = oam + x * 4
-; positionX = oam+3 + x * 4
-    txa                                 ; Transfer X to A
-    tay                                 ; Transfer A to Y
-    lda #00                             ; Clear A
-	cpy #00                             ; if Y == 0
-	beq :+                              ; Don't multiply
-multiply_loop:                          ;
-    clc                                 ; Clear Carry
-	adc #4                              ; Add 4 (because sprites have 4 bytes of information)
-	dey                                 ; --Y    
-	beq:+                               ; if Y == 0 we're done
-	jmp multiply_loop
-:
-    tax                                 ; Store A back into X so that X = X * 4
-
-    lda d_y                             ; Load back Y position
-    sta oam, x                          ; Set Y position of active bullet
-    lda d_x                             ; Load back X position
-    sta oam+3,x                         ; Set X position of active bullet
-
-    rts                                 ; return
-.endproc
 
 ; .proc update_bullets
 ;     ldx #01
