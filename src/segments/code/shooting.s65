@@ -90,55 +90,55 @@ multiply_loop:                              ; Else loop multiply
 ; Step 1: Calculate column index
     lda oam + 3                             ; Get X position of first sprite
 	clc 
-	adc #4
+	adc #4									; Set check to center pixel X
     lsr a                                   ; Divide by 2 (shift right once)
     lsr a                                   ; Divide by 4
     lsr a                                   ; Divide by 8 (now A = column index)
 	sta temp_byte                           ; Temporarily store the column index for addition later
 
-	; Check if the sprite movement is right or left, if so we want to add or remove one to the tile position we want
-	lda bullet_info                         ; Load the sprite info
-    and #%00000011                          ; Mask out all but the two LSBs
-    cmp #%00000001                          ; Check if the two LSBs are 01 (RIGHT)
-    beq add_one                             ; If so, jump to add one to X
-    cmp #%00000011                          ; Check if the two LSBs are 11 (LEFT)
-    beq subtract_one                        ; If so, jump to subtract one to X
-    jmp skip                                ; Otherwise, skip adjustment
-add_one:
-    inc temp_byte                           ; ++X
-    jmp skip                                ; Skip over
-subtract_one:
-    dec temp_byte                           ; --X
-skip:
+; 	; Check if the sprite movement is right or left, if so we want to add or remove one to the tile position we want
+; 	lda bullet_info                         ; Load the sprite info
+;     and #%00000011                          ; Mask out all but the two LSBs
+;     cmp #%00000001                          ; Check if the two LSBs are 01 (RIGHT)
+;     beq add_one                             ; If so, jump to add one to X
+;     cmp #%00000011                          ; Check if the two LSBs are 11 (LEFT)
+;     beq subtract_one                        ; If so, jump to subtract one to X
+;     jmp skip                                ; Otherwise, skip adjustment
+; add_one:
+;     inc temp_byte                           ; ++X
+;     jmp skip                                ; Skip over
+; subtract_one:
+;     dec temp_byte                           ; --X
+; skip:
 
 ; Step 2: Calculate row index
     lda oam                                 ; Get Y position of first sprite
 	clc 
-	adc #4
+	adc #4									; Set check to center pixel YS
     lsr a                                   ; Divide by 2 (shift right once)
     lsr a                                   ; Divide by 4
     lsr a                                   ; Divide by 8 (now A = row index)
     tay                                     ; Transfer to Y for later multiplication
                 
-	lda bullet_info                         ; Load the sprite info
-    and #%00000011                          ; Mask out all but the two LSBs
-    cmp #%00000010                          ; Check if the two LSBs are 01 (DOWN)
-    beq add_to_Y                            ; If so, jump to add one to Y
-    cmp #%00000000                          ; Check if the two LSBs are 11 (UP)
-    beq subtract_from_Y                     ; If so, jump to subtract one to Y
-    jmp end                                 ; Otherwise, skip adjustment
-add_to_Y:
-    iny                                     ; ++Y
-    jmp end                                 ; Skip over
-subtract_from_Y:
-    dey                                     ; --Y
-end: ; Need to check for edge cases, currently it's wrapping around
+; 	lda bullet_info                         ; Load the sprite info
+;     and #%00000011                          ; Mask out all but the two LSBs
+;     cmp #%00000010                          ; Check if the two LSBs are 01 (DOWN)
+;     beq add_to_Y                            ; If so, jump to add one to Y
+;     cmp #%00000000                          ; Check if the two LSBs are 11 (UP)
+;     beq subtract_from_Y                     ; If so, jump to subtract one to Y
+;     jmp end                                 ; Otherwise, skip adjustment
+; add_to_Y:
+;     iny                                     ; ++Y
+;     jmp end                                 ; Skip over
+; subtract_from_Y:
+;     dey                                     ; --Y
+; end: ; Need to check for edge cases, currently it's wrapping around
 
 ; Step 3: Compute tile position = row (Y) × 32 + column (temp_byte)
     ldx #$20                                ; Clear X (setting it to nametable high byte location)
     lda #00                                 ; Clear A
 	cpy #00                                 ; if Y == 0
-	beq :+                                  ; Don't multiply
+	beq :++                                	; Don't multiply
 multiply_loop:                              ; Else loop multiply
     clc                                     ; Clear Carry
 	adc #32                                 ; Add 32
