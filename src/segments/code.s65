@@ -182,6 +182,7 @@ main_loop:
     jsr find_bg_tile_position
 	jsr update_bullets
 
+    SELECT_SONG SONG_1
     ON_BUTTON_RELEASED PAD_B, TOGGLE_MUSIC
     jsr famistudio_update
 

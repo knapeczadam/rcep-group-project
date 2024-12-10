@@ -1,7 +1,8 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; button : 8-bit input constant found in input.inc
-;; macro  : macro to execute if the button is pressed
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;===================================================================================================
+; Executes a macro if a specified button is pressed by checking the gamepad input state.
+; button : 8-bit input constant found in input.inc
+; macro  : macro to execute if the button is pressed
+;===================================================================================================
 .macro ON_BUTTON_PRESSED button, macro
     lda gamepad                        ; Load gamepad state 
     and #button                        ; Check if the button is pressed
@@ -10,10 +11,11 @@
 :
 .endmacro
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; button : 8-bit input constant found in input.inc
-;; macro  : macro to execute if the button is released
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;===================================================================================================
+; Executes a macro if a specified button is released by checking the gamepad input state.
+; button : 8-bit input constant found in input.inc
+; macro  : macro to execute if the button is released
+;===================================================================================================
 .macro ON_BUTTON_RELEASED button, macro
     lda gamepad_released               ; Load gamepad state
     and #button                        ; Check if the button is released
@@ -22,21 +24,23 @@
 :
 .endmacro
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; in  : 16-bit address
-;; out : 16-bit address
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;===================================================================================================
+; Stores a 16-bit address (in) into another 16-bit address (out) by handling low and high bytes.
+; in  : 16-bit address
+; out : 16-bit address
+;===================================================================================================
 .macro STORE_ADDRESS in, out
-    lda #<in
+    lda #.lobyte(in)
     sta out
-    lda #>in
+    lda #.hibyte(in)
     sta out+1
 .endmacro
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; macro_a : macro to execute if the flip-flop is 0
-;; macro_b : macro to execute if the flip-flop is 1
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;===================================================================================================
+; Toggles a flip-flop variable and executes macro_a if the flip-flop is 0, or macro_b if it is 1.
+; macro_a : macro to execute if the flip-flop is 0
+; macro_b : macro to execute if the flip-flop is 1
+;===================================================================================================
 .macro FLIP_FLOP macro_a, macro_b
 .local flip_variable, execute_macro_b
     lda flip_flop
