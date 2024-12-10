@@ -147,8 +147,14 @@ NOT_GAMEPAD_A:
 .endproc
 
 .proc find_bg_tile_position
+; Loop through every bullet, check if it's active. If so check the tile at the center 
+; (for simplicity otherwise we can use the tip of the bullet but that requires calculating it based on the direction etc..)
+; if the center of the sprite is in a tile that is not #FF or whatever background color set its colliding flag and then loop next bullet
+
 ; Step 1: Calculate column index
     lda oam + 3                             ; Get X position of first sprite
+	clc 
+	adc #4
     lsr a                                   ; Divide by 2 (shift right once)
     lsr a                                   ; Divide by 4
     lsr a                                   ; Divide by 8 (now A = column index)
@@ -171,6 +177,8 @@ skip:
 
 ; Step 2: Calculate row index
     lda oam                                 ; Get Y position of first sprite
+	clc 
+	adc #4
     lsr a                                   ; Divide by 2 (shift right once)
     lsr a                                   ; Divide by 4
     lsr a                                   ; Divide by 8 (now A = row index)
@@ -315,28 +323,37 @@ multiply_loop:                          ;
 	; inc
     inc oam+3,x                         ; increase X position by one
 
+	pla									; Pull X back into A
+	tay									; Transfer it to Y
+	pha									; Push it back for later
+	jsr check_wall_collision			; Check if bullet collides with the wall
 
-; If sprite moves out of screen disable bullet
-	lda oam+3, x                          ; Get current X of first sprite
-	cmp #255                             ; Check if sprite is already at position 248 (256 - 8)
-	bne :+                ; If so then don't move right
 
-	pla
-	tay
-	pha
-	
-	lda bullet_info, y                  ; Load the value at bullet_info, x
-    and #%11111011                      ; 
-	sta bullet_info, y                  ; Load the value at bullet_info, x
-	lda #$F0
-	sta oam,x
-:
 
 	pla									; Pull back X
 	tax									;
 	jmp label							; Jump back to loop the rest
 done:
 	rts									; return
+.endproc
+
+.proc check_wall_collision
+; If sprite moves out of screen disable bullet
+	lda oam+3, x       					; Get X position of the bullet
+	cmp #255           					; Check if sprite is out of screen
+	bne :+                				; If not skip ahead
+	
+	lda bullet_info, y                  ; Load the value at bullet_info, x (Y has the value of X)
+    and #%11111011                      ; Flip the active bit, set to inactive
+	sta bullet_info, y                  ; Store it back at bullet_info, x
+	lda #$F0							; Reset the Y coord to be out of screen (just in case)
+	sta oam,x							; 
+:
+	rts									; return
+.endproc
+
+.proc check_background_collision
+
 .endproc
 
 .proc clear_background_tile
