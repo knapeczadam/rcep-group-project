@@ -20,24 +20,4 @@ FAMISTUDIO_USE_RELEASE_NOTES  = 1
 FAMISTUDIO_DPCM_OFF           = $E000
 
 .include "../audio/sound_engine.s65"
-
-music_data:
 .include "../../data/music.s65"
-
-.proc sound_engine_init
-    ldx #<music_data_untitled
-    ldy #>music_data_untitled
-
-    lda #0
-    jsr famistudio_init
-.endproc
-
-.proc play_music
-    lda #0 ; PAL
-    jsr famistudio_music_play
-.endproc
-
-.proc stop_music
-    lda #0 ; PAL
-    jsr famistudio_music_stop
-.endproc
