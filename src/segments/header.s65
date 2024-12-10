@@ -1,8 +1,9 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; The NES 2.0 header
-;; https://www.nesdev.org/wiki/INES
-;; https://www.nesdev.org/wiki/NES_2.0
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;===================================================================================================
+; HEADER segment contains the program's initialization and setup code.
+; NES 2.0 header format is used.
+; https://www.nesdev.org/wiki/INES
+; https://www.nesdev.org/wiki/NES_2.0
+;===================================================================================================
 .segment "HEADER"
 .byte $4E, $45, $53, $1A               ; 0-3: Identification String. Must be "NES<EOF>"
 .byte $02                              ;   4: Size of PRG-ROM in 16 KB units                                                       | 2 * 16 KB = 32 KB

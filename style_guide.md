@@ -1,4 +1,4 @@
-IDENTIFIERS
+NAMING CONVENTIONS
 constants:  SCREAMING_SNAKE_CASE
 labels:     snake_case
 macros:     SCREAMING_SNAKE_CASE
@@ -23,3 +23,5 @@ ____           _                       ^
 PREFIX:
 private macro: __
 
+END OF FILE
+empty line
