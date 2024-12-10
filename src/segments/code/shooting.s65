@@ -14,9 +14,10 @@ bullet_data:
 
 ;; TODO SET UP VARIABLES FOR THE POSITIONS
 
-;===========================================================================================================================================================================;
-; Subroutine to load Bullet Sprites into OAM-RAM starting at $0200, the function will load one sprite then loop back to load the next one until 6 bullets are loaded in OAM ;
-;===========================================================================================================================================================================;
+;===================================================================================================
+; Subroutine to load Bullet Sprites into OAM-RAM starting at $0200. 
+; The function will load one sprite then loop back to load the next one until 6 bullets are loaded in OAM
+;===================================================================================================
 .proc load_bullets
     ldx #0                                  ; Reset X
 	ldy #0                                  ; Reset Y
@@ -62,9 +63,10 @@ multiply_loop:                              ; Else loop multiply
     rts                                     ; return
 .endproc
 
-;====================================================================================================================================;
-; Subroutine to move the first Bullet Sprite manually and Shoot new bullets, the function will move the sprite based on given inputs ;
-;====================================================================================================================================;
+;===================================================================================================
+; Subroutine to move the first Bullet Sprite manually and Shoot new bullets.
+; The function will move the sprite based on given input.
+;===================================================================================================
 .proc move_bullet 
     lda bullet_info                          ; Load the current bullet_info byte
     and #%11111100                           ; Clear bits 0 and 1 for idle state default
@@ -80,9 +82,9 @@ multiply_loop:                              ; Else loop multiply
     rts                                      ; return
 .endproc
 
-;===========================================================================================;
-; Subroutine to find the background tile on which the middle pixel of the current bullet is ;
-;===========================================================================================;
+;===================================================================================================
+; Subroutine to find the background tile on which the middle pixel of the current bullet is.
+;===================================================================================================
 .proc find_bg_tile_position
 ; Step 1: Calculate column index
     lda oam + 3, x                      ; Get X position of first sprite
@@ -127,9 +129,10 @@ multiply_loop:                              ; Else loop multiply
   rts                                       ; return
 .endproc
 
-;=========================================================================================================;
-; Subroutine to update the bullets, Checks if bullet is active --> check if it collided, else --> move it ;
-;=========================================================================================================;
+;===================================================================================================
+; Subroutine to update the bullets.
+; Checks if bullet is active --> check if it collided, else --> move it
+;===================================================================================================
 .proc update_bullets
 ; Loop through the bullets (for now starting at 1 instead of 0)
     ldx #00                             ; Reset X
@@ -189,9 +192,9 @@ done:
 	rts									; return
 .endproc
 
-;=====================================================;
-; Subroutine to check if a bullet hit a viewport wall ;
-;=====================================================;
+;===================================================================================================
+; Subroutine to check if a bullet hit a viewport wall.
+;===================================================================================================
 .proc check_wall_collision
 ; If sprite moves out of screen disable bullet
 	lda oam+3, x       					; Get X position of the bullet
@@ -207,9 +210,10 @@ done:
 	rts									; return
 .endproc
 
-;==================================================================================================================================;
-; Subroutine to check if the center pixel of a bullet is colliding with a letter --> erase the letter and mark bullet has collided ;
-;==================================================================================================================================;
+;===================================================================================================
+; Subroutine to check if the center pixel of a bullet is colliding with a letter.
+; Erase the letter and mark bullet has collided.
+;===================================================================================================
 .proc check_background_collision
 ; Loop through every bullet, check if it's active. If so check the tile at the center 
 ; (for simplicity otherwise we can use the tip of the bullet but that requires calculating it based on the direction etc.. or use a bounding box)
@@ -243,9 +247,9 @@ done:
 	rts									; return
 .endproc
 
-;==================================================================;
-; Subroutine to clear the background tile the bullet collided with ;
-;==================================================================;
+;===================================================================================================
+; Subroutine to clear the background tile the bullet collided with.
+;===================================================================================================
 .proc clear_background_tile
 ; Define the target nametable address
 	SET_PPU_VRAM_ADRESS background_tile_ptr
@@ -268,9 +272,9 @@ done:
 .endproc
 
 
-;==========================================;
-; Legacy code to reuse or throw away later ;
-;==========================================;
+;===================================================================================================
+; Legacy code to reuse or throw away later.
+;===================================================================================================
 ; 	; Check if the sprite movement is right or left, if so we want to add or remove one to the tile position we want
 ; 	lda bullet_info                         ; Load the sprite info
 ;     and #%00000011                          ; Mask out all but the two LSBs

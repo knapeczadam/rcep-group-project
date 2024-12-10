@@ -1,5 +1,5 @@
 ;===================================================================================================
-; ZP segment is used for storing variables in the first 256 bytes of memory for faster access.
+; VECTORS segment contains the memory addresses for interrupt and reset vector tables in NES.
 ;===================================================================================================
 .segment "VECTORS"
 
