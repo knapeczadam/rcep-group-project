@@ -82,14 +82,14 @@ label:
     tay                                 ; Transfer A to Y
     lda #00                             ; Clear A
 	cpy #00                             ; if Y == 0
-	beq temp_label                              ; Don't multiply
+	beq end_multiply                    ; Don't multiply
 multiply_loop:                          ;
     clc                                 ; Clear Carry
 	adc #4                              ; Add 4 (because sprites have 4 bytes of information)
 	dey                                 ; --Y    
-	beq temp_label                               ; if Y == 0 we're done
+	beq end_multiply                    ; if Y == 0 we're done
 	jmp multiply_loop
-temp_label:
+end_multiply:
     tax                                 ; Store A back into X so that X = X * 4
 
     lda d_y                             ; Load back Y position
