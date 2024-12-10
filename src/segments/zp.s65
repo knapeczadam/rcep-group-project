@@ -16,13 +16,13 @@ temp_64_byte_storage :.res 64
 byte_holder: .res 1
 temp_address_holder: .res 1
 
-bullet_info: .res 1
+bullet_info: .res 6 ; we can shoot up to 6 bullets
 ; bullet_info Byte:
 ;-----------------------
 ; 76543210
 ; ||||||||
 ; ||||||++- Direction the bullet is travelling, going clock wise starting at the top or 12 o'clock we have 00 == UP / 01 == RIGHT / 10 == DOWN / 11 == LEFT
-; |||||+---
+; |||||+--- Bool to check if bullet is Active
 ; ||||+----
 ; |||+-----
 ; ||+------ 

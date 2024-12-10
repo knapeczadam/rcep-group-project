@@ -9,6 +9,7 @@
 .include "code/nmi.s65"
 .include "code/reset.s65"
 .include "code/irq.s65"
+.include "code/gamepad.s65"
 
 .proc ppu_signal
 	sta nmi_ready
