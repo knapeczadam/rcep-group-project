@@ -1,7 +1,3 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 ; Sprite Attribute Byte:
 ;-----------------------
 ; 76543210
@@ -18,9 +14,9 @@ bullet_data:
 
 ;; TODO SET UP VARIABLES FOR THE POSITIONS
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Subroutine to load Bullet Sprites into OAM-RAM starting at $0200, the function will load one sprite then loop back to load the next one until 6 bullets are loaded in OAM
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;===========================================================================================================================================================================;
+; Subroutine to load Bullet Sprites into OAM-RAM starting at $0200, the function will load one sprite then loop back to load the next one until 6 bullets are loaded in OAM ;
+;===========================================================================================================================================================================;
 .proc load_bullets
     ldx #0                                  ; Reset X
 	ldy #0                                  ; Reset Y
@@ -66,7 +62,9 @@ multiply_loop:                              ; Else loop multiply
     rts                                     ; return
 .endproc
 
-; this code currently only moves the first sprite in the oam. Since there's only one sprite its fine for now but will need to either keep track of which sprite is where if we add more
+;====================================================================================================================================;
+; Subroutine to move the first Bullet Sprite manually and Shoot new bullets, the function will move the sprite based on given inputs ;
+;====================================================================================================================================;
 .proc move_bullet 
     lda bullet_info                          ; Load the current bullet_info byte
     and #%11111100                           ; Clear bits 0 and 1 for idle state default
@@ -82,6 +80,9 @@ multiply_loop:                              ; Else loop multiply
     rts                                      ; return
 .endproc
 
+;===========================================================================================;
+; Subroutine to find the background tile on which the middle pixel of the current bullet is ;
+;===========================================================================================;
 .proc find_bg_tile_position
 ; Step 1: Calculate column index
     lda oam + 3, x                      ; Get X position of first sprite
@@ -126,6 +127,9 @@ multiply_loop:                              ; Else loop multiply
   rts                                       ; return
 .endproc
 
+;=========================================================================================================;
+; Subroutine to update the bullets, Checks if bullet is active --> check if it collided, else --> move it ;
+;=========================================================================================================;
 .proc update_bullets
 ; Loop through the bullets (for now starting at 1 instead of 0)
     ldx #00                             ; Reset X
@@ -137,28 +141,18 @@ label:
     and #%00000100                      ; Mask out all bits except bit 2
     beq label                           ; If bit 2 is 0 (result is 0), branch (means bullet is not active we dont need to update)
 
-; If bullet is active
-; First check if it collided, if so reset it
-; Else
-; Change its position
+; Bullet is active
+; First check if it collided, if so reset it and go next
+; Otherwise change its position
 ; positionY = oam + x * 4
 ; positionX = oam+3 + x * 4
 
     txa                                 ; Transfer X to A
 	pha									; Push X to stack for later
     tay                                 ; Transfer A to Y (X to Y)
-    lda #00                             ; Clear A
-	cpy #00                             ; if Y == 0
-	beq :+                              ; Don't multiply
-multiply_loop:                          ;
-    clc                                 ; Clear Carry
-	adc #4                              ; Add 4 (because sprites have 4 bytes of information)
-	dey                                 ; --Y    
-	beq:+                               ; if Y == 0 we're done
-	jmp multiply_loop
-:
-    tax                                 ; Store A back into X so that X = X * 4
+    MULTIPLY_X_BY_4 					; Get X = X * 4
 
+; Collision check
 	pla									; Get X back from the stack
 	tay									; Put X in Y
 	pha									; Push it back on the stack if we need it later
@@ -195,6 +189,9 @@ done:
 	rts									; return
 .endproc
 
+;=====================================================;
+; Subroutine to check if a bullet hit a viewport wall ;
+;=====================================================;
 .proc check_wall_collision
 ; If sprite moves out of screen disable bullet
 	lda oam+3, x       					; Get X position of the bullet
@@ -210,9 +207,12 @@ done:
 	rts									; return
 .endproc
 
+;==================================================================================================================================;
+; Subroutine to check if the center pixel of a bullet is colliding with a letter --> erase the letter and mark bullet has collided ;
+;==================================================================================================================================;
 .proc check_background_collision
 ; Loop through every bullet, check if it's active. If so check the tile at the center 
-; (for simplicity otherwise we can use the tip of the bullet but that requires calculating it based on the direction etc..)
+; (for simplicity otherwise we can use the tip of the bullet but that requires calculating it based on the direction etc.. or use a bounding box)
 ; if the center of the sprite is in a tile that is not #$00 or whatever background color, set its colliding flag and then loop next bullet
 
 ; Loop through the bullets
@@ -228,17 +228,9 @@ label:
 	txa									; Transfer X to A
 	pha									; Store it on the stack
 	tay                                 ; Transfer A to Y (X to Y)
-    lda #00                             ; Clear A
-	cpy #00                             ; if Y == 0
-	beq :+                              ; Don't multiply
-multiply_loop:                          ;
-    clc                                 ; Clear Carry
-	adc #4                              ; Add 4 (because sprites have 4 bytes of information)
-	dey                                 ; --Y    
-	beq:+                               ; if Y == 0 we're done
-	jmp multiply_loop
-:
-    tax                                 ; Store A back into X so that X = X * 4
+
+	MULTIPLY_X_BY_4 					; Get X = X * 4
+
 	jsr find_bg_tile_position			; Find the Background tile in VRAM on which the center pixel of the bullet is
 
 	pla									; Load X from the stack
@@ -251,12 +243,12 @@ done:
 	rts									; return
 .endproc
 
+;==================================================================;
+; Subroutine to clear the background tile the bullet collided with ;
+;==================================================================;
 .proc clear_background_tile
 ; Define the target nametable address
-    lda background_tile_ptr             ; High byte of the address
-    sta PPU_VRAM_ADDRESS2               ; Write high byte to PPU_ADDRESS
-    lda background_tile_ptr+1           ; Low byte of the address
-    sta PPU_VRAM_ADDRESS2               ; Write low byte to PPU_ADDRESS
+	SET_PPU_VRAM_ADRESS background_tile_ptr
 
 	lda PPU_VRAM_IO						; Load the tile
 	lda PPU_VRAM_IO						; Load it again, I think because each tile is 2bytes and we need to check the second byte. regardless it would often load 0 if I load it only once
@@ -266,10 +258,7 @@ done:
     ora #%10000000                      ; Mark bullet as collided
 	sta bullet_info, x					; 
 
-	lda background_tile_ptr             ; High byte of the address
-    sta PPU_VRAM_ADDRESS2               ; Write high byte to PPU_ADDRESS
-    lda background_tile_ptr+1           ; Low byte of the address
-    sta PPU_VRAM_ADDRESS2               ; Write low byte to PPU_ADDRESS
+	SET_PPU_VRAM_ADRESS background_tile_ptr
 
 	lda #$00							; 
 	sta PPU_VRAM_IO						; Delete the background tile that was collided
@@ -279,7 +268,9 @@ done:
 .endproc
 
 
-;; legacy code I keep it in case I need it later
+;==========================================;
+; Legacy code to reuse or throw away later ;
+;==========================================;
 ; 	; Check if the sprite movement is right or left, if so we want to add or remove one to the tile position we want
 ; 	lda bullet_info                         ; Load the sprite info
 ;     and #%00000011                          ; Mask out all but the two LSBs

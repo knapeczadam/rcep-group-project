@@ -98,3 +98,17 @@ end_multiply:
     sta oam+3,x                         ; Set X position of active bullet
 end:
 .endmacro
+
+.macro MULTIPLY_X_BY_4
+    lda #00                             ; Clear A
+	cpy #00                             ; if Y == 0
+	beq end                             ; Don't multiply
+multiply_loop:                          ;
+    clc                                 ; Clear Carry
+	adc #4                              ; Add 4 (because sprites have 4 bytes of information)
+	dey                                 ; --Y    
+	beq end                             ; if Y == 0 we're done
+	jmp multiply_loop
+end:
+    tax                                 ; Store A back into X so that X = X * 4
+.endmacro

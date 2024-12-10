@@ -33,6 +33,17 @@
     sta out+1
 .endmacro
 
+;=================================;
+; in  : 16-bit address            ;
+; out : PPU_VRAM_ADDRESS2 ($2006) ;
+;=================================;
+.macro SET_PPU_VRAM_ADRESS in
+    lda in
+    sta PPU_VRAM_ADDRESS2
+    lda in+1
+    sta PPU_VRAM_ADDRESS2
+.endmacro
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; macro_a : macro to execute if the flip-flop is 0
 ;; macro_b : macro to execute if the flip-flop is 1
