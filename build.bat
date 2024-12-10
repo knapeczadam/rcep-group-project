@@ -1,2 +1,1 @@
-make all
-pause
+make clean OS="" && make all
