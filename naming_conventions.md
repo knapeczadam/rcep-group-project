@@ -1,14 +1,16 @@
 IDENTIFIERS
 constants:  SCREAMING_SNAKE_CASE
 labels:     snake_case
-macros:     Pascal_Snake_Case
-procedures: PascalCase
-variables:  camelCase
+macros:     SCREAMING_SNAKE_CASE
+procedures: snake_case
+variables:  snake_case
 
 COMMENTS
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 100 columns
-;;                                                                                                     2 columns
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 100 columns
+;=================================================================================================== (100 columns)
+; Description
+; Variable name with its usage
+; References
+;=================================================================================================== (100 columns)
 
 INDENTATIONS
 label:
@@ -18,4 +20,6 @@ ____           _                       ^
    |           |                       |
    4 spaces    1 space                 40 columns
 
+PREFIX:
+private macro: __
 
