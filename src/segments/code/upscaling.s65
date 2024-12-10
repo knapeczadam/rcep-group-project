@@ -3,10 +3,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .proc copy_tiles_chr
-  lda #<tiles_chr                       ; load the source address into a pointer in zero page
-  sta temp16bit_ptr
-  lda #>tiles_chr
-  sta temp16bit_ptr+1
+  STORE_ADDRESS tiles_chr, temp16bit_ptr ; load the source address into a pointer in zero page
 
   ldy #0                                ; starting index into the first page
   sty PPU_MASK                          ; Turn off rendering just in case
@@ -236,11 +233,7 @@ loop:
   sta temp_address_holder               ; Store the address of the tile for mapping later
   jsr get_tile_position                 ; Jump to subroutine to Get X and Y of the tile
 
-  ; Load the source address of tiles_chr into a temporary pointer in zero-page
-  lda #<tiles_chr                       ; Load low byte of tiles_chr address
-  sta temp16bit_ptr                     ; Store it in temp16bit_ptr
-  lda #>tiles_chr                       ; Load high byte of tiles_chr address
-  sta temp16bit_ptr+1                   ; Store it in temp16bit_ptr+1
+  STORE_ADDRESS tiles_chr, temp16bit_ptr ; Load the source address of tiles_chr into a temporary pointer in zero-page
 
 set_tile_row:                           ; Move the pointer to point to the correct Y location (simple for loop)
   cpx #$00                              ; if x == 0
