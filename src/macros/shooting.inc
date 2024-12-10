@@ -43,7 +43,7 @@
 .macro MOVE_DOWN
     lda oam                              ; Get current Y of the first sprite      
     cmp #232                             ; Check if Y is 232 because maximum Y (240 - 8, since sprite height is 8px)
-    beq done                 ; If so don't move down
+    beq :+                 ; If so don't move down
     clc                                  ; Clear carry   
     adc #1                               ; Add 1
     sta oam                              ; Store Y + 1 to Y
@@ -65,13 +65,14 @@
 label:
     inx                                 ; ++x
     cpx #6                              ; If x == 6 we checked all 6 bullets
-    beq done                              ; Skip ahead (If I do my math correctly we shouldn't be able to shoot more than 6 bullets anyways)
+    beq end                             ; Skip ahead (If I do my math correctly we shouldn't be able to shoot more than 6 bullets anyways)
     lda bullet_info, x                  ; Load the value at bullet_info, x
     and #%00000100                      ; Mask out all bits except bit 2
     bne label                           ; If bit 2 is 1 (result is 1), branch (means bullet is already active we dont want to touch it)
 
 ; If bullet is not active (also dont just overrite it just flip the bit because direction shouldnt be overwriteen)
-    lda #4                              ; Flip bit 2
+; I'm also adding a default move right mopvement but we can get parent movement and update accordingly
+    lda #5                              ; Flip bit 2
     sta bullet_info, x                  ; Activate the bullet
 
 ; Change its position
@@ -81,18 +82,19 @@ label:
     tay                                 ; Transfer A to Y
     lda #00                             ; Clear A
 	cpy #00                             ; if Y == 0
-	beq done                              ; Don't multiply
+	beq temp_label                              ; Don't multiply
 multiply_loop:                          ;
     clc                                 ; Clear Carry
 	adc #4                              ; Add 4 (because sprites have 4 bytes of information)
 	dey                                 ; --Y    
-	beq done                               ; if Y == 0 we're done
+	beq temp_label                               ; if Y == 0 we're done
 	jmp multiply_loop
-done:
+temp_label:
     tax                                 ; Store A back into X so that X = X * 4
 
     lda d_y                             ; Load back Y position
     sta oam, x                          ; Set Y position of active bullet
     lda d_x                             ; Load back X position
     sta oam+3,x                         ; Set X position of active bullet
+end:
 .endmacro

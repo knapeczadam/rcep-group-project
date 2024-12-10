@@ -176,6 +176,7 @@ main_loop:
  	jsr gamepad_poll ; read the gamepad
     jsr move_bullet
     jsr find_bg_tile_position
+	jsr update_bullets
 
 	lda #1
 	sta nmi_ready

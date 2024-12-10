@@ -167,20 +167,66 @@ multiply_loop:                              ; Else loop multiply
 ; 	rts
 ; .endproc
 
-; .proc update_bullets
-;     ldx #01
-;     lda oam                              ; Get current Y of the first sprite      
-;     cmp #0                               ; Check if Y is already 0
-;     beq NOT_GAMEPAD_UP                   ; If so don't move up
-;     sec                                  ; Set carry   
-;     sbc #1                               ; Substract 1
-;     sta oam                              ; Store Y - 1 to Y
+.proc update_bullets
+; Loop through the bullets (for now starting at 1 instead of 0)
+    ldx #00                             ; Reset X
+label:
+    inx                                 ; ++x
+    cpx #6                              ; If x == 6 we checked all 6 bullets
+    beq done                              ; Skip ahead
+    lda bullet_info, x                  ; Load the value at bullet_info, x
+    and #%00000100                      ; Mask out all bits except bit 2
+    beq label                           ; If bit 2 is 0 (result is 0), branch (means bullet is not active we dont need to update)
 
-;     lda bullet_info                      ; Load the current bullet_info byte
-;     and #%11111100                       ; Clear bits 0 and 1 
-;     ; ora #%00000000                     ; Don't need to combine Up is 00
-;     sta bullet_info                      ; Store the updated value back to bullet_info
-; .endproc
+; If bullet is active
+; Change its position
+; positionY = oam + x * 4
+; positionX = oam+3 + x * 4
+    txa                                 ; Transfer X to A
+	pha									; Push X to stack for later
+    tay                                 ; Transfer A to Y (X to Y)
+    lda #00                             ; Clear A
+	cpy #00                             ; if Y == 0
+	beq :+                              ; Don't multiply
+multiply_loop:                          ;
+    clc                                 ; Clear Carry
+	adc #4                              ; Add 4 (because sprites have 4 bytes of information)
+	dey                                 ; --Y    
+	beq:+                               ; if Y == 0 we're done
+	jmp multiply_loop
+:
+    tax                                 ; Store A back into X so that X = X * 4
+
+;Check direction of bullet and move it in said direction
+	; lda oam, x         					; Load Y position
+    ; sta oam, x                          ; Set Y position of active bullet
+    ; lda d_x                             ; Load X position
+	; inc
+    inc oam+3,x                         ; increase X position by one
+
+
+; If sprite moves out of screen disable bullet
+	lda oam+3, x                          ; Get current X of first sprite
+	cmp #255                             ; Check if sprite is already at position 248 (256 - 8)
+	bne :+                ; If so then don't move right
+
+	pla
+	tay
+	pha
+	
+	lda bullet_info, y                  ; Load the value at bullet_info, x
+    and #%11111011                      ; 
+	sta bullet_info, y                  ; Load the value at bullet_info, x
+	lda #$F0
+	sta oam,x
+:
+
+	pla									; Pull back X
+	tax									;
+	jmp label							; Jump back to loop the rest
+done:
+	rts									; return
+.endproc
 
 .proc clear_background_tile
 ; Define the target nametable address
