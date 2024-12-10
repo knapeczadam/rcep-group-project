@@ -62,6 +62,8 @@ wait_vblank2:
 	; Enable V-Blank
 	lda #%10001000
 	sta PPU_CONTROL
+init_sound:
+    INIT_SOUND_ENGINE
 
 	jmp main
 .endproc

@@ -23,12 +23,30 @@
 .endmacro
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; in:  16-bit address
-;; out: 16-bit address
+;; in  : 16-bit address
+;; out : 16-bit address
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 .macro STORE_ADDRESS in, out
     lda #<in
     sta out
     lda #>in
     sta out+1
+.endmacro
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; macro_a : macro to execute if the flip-flop is 0
+;; macro_b : macro to execute if the flip-flop is 1
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.macro FLIP_FLOP macro_a, macro_b
+.local flip_variable, execute_macro_b
+    lda flip_flop
+    and #%00000001
+    bne execute_macro_b
+    macro_a
+    jmp flip_variable
+execute_macro_b:
+    macro_b
+flip_variable:
+    eor #%00000001
+    sta flip_flop
 .endmacro
