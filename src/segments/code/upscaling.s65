@@ -3,12 +3,12 @@
 
   ldy #0                                ; starting index into the first page
   sty PPU_MASK                          ; Turn off rendering just in case
-  sty PPU_VRAM_ADDRESS2                 ; Set the destination address high byte
-  sty PPU_VRAM_ADDRESS2                 ; Set the destination address low byte
+  sty PPU_ADDRESS                 ; Set the destination address high byte
+  sty PPU_ADDRESS                 ; Set the destination address low byte
   ldx #32                               ; number of 256-byte pages to copy
 loop:
   lda (temp_00_ptr),y                   ; copy one byte
-  sta PPU_VRAM_IO
+  sta PPU_DATA
   iny
   bne loop                              ; repeat until we finish the page
   inc temp_00_ptr+1                     ; go to the next page
@@ -29,15 +29,15 @@ loop:
   lda #0
   sta PPU_MASK                          ; Turn off rendering just in case
   lda #$14                              ; High byte address for the second pattern table of the position for the letter A (#$10 + high nibble of "A" (#$41))
-  sta PPU_VRAM_ADDRESS2                 ; Set the destination address high byte
+  sta PPU_ADDRESS                 ; Set the destination address high byte
   lda #$00                              ; Low byte address for the second pattern table of the position for the letter A (#$00 + low nibble of "A" (#$41) (low nibble is #$10 this is important because one tiles stores 16bytes so if we want to start at A we need to add 16 not 1))
-  sta PPU_VRAM_ADDRESS2                 ; Set the destination address low byte
+  sta PPU_ADDRESS                 ; Set the destination address low byte
   
   ldy #0                                
   ldx #2                                ; Number of rows to copy
 loop:
   lda (temp_00_ptr),y                   ; Copy one byte
-  sta PPU_VRAM_IO                       ; Store it in the patter table at the previously given address
+  sta PPU_DATA                       ; Store it in the patter table at the previously given address
   iny                                   ; Increase Y
   ; cpy #$FF                              ; Compare it 255 otherwise it will only be equal to zero on 255 + 1 copying one extra byte of data. Which would not be a problem if we copied the whole table
   bne loop                              ; If Y != 255 then repeat
@@ -200,7 +200,7 @@ third_check_d_flag_clear:
   lsr                                   ; Repeat
   lsr                                   ; Repeat
   ora #$10                              ; Combine with #$10 to write to the high byte of PPU address
-  sta PPU_VRAM_ADDRESS2                 ; Write high byte to PPU address register
+  sta PPU_ADDRESS                 ; Write high byte to PPU address register
 
   tya                                   ; Reload the full result from Y
   and #$0F                              ; Isolate the low nibble
@@ -208,13 +208,13 @@ third_check_d_flag_clear:
   asl                                   ; Repeat
   asl                                   ; Repeat
   asl                                   ; Repeat
-  sta PPU_VRAM_ADDRESS2                 ; Write low byte to PPU address register
+  sta PPU_ADDRESS                 ; Write low byte to PPU address register
 
   ldx #$40                              ; How many bits we need to transfer from ZP to VRAM
   ldy #$00                              ; Offset
 loop:  
   lda temp_64_arr,y                     ; Load the upscaled info from ZP into accumulator
-  sta PPU_VRAM_IO                       ; Write it to the VRAM (this one is will automatically increment which is why the weird chunk division was done, because I don't know how to change the exact byte I want in VRAM without the automatic inrement)
+  sta PPU_DATA                       ; Write it to the VRAM (this one is will automatically increment which is why the weird chunk division was done, because I don't know how to change the exact byte I want in VRAM without the automatic inrement)
   iny                                   ; Increment offset
   dex                                   ; Decrease X
   cpx #$00                              ; Check if X == 0

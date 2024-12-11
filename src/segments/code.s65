@@ -44,10 +44,10 @@ main_loop:
 	sta PPU_MASK
     
 	lda PPU_STATUS
-	lda #>PPU_ADDR_NT_0
-	sta PPU_VRAM_ADDRESS2
-	lda #<PPU_ADDR_NT_0
-	sta PPU_VRAM_ADDRESS2
+	lda #>NT1_ADDRESS
+	sta PPU_ADDRESS
+	lda #<NT1_ADDRESS
+	sta PPU_ADDRESS
 
 	ldx #0
 	ldy #0			                   ; Character index on curent line
@@ -56,7 +56,7 @@ text_loop:
 	inx
 	cmp #NEWLINE
 	beq while_prepare	               ; Check if newline, if so, start newline logic.
-	sta PPU_VRAM_IO
+	sta PPU_DATA
 	iny			                       ; ++currentLineChar;
 	jmp :+
 
@@ -66,7 +66,7 @@ while_prepare:
 while:
 	cpy #MAX_LINE_CHARS
 	bcs exit_while		               ; Break out of while loop if Y >= MAX_LINE_CHARS - 1
-	sta PPU_VRAM_IO
+	sta PPU_DATA
 	iny
 	jmp while
 

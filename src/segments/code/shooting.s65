@@ -246,8 +246,8 @@ done:
 ; Define the target nametable address
 	SET_PPU_VRAM_ADRESS temp_00_ptr
 
-	lda PPU_VRAM_IO						; Load the tile
-	lda PPU_VRAM_IO						; Load it again, I think because each tile is 2bytes and we need to check the second byte. regardless it would often load 0 if I load it only once
+	lda PPU_DATA						; Load the tile
+	lda PPU_DATA						; Load it again, I think because each tile is 2bytes and we need to check the second byte. regardless it would often load 0 if I load it only once
 	and #$FF							; Check if the Tile is empty 
 	beq :+								; If it is do nothing so jump to end
 	lda var_bullets_arr, x				; Load the value at var_bullets_arr, x
@@ -257,7 +257,7 @@ done:
 	SET_PPU_VRAM_ADRESS temp_00_ptr
 
 	lda #$00							; 
-	sta PPU_VRAM_IO						; Delete the background tile that was collided
+	sta PPU_DATA						; Delete the background tile that was collided
 	:
 
 	rts									; return
@@ -301,13 +301,13 @@ done:
 ; .proc clear_background_tile
 ; ; Define the target nametable address
 ;     lda temp_00_ptr                 ; High byte of the address
-;     sta PPU_VRAM_ADDRESS2                   ; Write high byte to PPU_ADDRESS
+;     sta PPU_ADDRESS                   ; Write high byte to PPU_ADDRESS
 ;     lda temp_00_ptr+1               ; Low byte of the address
-;     sta PPU_VRAM_ADDRESS2                   ; Write low byte to PPU_ADDRESS
+;     sta PPU_ADDRESS                   ; Write low byte to PPU_ADDRESS
 
 ; ; Write the tile index (e.g., tile $03)
 ;     lda #$00              ; Tile index to write
-;     sta PPU_VRAM_IO                         ; Write to PPU_DATA
+;     sta PPU_DATA                         ; Write to PPU_DATA
 
 ; 	rts
 ; .endproc

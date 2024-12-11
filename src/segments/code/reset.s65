@@ -113,10 +113,10 @@ loop:
 	lda PPU_STATUS
 
 	; Set PPU address to first nametable address
-	lda #>PPU_ADDR_NT_0
-	sta PPU_VRAM_ADDRESS2
-	lda #<PPU_ADDR_NT_0
-	sta PPU_VRAM_ADDRESS2
+	lda #>NT1_ADDRESS
+	sta PPU_ADDRESS
+	lda #<NT1_ADDRESS
+	sta PPU_ADDRESS
 
 	; Clear the nametable
 	lda #0
@@ -125,7 +125,7 @@ row_loop:
 	ldx #32
 
 col_loop:
-	sta PPU_VRAM_IO
+	sta PPU_DATA
 	dex
 	bne col_loop
 
@@ -135,7 +135,7 @@ col_loop:
 	; Clear the attribute table
 	ldx #64
 attribute_loop:
-	sta PPU_VRAM_IO
+	sta PPU_DATA
 	dex
 	bne attribute_loop
 
@@ -148,12 +148,12 @@ attribute_loop:
     lda PPU_STATUS
 	   
     ldy #0                             ; starting index into the first page
-    sty PPU_VRAM_ADDRESS2              ; Set the destination address high byte
-    sty PPU_VRAM_ADDRESS2              ; Set the destination address low byte
+    sty PPU_ADDRESS              ; Set the destination address high byte
+    sty PPU_ADDRESS              ; Set the destination address low byte
     ldx #32                            ; number of 256-byte pages to copy
 loop:
     lda (temp_00_ptr),y                ; copy one byte
-    sta PPU_VRAM_IO
+    sta PPU_DATA
     iny
     bne loop                           ; repeat until we finish the page
     inc temp_00_ptr+1                  ; go to the next page
@@ -171,12 +171,12 @@ loop:
 
     ; Set the high byte of the target address in the PPU
     lda #$3F
-    sta PPU_VRAM_ADDRESS2
+    sta PPU_ADDRESS
 
-    stx PPU_VRAM_ADDRESS2              ; Set the low byte of the target address in the PPU (the X register contains zero after the overflow in the TRANSFER_NAMETABLE_QUARTER_4+ loop)
+    stx PPU_ADDRESS              ; Set the low byte of the target address in the PPU (the X register contains zero after the overflow in the TRANSFER_NAMETABLE_QUARTER_4+ loop)
 transfer_palette:
     lda default_palette,X
-    sta PPU_VRAM_IO
+    sta PPU_DATA
     inx
     cpx #32
     bne transfer_palette
