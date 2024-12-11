@@ -53,9 +53,7 @@ wait_vblank2:
     ; Copy CHR tiles into CHR RAM
 	jsr copy_tiles_chr
 	
-	; testing write to CHR RAM
 	jsr write_data_to_chr
-	; jsr test_create_upscale
 
     jsr load_bullets                   ; Call load_bullet subroutine to load the bullet into OAM-RAM
     jsr load_player                    ; Call load_player subroutine to load the player into OAM-RAM

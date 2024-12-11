@@ -67,15 +67,15 @@ multiply_loop:                              ; Else loop multiply
 ; Subroutine to move the first Bullet Sprite manually and Shoot new bullets.
 ; The function will move the sprite based on given input.
 ;===================================================================================================
-.proc move_bullet 
-    lda var_bullets_arr                          ; Load the current var_bullets_arr byte
-    and #%11111100                           ; Clear bits 0 and 1 for idle state default
-    sta var_bullets_arr                          ; Store the updated value back to var_bullets_arr
+.proc shooting_button_handler 
+    ; lda var_bullets_arr                          ; Load the current var_bullets_arr byte
+    ; and #%11111100                           ; Clear bits 0 and 1 for idle state default
+    ; sta var_bullets_arr                          ; Store the updated value back to var_bullets_arr
 
-    ON_BUTTON_PRESSED PAD_L, MOVE_LEFT
-    ON_BUTTON_PRESSED PAD_R, MOVE_RIGHT
-    ON_BUTTON_PRESSED PAD_U, MOVE_UP
-    ON_BUTTON_PRESSED PAD_D, MOVE_DOWN
+    ; ON_BUTTON_PRESSED PAD_L, MOVE_LEFT
+    ; ON_BUTTON_PRESSED PAD_R, MOVE_RIGHT
+    ; ON_BUTTON_PRESSED PAD_U, MOVE_UP
+    ; ON_BUTTON_PRESSED PAD_D, MOVE_DOWN
 
     ON_BUTTON_RELEASED PAD_A, SHOOT_BULLET
 
