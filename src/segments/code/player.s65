@@ -12,11 +12,11 @@ player_data:
 .proc load_player
     ldx #0
 loop:
-    lda player_data,x                       ; We fetch bytes from player_data
-    sta oam,x                             ; We store the bytes starting at OAM address oam
-    inx                                     ; ++x
+    lda player_data,x                   ; We fetch bytes from player_data
+    sta oam,x                           ; We store the bytes starting at OAM address oam
+    inx                                 ; ++x
     cpx #20
-    bne loop                                ; Loop 16 times (4 hardware sprites, 4 bytes each)
+    bne loop                            ; Loop 16 times (4 hardware sprites, 4 bytes each)
     rts
 .endproc
 
@@ -55,24 +55,24 @@ loop:
     @player_cigar_x           = oam + 3
     @player_cigar_y           = oam
 
-    lda var_player_x
-    sta @player_bottom_left_x
+    lda var_player_x                    ; Load player x position
+    sta @player_bottom_left_x           ; Set the left sprites to x
     sta @player_top_left_x
     clc
-    adc #8
-    sta @player_bottom_right_x
+    adc #8                              ; Add 8 for the right sprites
+    sta @player_bottom_right_x          ; Set the right sprites to x + 8
     sta @player_top_right_x
-    sta @player_cigar_x
+    sta @player_cigar_x                 ; Cigar too is a right sprite
 
-    lda var_player_y
-    sta @player_top_left_y
+    lda var_player_y                    ; Load player y position
+    sta @player_top_left_y              ; Set the top sprites to y
     sta @player_top_right_y
-    sta @player_cigar_y
+    sta @player_cigar_y                 ; Cigar is also a top sprite
     clc
-    adc #8
-    sta @player_bottom_left_y
+    adc #8                              ; Add 8 for the bottom sprites
+    sta @player_bottom_left_y           ; Set the bottom sprites to y + 8   
     sta @player_bottom_right_y
 
 @return:
-    rts
+    rts                                 ; return
 .endproc
