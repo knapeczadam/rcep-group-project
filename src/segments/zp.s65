@@ -9,10 +9,8 @@ var_gamepad_released:       .res 1	        ; stores gamepad values released this
 var_flip_flop:              .res 1
 var_frame_count:            .res 1
 var_last_frame_count:       .res 1
-var_bullets_arr:            .res 6 ; we can shoot up to 6 bullets
 var_current_song:           .res 1
 var_current_fx:             .res 1
-var_bools:                  .res 1
 
 FIRE_RATE = 45
 ; var_bullets_arr Byte:
@@ -26,6 +24,7 @@ FIRE_RATE = 45
 ; ||+------ 
 ; |+------- 
 ; +-------- Did a collision occur? 0 == False / 1 == True 
+var_bullets_arr:            .res 6 ; we can shoot up to 6 bullets
 
 ; var_bools is used to keep track of global booleans feel free to assign you own bools here:
 ;-----------------------
@@ -39,6 +38,7 @@ FIRE_RATE = 45
 ; ||+------ 
 ; |+------- 
 ; +--------
+var_bools:                  .res 1
 
 temp_00_ptr:                .res 2
 temp_00:                    .res 1
