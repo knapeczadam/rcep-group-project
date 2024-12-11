@@ -1,28 +1,26 @@
 ;===================================================================================================
 ; RESET is the entry point where the program starts, triggered when the system is powered on or reset.
 ;===================================================================================================
-
 .proc reset
-	sei 			; disable interrupts
+	sei                                ; disable IRQs
 	lda #0
-	sta PPU_CONTROL
-	sta PPU_MASK
-	sta APU_DM_CONTROL
+	sta PPU_CONTROL                    ; set all the PPU miscellaneous settings to 0
+	sta PPU_MASK                       ; disable all the PPU rendering settings
+	sta APU_DM_CONTROL                 ; disable DMC IRQs
+
+	; disable APU frame IRQs
 	lda #$40
 	sta JOYPAD2
 
 	; Disable decimal mode
 	cld
+
+    ; Initialise the stack
 	ldx #$FF
 	txs
 
-	; Wait for V-Blank
-	bit PPU_STATUS
-wait_vblank:
-	bit PPU_STATUS
-	bpl wait_vblank
-
-	lda #0
+    ; Clear the RAM (cannot be a subroutine as it clears the stack as well)
+    lda #0
 	ldx #0
 clear_ram:
 	sta $0000, x
@@ -35,36 +33,6 @@ clear_ram:
 	sta $0700, x
 	inx
 	bne clear_ram
-
-	lda #$FF
-	ldx #0
-clear_oam:
-	sta oam, x
-	inx
-	inx
-	inx
-	inx
-	bne clear_oam
-
-wait_vblank2:
-	bit PPU_STATUS
-	bpl wait_vblank2
-
-    ; Copy CHR tiles into CHR RAM
-	jsr copy_tiles_chr
-	
-	jsr write_data_to_chr
-
-    jsr load_bullets                   ; Call load_bullet subroutine to load the bullet into OAM-RAM
-    jsr load_player                    ; Call load_player subroutine to load the player into OAM-RAM
-
-	; Enable V-Blank
-	lda #%10001000
-	sta PPU_CONTROL
-init_sound:
-    INIT_SOUND_ENGINE
-    SELECT_SONG SONG_1
-    SELECT_FX FX_1
 
 @init_player_pos:
 	ldx #4								; load 4 in X (position of the top left sprite of the player)
@@ -80,5 +48,138 @@ init_sound:
 	lda var_bools
 	ora #%00000011 						; Setting the boolean for firing to true by default bit 0/ Setting fun mode for controls bit 1
 	sta var_bools	
+
+	; Clear the local OAM
+    jsr clear_oam
+
+	; Wait for the first 2 VBlanks to let the PPU stabilise before writing to it
+	ldy #2
+	jsr wait_vblank_y_times
+
+	; Transfer the local, now cleared, OAM data into the PPU to reduce the visible artifacts at start
+    jsr transfer_oam
+
+    ; Clear the nametable
+    jsr clear_nametable
+
+    ; Copy CHR tiles into CHR RAM
+    jsr copy_chr_tiles
+
+	; Copy the palette to the PPU
+    jsr copy_palette
+
+    ; Intialise the sound engine (doing this late to take advantage of the PPU stabilisation time; we let the APU stabilise as well)
+    INIT_SOUND_ENGINE
+
+	; Set the default song and FX
+    SELECT_SONG SONG_1
+    SELECT_FX FX_1
+    
+	; Show both the background and the sprites in the leftmost 8 pixels of the screen and enable rendering for both the background and the sprites
+	lda #%00011110
+	sta PPU_MASK
+
+	; Enable VBlank NMIs
+    lda #%10000000
+    sta PPU_CONTROL
+
 	jmp main
+.endproc
+
+.proc clear_oam
+	lda #$FF
+	ldx #0
+loop:
+	sta oam, x
+	inx
+	inx
+	inx
+	inx
+	bne loop
+
+	rts
+.endproc
+
+.proc wait_vblank_y_times
+    bit PPU_STATUS
+    bpl wait_vblank_y_times
+    dey
+    bne wait_vblank_y_times
+
+    rts
+.endproc
+
+.proc clear_nametable
+	lda PPU_STATUS
+
+	; Set PPU address to first nametable address
+	lda #>PPU_ADDR_NT_0
+	sta PPU_VRAM_ADDRESS2
+	lda #<PPU_ADDR_NT_0
+	sta PPU_VRAM_ADDRESS2
+
+	; Clear the nametable
+	lda #0
+	ldy #30
+row_loop:
+	ldx #32
+
+col_loop:
+	sta PPU_VRAM_IO
+	dex
+	bne col_loop
+
+	dey
+	bne row_loop
+
+	; Clear the attribute table
+	ldx #64
+attribute_loop:
+	sta PPU_VRAM_IO
+	dex
+	bne attribute_loop
+
+	rts
+.endproc
+
+.proc copy_chr_tiles
+	STORE_ADDRESS tiles_chr, temp_00_ptr ; load the source address into a pointer in zero page
+	
+    lda PPU_STATUS
+	   
+    ldy #0                             ; starting index into the first page
+    sty PPU_VRAM_ADDRESS2              ; Set the destination address high byte
+    sty PPU_VRAM_ADDRESS2              ; Set the destination address low byte
+    ldx #32                            ; number of 256-byte pages to copy
+loop:
+    lda (temp_00_ptr),y                ; copy one byte
+    sta PPU_VRAM_IO
+    iny
+    bne loop                           ; repeat until we finish the page
+    inc temp_00_ptr+1                  ; go to the next page
+    dex
+    bne loop                           ; repeat until we've copied enough pages
+
+    jsr load_player                    ; Call load_player subroutine to load the player into OAM-RAM
+    jsr load_bullets                   ; Call load_bullet subroutine to load the bullet into OAM-RAM
+
+	rts
+.endproc
+
+.proc copy_palette
+    lda PPU_STATUS                     ; clear the PPU's internal W register used for tracking whether the following write is the first or the second one (high or low byte)
+
+    ; Set the high byte of the target address in the PPU
+    lda #$3F
+    sta PPU_VRAM_ADDRESS2
+
+    stx PPU_VRAM_ADDRESS2              ; Set the low byte of the target address in the PPU (the X register contains zero after the overflow in the TRANSFER_NAMETABLE_QUARTER_4+ loop)
+transfer_palette:
+    lda default_palette,X
+    sta PPU_VRAM_IO
+    inx
+    cpx #32
+    bne transfer_palette
+
+	rts
 .endproc
