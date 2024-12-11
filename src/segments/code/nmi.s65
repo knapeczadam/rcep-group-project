@@ -43,7 +43,7 @@
 	jmp end
 
 continue:
-    lda #$02                 ; Every frame, we copy spite data starting at $02**.
+    lda #$02                 ; Every frame, we copy spite data starting at $02**. (because of decay. only for real hardware because emulators don't decay info)
     sta $4014                ; The OAM DMA copy starts when we write to $4014.
 
 	jsr check_background_collision

@@ -28,7 +28,7 @@ loop:
     and #PAD_U
     beq gamepad_up_not_pressed
 
-    lda oam + 4
+    lda oam + 4                         ; Check Y position of top sprite
     cmp #0
     beq gamepad_up_not_pressed
 
