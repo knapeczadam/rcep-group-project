@@ -4,3 +4,4 @@
 .include "macros/sound.inc"
 .include "macros/shooting.inc"
 .include "macros/utils.inc"
+.include "macros/player.inc"

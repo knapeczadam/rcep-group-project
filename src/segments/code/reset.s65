@@ -69,5 +69,15 @@ init_sound:
     SELECT_SONG SONG_1
     SELECT_FX FX_1
 
+@init_player_pos:
+	ldx #16								; load 16 in X (position of the bottom left sprite in oam)
+	lda player_data, x					; Check player position y in raw data
+	sta var_player_y					; Set player position y variable
+	inx									;
+	inx									; x+3 to go to X position of sprite in the raw data
+	inx									;
+	lda player_data, x					; Load player position x variable
+	sta var_player_x					; Set player position x variable
+
 	jmp main
 .endproc

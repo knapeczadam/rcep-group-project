@@ -125,9 +125,12 @@ main_loop:
 	bne main_loop
 
  	jsr gamepad_poll ; read the gamepad
-    jsr update_player
 	jsr check_can_shoot
     jsr shooting_button_handler
+
+	jsr handle_player_input
+    jsr update_player
+	
 	jsr update_bullets
 
     ON_BUTTON_RELEASED PAD_START, TOGGLE_MUSIC

@@ -20,47 +20,54 @@ loop:
     rts
 .endproc
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Subroutine to move the player
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;===================================================================================================
+; Subroutine to handle player movement input.
+;===================================================================================================
+.proc handle_player_input
+;;handle shooting
+
+    ON_BUTTON_PRESSED PAD_U, MOVE_UP
+    ON_BUTTON_PRESSED PAD_D, MOVE_DOWN
+
+; Check if player controls are active first
+
+    ON_BUTTON_PRESSED PAD_L, MOVE_LEFT
+    ON_BUTTON_PRESSED PAD_R, MOVE_RIGHT
+
+@return:
+    rts
+.endproc
+
 .proc update_player
-    lda var_gamepad
-    and #PAD_U
-    beq gamepad_up_not_pressed
+    @player_bottom_left_x     = oam + 15
+    @player_bottom_left_y     = oam + 12
+    @player_bottom_right_x    = oam + 19
+    @player_bottom_right_y    = oam + 16
+    @player_top_left_x        = oam + 7
+    @player_top_left_y        = oam + 4
+    @player_top_right_x       = oam + 11
+    @player_top_right_y       = oam + 8
+    @player_cigar_x           = oam + 3
+    @player_cigar_y           = oam
 
-    lda oam + 4                         ; Check Y position of top sprite
-    cmp #0
-    beq gamepad_up_not_pressed
+    lda var_player_x
+    sta @player_bottom_left_x
+    sta @player_top_left_x
+    clc
+    adc #8
+    sta @player_bottom_right_x
+    sta @player_top_right_x
+    sta @player_cigar_x
 
-    ldx #0
-go_up:
-    dec oam,x
-    inx
-    inx
-    inx
-    inx
-    cpx #20
-    bne go_up
+    lda var_player_y
+    sta @player_top_left_y
+    sta @player_top_right_y
+    sta @player_cigar_y
+    clc
+    adc #8
+    sta @player_bottom_left_y
+    sta @player_bottom_right_y
 
-gamepad_up_not_pressed:
-    lda var_gamepad
-    and #PAD_D
-    beq return
-
-    lda oam + 4
-    cmp #224
-    beq return
-
-    ldx #0
-go_down:
-    inc oam,x
-    inx
-    inx
-    inx
-    inx
-    cpx #20
-    bne go_down
-
-return:
+@return:
     rts
 .endproc
