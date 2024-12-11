@@ -50,6 +50,9 @@ wait_vblank2:
 	bit PPU_STATUS
 	bpl wait_vblank2
 
+	lda var_bools
+	ora #%00000001 						; Setting the boolean for firing to true by default
+	sta var_bools
     ; Copy CHR tiles into CHR RAM
 	jsr copy_tiles_chr
 	

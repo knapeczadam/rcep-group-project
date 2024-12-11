@@ -69,6 +69,12 @@ return:
 .endmacro
 
 .macro SHOOT_BULLET
+; Check if we can shoot first, then shoot
+    lda var_bools                       ; Load bools
+    and #%00000001                      ; Check canShoot
+    beq end                             ; if not return
+; Don't reset shoot timer yet we don't know if we have an available bullet yet
+
     @player_y_pos = oam + 16
     @player_x_pos = oam + 19
 
@@ -89,7 +95,14 @@ label:
     and #%00000100                      ; Mask out all bits except bit 2
     bne label                           ; If bit 2 is 1 (result is 1), branch (means bullet is already active we dont want to touch it)
 
-; If bullet is not active (also dont just overrite it just flip the bit because direction shouldnt be overwriteen)
+; If bullet is not active 
+    lda #FIRE_RATE                      ; Load fire rate
+    sta var_last_frame_count            ; Reset fire rate
+    lda var_bools                       ; Load bools
+    and #%11111110                      ; Set CanShoot to false
+    sta var_bools
+
+;(also dont just overrite it just flip the bit because direction shouldnt be overwriteen)
 ; I'm also adding a default move right mopvement but we can get parent movement and update accordingly
     lda #5                              ; Flip bit 2
     sta var_bullets_arr, x              ; Activate the bullet

@@ -12,8 +12,6 @@ bullet_data:
 ;      Y   tile#   attribs     X
 .byte $F0,  $04,  %00000000,  $50           ; OAM sprite 1 at (x: 16, y: 16)
 
-;; TODO SET UP VARIABLES FOR THE POSITIONS
-
 ;===================================================================================================
 ; Subroutine to load Bullet Sprites into OAM-RAM starting at $0200. 
 ; The function will load one sprite then loop back to load the next one until 6 bullets are loaded in OAM
@@ -192,14 +190,30 @@ done:
 	cmp #255           					; Check if sprite is out of screen
 	bne :+                				; If not skip ahead
 	
-	lda var_bullets_arr, y                  ; Load the value at var_bullets_arr, x (Y has the value of X)
+	lda var_bullets_arr, y				; Load the value at var_bullets_arr, x (Y has the value of X)
     and #%01111011                      ; Flip the active bit, set to inactive and reset collision as well
-	sta var_bullets_arr, y                  ; Store it back at var_bullets_arr, x
+	sta var_bullets_arr, y				; Store it back at var_bullets_arr, x
 	lda #$F0							; Reset the Y coord to be out of screen (just in case)
 	sta oam,x							; 
 :
 	rts									; return
 .endproc
+
+;===================================================================================================
+; Subroutine to check if we can shoot again.
+;===================================================================================================
+.proc check_can_shoot
+	lda var_last_frame_count			; Load last frame fired
+	beq	@return							; If it is zero return
+	dec var_last_frame_count			; Else decrease it
+	bne @return							; if it's not zero return
+	lda var_bools						; Else load bools
+	ora #%00000001						; Flip canShoot back to True
+	sta var_bools						; Store it
+@return:
+	rts									; return
+.endproc
+
 
 ;===================================================================================================
 ; Subroutine to check if the center pixel of a bullet is colliding with a letter.
