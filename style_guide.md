@@ -14,9 +14,9 @@
 | reusable variable        | temp_  |         | temp_00         |
 | private macro            | __     |         | __PLAY_MUSIC    |
 | 2 bytes pointer          |        | _ptr    | temp_00_ptr     |
-| 2 bytes non-pointer      |        | _long   |                 |
+| 2 bytes non-pointer      |        | _long   | temp_00_long    |
 | 2+ bytes array           |        | _arr    | var_bullets_arr |
-| 2+ bytes temporary array |        | _arr    | temp_64_arr     |
+| 2+ bytes temporary array |        |VALUE_arr| temp_64_arr     |
 
 **COMMENTS**
 ```
