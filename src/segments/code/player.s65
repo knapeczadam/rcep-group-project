@@ -21,15 +21,16 @@ loop:
 .endproc
 
 ;===================================================================================================
-; Subroutine to handle player movement input.
+; Subroutine to handle player inputs.
 ;===================================================================================================
 .proc handle_player_input
-;;handle shooting
+; Handle shooting and Up/Down
+    ON_BUTTON_RELEASED PAD_A, SHOOT_BULLET
 
     ON_BUTTON_PRESSED PAD_U, MOVE_UP
     ON_BUTTON_PRESSED PAD_D, MOVE_DOWN
 
-; Check if player controls are active first
+; Check if player controls are active first then move Left/Right
 
     ON_BUTTON_PRESSED PAD_L, MOVE_LEFT
     ON_BUTTON_PRESSED PAD_R, MOVE_RIGHT

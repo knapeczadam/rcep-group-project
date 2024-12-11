@@ -126,8 +126,6 @@ main_loop:
 
  	jsr gamepad_poll ; read the gamepad
 	jsr check_can_shoot
-    jsr shooting_button_handler
-
 	jsr handle_player_input
     jsr update_player
 	
