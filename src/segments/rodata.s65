@@ -14,7 +14,8 @@ default_palette:
 .byte $0F,$1B,$2B,$3B
 .byte $0F,$12,$22,$32
 
-welcome_txt:
+slides:
+.byte NEWLINE
 .byte "ACCORDING TO ALL KNOWN LAWS", NEWLINE
 .byte "OF AVIATION, A BEE SHOULD NOT", NEWLINE
 .byte "BE ABLE TO FLY. ITS WINGS ARE", NEWLINE

@@ -92,7 +92,7 @@ paletteloop:
 	ldx #0
 	ldy #0			; Character index on curent line
 text_loop:
-	lda welcome_txt, x
+	lda slides, x
 	inx
 	cmp #NEWLINE
 	beq while_prepare	; Check if newline, if so, start newline logic.
@@ -117,60 +117,6 @@ exit_while:
 	beq :+
 	jmp text_loop
 :
-	
-	; Temporary code to show the upscaled Letter
-	; lda PPU_STATUS
-	; lda #$07              
-	; sta PPU_VRAM_ADDRESS2                 ; Write high byte to PPU address register
-	; lda #$60              
-	; sta PPU_VRAM_ADDRESS2                 ; Write low byte to PPU address register
-
-    ldx #240                                ; Just padding
-padding:
-	lda #$00
-	sta PPU_VRAM_IO
-	dex
-	cpx #0
-	beq :+
-	jmp padding
-:
-
-	lda #$78
-	sta PPU_VRAM_IO
-
-	lda #$7A
-	sta PPU_VRAM_IO
-
-    lda #$78
-	sta PPU_VRAM_IO
-
-	lda #$7A
-	sta PPU_VRAM_IO
-
-    ldx #28                                ; Just padding
-more_padding:
-	lda #$00
-	sta PPU_VRAM_IO
-	dex
-	cpx #0
-	beq :+
-	jmp more_padding
-:
-
-    lda #$79
-	sta PPU_VRAM_IO
-
-	lda #$7B
-	sta PPU_VRAM_IO
-
-    lda #$79
-	sta PPU_VRAM_IO
-
-	lda #$7B
-	sta PPU_VRAM_IO
-
-    ; End temp Code for upscale
-
 	jsr ppu_update
 
 main_loop:

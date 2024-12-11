@@ -10,7 +10,7 @@
 
 bullet_data:
 ;      Y   tile#   attribs     X
-.byte $F0,  $04,  %00000000,  $50           ; OAM sprite 1 at (x: 16, y: 16)
+.byte $F0,  $2D,  %00000011,  $50           ; OAM sprite 1 at (x: 16, y: 16)
 
 ;===================================================================================================
 ; Subroutine to load Bullet Sprites into OAM-RAM starting at $0200. 
