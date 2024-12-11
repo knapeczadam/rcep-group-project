@@ -32,6 +32,10 @@ loop:
 
 ; Check if player controls are active first then move Left/Right
 
+    lda var_bools                       ; Load bools
+    and #%00000010                      ; Check if input is fun or not
+    beq @return                         ; if not return
+
     ON_BUTTON_PRESSED PAD_L, MOVE_LEFT
     ON_BUTTON_PRESSED PAD_R, MOVE_RIGHT
 

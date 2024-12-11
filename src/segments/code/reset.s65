@@ -50,9 +50,6 @@ wait_vblank2:
 	bit PPU_STATUS
 	bpl wait_vblank2
 
-	lda var_bools
-	ora #%00000001 						; Setting the boolean for firing to true by default
-	sta var_bools
     ; Copy CHR tiles into CHR RAM
 	jsr copy_tiles_chr
 	
@@ -79,5 +76,9 @@ init_sound:
 	lda player_data, x					; Load player position x variable
 	sta var_player_x					; Set player position x variable
 
+@init_bools:
+	lda var_bools
+	ora #%00000011 						; Setting the boolean for firing to true by default bit 0/ Setting fun mode for controls bit 1
+	sta var_bools	
 	jmp main
 .endproc
