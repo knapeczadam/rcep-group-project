@@ -30,6 +30,7 @@ loop_sprite:
     tya                                     ; 
     pha                                     ; Push Y on stack
 ; we now want to calculate the position of the sprite x = x + y * 4
+;;TODO CHANGE THIS WITH MULTIPLY X 4 just odnt forget to clc adc temp_00 after
     lda #00                                 ; Clear A
 	cpy #00                                 ; if Y == 0
 	beq :+                                  ; Don't multiply
@@ -42,6 +43,7 @@ multiply_loop:                              ; Else loop multiply
 :
     clc                                     ; Clear Carry
     adc temp_01                           	; Add X back to Y * 4
+	adc #$20								; Moving it to second OAM line
     tax                                     ; Assign X + Y * 4 back to X => X = X + Y * 4
 
     pla                                     ;
@@ -134,13 +136,13 @@ multiply_loop:                              ; Else loop multiply
 ; Checks if bullet is active --> check if it collided, else --> move it
 ;===================================================================================================
 .proc update_bullets
-; Loop through the bullets (for now starting at 1 instead of 0)
-    ldx #00                             ; Reset X
+; Loop through the bullets
+    ldx #$FF                            ; Reset X
 label:
     inx                                 ; ++x
     cpx #6                              ; If x == 6 we checked all 6 bullets
     beq done                            ; Skip ahead
-    lda var_bullets_arr, x                  ; Load the value at var_bullets_arr, x
+    lda var_bullets_arr, x              ; Load the value at var_bullets_arr, x
     and #%00000100                      ; Mask out all bits except bit 2
     beq label                           ; If bit 2 is 0 (result is 0), branch (means bullet is not active we dont need to update)
 
@@ -159,12 +161,12 @@ label:
 	pla									; Get X back from the stack
 	tay									; Put X in Y
 	pha									; Push it back on the stack if we need it later
-    lda var_bullets_arr, y                  ; Load the value at var_bullets_arr, x
+    lda var_bullets_arr, y              ; Load the value at var_bullets_arr, x
     and #%10000000                      ; Check Collision Bit
 	beq :+								; If no collision go to moving the bullet
-	lda var_bullets_arr, y                  ; Load the value at var_bullets_arr, x
+	lda var_bullets_arr, y				; Load the value at var_bullets_arr, x
     and #%01111011                      ; Flip the active bit, set to inactive and reset collision as well
-	sta var_bullets_arr, y                  ; Store it back at var_bullets_arr, x
+	sta var_bullets_arr, y				; Store it back at var_bullets_arr, x
 	lda #$F0							; Reset the Y coord to be out of screen
 	sta oam,x							; 
 	pla									; We're jumping back so pull back X
@@ -258,9 +260,9 @@ done:
 	lda PPU_VRAM_IO						; Load it again, I think because each tile is 2bytes and we need to check the second byte. regardless it would often load 0 if I load it only once
 	and #$FF							; Check if the Tile is empty 
 	beq :+								; If it is do nothing so jump to end
-	lda var_bullets_arr, x                  ; Load the value at var_bullets_arr, x
+	lda var_bullets_arr, x				; Load the value at var_bullets_arr, x
     ora #%10000000                      ; Mark bullet as collided
-	sta var_bullets_arr, x					; 
+	sta var_bullets_arr, x				; 
 
 	SET_PPU_VRAM_ADRESS temp_00_ptr
 

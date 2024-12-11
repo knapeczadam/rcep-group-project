@@ -17,7 +17,7 @@
 ; macro  : macro to execute if the button is released
 ;===================================================================================================
 .macro ON_BUTTON_RELEASED button, macro
-    lda var_gamepad_released               ; Load var_gamepad state
+    lda var_gamepad_released           ; Load var_gamepad state
     and #button                        ; Check if the button is released
     beq :+                             ; If not, skip the next instruction
     macro                              ; Execute the macro
