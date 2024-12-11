@@ -13,7 +13,7 @@ player_data:
     ldx #0
 loop:
     lda player_data,x                       ; We fetch bytes from player_data
-    sta $0204,x                             ; We store the bytes starting at OAM address $0204
+    sta oam,x                             ; We store the bytes starting at OAM address oam
     inx                                     ; ++x
     cpx #20
     bne loop                                ; Loop 16 times (4 hardware sprites, 4 bytes each)
@@ -28,13 +28,13 @@ loop:
     and #PAD_U
     beq gamepad_up_not_pressed
 
-    lda $0204 + 4
+    lda oam + 4
     cmp #0
     beq gamepad_up_not_pressed
 
     ldx #0
 go_up:
-    dec $0204,x
+    dec oam,x
     inx
     inx
     inx
@@ -47,13 +47,13 @@ gamepad_up_not_pressed:
     and #PAD_D
     beq return
 
-    lda $0204 + 4
+    lda oam + 4
     cmp #224
     beq return
 
     ldx #0
 go_down:
-    inc $0204,x
+    inc oam,x
     inx
     inx
     inx

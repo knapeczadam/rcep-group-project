@@ -30,20 +30,9 @@ loop_sprite:
     tya                                     ; 
     pha                                     ; Push Y on stack
 ; we now want to calculate the position of the sprite x = x + y * 4
-;;TODO CHANGE THIS WITH MULTIPLY X 4 just odnt forget to clc adc temp_00 after
-    lda #00                                 ; Clear A
-	cpy #00                                 ; if Y == 0
-	beq :+                                  ; Don't multiply
-multiply_loop:                              ; Else loop multiply
-    clc                                     ; Clear Carry
-	adc #4                                  ; Add 4
-	dey                                     ; --Y    
-	beq:+                                   ; if Y == 0 we're done
-	jmp multiply_loop
-:
+	MULTIPLY_X_BY_4
     clc                                     ; Clear Carry
     adc temp_01                           	; Add X back to Y * 4
-	adc #$20								; Moving it to second OAM line
     tax                                     ; Assign X + Y * 4 back to X => X = X + Y * 4
 
     pla                                     ;

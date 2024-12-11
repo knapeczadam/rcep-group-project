@@ -69,12 +69,15 @@ return:
 .endmacro
 
 .macro SHOOT_BULLET
-    lda oam + 20                        ; Get Y position of the player sprite
-    sta temp_00                         ; Store it
-    lda oam + 20 + 3                    ; Get X position of the player sprite
+    @player_y_pos = oam + 16
+    @player_x_pos = oam + 19
+
+    lda @player_y_pos                  ; Get Y position of the player sprite
+    sta temp_00                        ; Store it
+    lda @player_x_pos                  ; Get X position of the player sprite
     clc 
-    adc #$08                            ; Add 8 to X (dont want to spawn on the player)
-    sta temp_01                         ; Store it
+    adc #$08                           ; Add 8 to X (don't want to spawn on the player)
+    sta temp_01                        ; Store it
 
 ; Loop through the bullets
     ldx #$FF                            ; Reset X
