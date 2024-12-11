@@ -21,3 +21,4 @@ FAMISTUDIO_DPCM_OFF           = $E000
 
 .include "../audio/sound_engine.s65"
 .include "../../data/music.s65"
+.include "../../data/fx.s65"

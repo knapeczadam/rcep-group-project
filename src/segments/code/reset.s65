@@ -64,6 +64,8 @@ wait_vblank2:
 	sta PPU_CONTROL
 init_sound:
     INIT_SOUND_ENGINE
+    SELECT_SONG SONG_1
+    SELECT_FX FX_1
 
 	jmp main
 .endproc

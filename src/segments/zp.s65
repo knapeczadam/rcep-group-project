@@ -17,6 +17,7 @@ var_flip_flop:              .res 1
 var_last_frame_count:       .res 1
 var_bullets_arr:            .res 6 ; we can shoot up to 6 bullets
 var_current_song:           .res 1
+var_current_fx:             .res 1
 
 ; var_bullets_arr Byte:
 ;-----------------------

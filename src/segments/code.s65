@@ -181,8 +181,8 @@ main_loop:
     jsr move_bullet
 	jsr update_bullets
 
-    SELECT_SONG SONG_1
-    ON_BUTTON_RELEASED PAD_B, TOGGLE_MUSIC
+    ON_BUTTON_RELEASED PAD_START, TOGGLE_MUSIC
+    ON_BUTTON_RELEASED PAD_SELECT, PLAY_FX
     jsr famistudio_update
 
 	lda #1

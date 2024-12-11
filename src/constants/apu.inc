@@ -1,5 +1,5 @@
 ;===================================================================================================
-; Defines memory-mapped registers for the APU and constants for song identifiers. 
+; Defines memory-mapped registers for the APU and constants for music and sound effects.
 ;===================================================================================================
 APU_DM_CONTROL = $4010
 APU_FLAGS      = $4015
@@ -17,3 +17,7 @@ APU_SQ2_HI     = $4007
 SONG_1         = 0
 SONG_2         = 1
 SONG_3         = 2
+
+FX_1           = 0
+FX_2           = 1
+FX_3           = 2

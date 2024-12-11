@@ -8,6 +8,10 @@
 
     lda #0
     jsr famistudio_init
+
+    ldx #.lobyte(fx_data)
+    ldy #.hibyte(fx_data)
+    jsr famistudio_sfx_init
 .endmacro
 
 ;===================================================================================================
@@ -31,6 +35,7 @@
 ;===================================================================================================
 .macro SELECT_SONG song_id
     lda #song_id
+    sta var_current_song
 .endmacro
 
 ;===================================================================================================
@@ -39,4 +44,22 @@
 .macro TOGGLE_MUSIC
     CIRCULAR_INCREMENT var_current_song, 1
     FLIP_FLOP __PLAY_MUSIC, __PLAY_MUSIC
+.endmacro
+
+;===================================================================================================
+; Macro to play a sound effect on the first channel.
+;===================================================================================================
+.macro PLAY_FX
+    lda var_current_fx
+    ldx #FAMISTUDIO_SFX_CH0
+    jsr famistudio_sfx_play
+.endmacro
+
+;===================================================================================================
+; Macro to select a sound effect by its ID. IDs are defined in constans/apu.inc.
+; fx_id : 8-bit sound effect ID
+;===================================================================================================
+.macro SELECT_FX fx_id
+    lda #fx_id
+    sta var_current_fx
 .endmacro
