@@ -43,6 +43,8 @@
 	jmp end
 
 continue:
+	inc var_frame_count		 ; Increase frame count
+
     lda #$02                 ; Every frame, we copy spite data starting at $02**. (because of decay. only for real hardware because emulators don't decay info)
     sta $4014                ; The OAM DMA copy starts when we write to $4014.
 
@@ -91,4 +93,16 @@ end:
 	tax
 	pla
 	rti
+.endproc
+
+.proc frame_count_cap
+	lda var_frame_count
+	cmp #50
+	bne @return
+
+	lda #0
+	sta var_frame_count
+
+@return:
+	rts
 .endproc

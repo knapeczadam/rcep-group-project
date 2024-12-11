@@ -178,6 +178,8 @@ main_loop:
 	; cmp #0 unnecessary because lda already sets this flag based on the value
 	bne main_loop
 
+	jsr frame_count_cap
+
  	jsr gamepad_poll ; read the gamepad
     jsr update_player
     jsr shooting_button_handler
