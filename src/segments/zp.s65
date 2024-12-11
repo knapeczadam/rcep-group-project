@@ -3,13 +3,6 @@
 ;===================================================================================================
 .segment "ZEROPAGE"
 
-; var_ for non reusable variables
-; temp_ for reusable variables
-; _ptr for 2bytes
-; _long for non pointers 2bytes
-; _arr for 2+ bytes, if allocating temporary array -> temp_LENGTH_arr
-
-
 var_nmi_ready:              .res 1
 var_gamepad:                .res 1
 var_gamepad_released:       .res 1	        ; stores gamepad values released this frame

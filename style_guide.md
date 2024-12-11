@@ -7,12 +7,16 @@
 | procedures | snake_case           |
 | variables  | snake_case           |
 
-**PREFIXES**
-| Type            | Prefix |
-|-----------------|--------|
-| global variable | var_   |
-| local variable  | temp_  |
-| private macro   | __     |
+**PREFIXES/POSTFIXES**
+| Type                     | Prefix | Postfix | Example         |
+|--------------------------|--------|---------|-----------------|
+| non-reusable variable    | var_   |         | var_gamepad     |
+| reusable variable        | temp_  |         | temp_00         |
+| private macro            | __     |         | __PLAY_MUSIC    |
+| 2 bytes pointer          |        | _ptr    | temp_00_ptr     |
+| 2 bytes non-pointer      |        | _long   |                 |
+| 2+ bytes array           |        | _arr    | var_bullets_arr |
+| 2+ bytes temporary array |        | _arr    | temp_64_arr     |
 
 **COMMENTS**
 ```
