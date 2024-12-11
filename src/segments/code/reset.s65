@@ -67,7 +67,7 @@ init_sound:
     SELECT_FX FX_1
 
 @init_player_pos:
-	ldx #16								; load 16 in X (position of the bottom left sprite in oam)
+	ldx #4								; load 4 in X (position of the top left sprite of the player)
 	lda player_data, x					; Check player position y in raw data
 	sta var_player_y					; Set player position y variable
 	inx									;
