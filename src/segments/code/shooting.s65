@@ -50,7 +50,7 @@ multiply_loop:                              ; Else loop multiply
     tay                                     ; Restore Y
 
     lda temp_00                   			; Reload the value we want to store
-    sta $0200,x                             ; We store the bytes starting at OAM address $0200 with offset X
+    sta oam ,x                              ; We store the bytes starting at OAM address $0200 with offset X
 
     PLA                                     ; 
     TAX                                     ; Restore X
