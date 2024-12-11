@@ -1,0 +1,66 @@
+player_data:
+;      Y   tile#   attribs     X
+.byte $51,  $61,  %00000001,  $08
+.byte $50,  $60,  %00000000,  $00
+.byte $50,  $60,  %01000000,  $08
+.byte $58,  $70,  %00000000,  $00
+.byte $58,  $70,  %01000000,  $08
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Subroutine to load the player into OAM-RAM
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.proc load_player
+    ldx #0
+loop:
+    lda player_data,x                       ; We fetch bytes from player_data
+    sta $0204,x                             ; We store the bytes starting at OAM address $0204
+    inx                                     ; ++x
+    cpx #20
+    bne loop                                ; Loop 16 times (4 hardware sprites, 4 bytes each)
+    rts
+.endproc
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Subroutine to move the player
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.proc update_player
+    lda var_gamepad
+    and #PAD_U
+    beq gamepad_up_not_pressed
+
+    lda $0204 + 4
+    cmp #0
+    beq gamepad_up_not_pressed
+
+    ldx #0
+go_up:
+    dec $0204,x
+    inx
+    inx
+    inx
+    inx
+    cpx #20
+    bne go_up
+
+gamepad_up_not_pressed:
+    lda var_gamepad
+    and #PAD_D
+    beq return
+
+    lda $0204 + 4
+    cmp #224
+    beq return
+
+    ldx #0
+go_down:
+    inc $0204,x
+    inx
+    inx
+    inx
+    inx
+    cpx #20
+    bne go_down
+
+return:
+    rts
+.endproc

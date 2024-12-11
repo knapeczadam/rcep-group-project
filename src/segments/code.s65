@@ -5,6 +5,7 @@
 
 .include "code/sound.s65"
 
+.include "code/player.s65"
 .include "code/shooting.s65"
 .include "code/upscaling.s65"
 
@@ -178,6 +179,7 @@ main_loop:
 	bne main_loop
 
  	jsr gamepad_poll ; read the gamepad
+    jsr update_player
     jsr move_bullet
 	jsr update_bullets
 
