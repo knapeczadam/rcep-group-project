@@ -65,3 +65,22 @@ flip_variable:
     eor #%00000001
     sta var_flip_flop
 .endmacro
+
+;===================================================================================================
+; Increments an 8-bit variable and resets it to 0 if it exceeds a specified maximum value.
+; variable  : 8-bit variable to increment
+; max_value : 8-bit maximum value for the variable, inclusive
+;===================================================================================================
+.macro CIRCULAR_INCREMENT variable, max_value
+.local zero_out, store
+    lda variable
+    cmp #max_value
+    beq zero_out
+    clc
+    adc #1
+    jmp store
+zero_out:
+    lda #0
+store:
+    sta variable
+.endmacro

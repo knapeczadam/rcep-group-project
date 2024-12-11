@@ -5,7 +5,7 @@
 .endif
 
 music_data:
-	.byte 1
+	.byte 2
 	.word @instruments
 	.word @samples-4
 ; 00 : Song 1
@@ -14,6 +14,13 @@ music_data:
 	.word @song0ch2
 	.word @song0ch3
 	.word @song0ch4
+	.byte .lobyte(@tempo_env_1_mid), .hibyte(@tempo_env_1_mid), 0, 0
+; 01 : Song 2
+	.word @song1ch0
+	.word @song1ch1
+	.word @song1ch2
+	.word @song1ch3
+	.word @song1ch4
 	.byte .lobyte(@tempo_env_1_mid), .hibyte(@tempo_env_1_mid), 0, 0
 
 .export music_data
@@ -80,3 +87,41 @@ music_data:
 @song0ch4loop:
 	.byte $ff, $df, $ff, $df, $ff, $df, $ff, $df, $42
 	.word @song0ch4loop
+@song1ch0:
+@song1ch0loop:
+	.byte $47, .lobyte(@tempo_env_1_mid), .hibyte(@tempo_env_1_mid), $82, $35, $b5, $30, $99, $31, $99, $33, $b5, $31, $99, $30
+	.byte $99, $48, $2e, $b5, $2e, $99, $31, $99, $35, $b5, $33, $99, $31, $99, $48, $30, $b5, $30, $99, $31, $99, $33, $b5, $35
+	.byte $b5, $48, $31, $b5, $2e, $b5, $2e, $b5, $00, $b5, $42
+	.word @song1ch0loop
+@song1ch1:
+@song1ch1loop:
+	.byte $b7, $80, $21, $99, $00, $d1, $22, $99, $21, $99, $1d, $d1, $00, $ff, $89, $21, $d1, $22, $99, $24, $b5, $00, $b5, $b7
+	.byte $1d, $ed, $00, $b5, $42
+	.word @song1ch1loop
+@song1ch2:
+@song1ch2loop:
+	.byte $80, $1d, $99, $29, $99, $1d, $99, $29, $99, $1d, $99, $29, $99, $1d, $99, $29
+@song1ref103:
+	.byte $99, $16, $99, $22, $99, $16, $99, $22, $99, $16, $99, $22, $99, $16, $99, $22, $99, $15, $99, $21, $99, $15, $99, $21
+	.byte $99, $15, $99, $21, $99, $15, $99, $21
+	.byte $41, $11
+	.word @song1ref103
+	.byte $42
+	.word @song1ch2loop
+@song1ch3:
+@song1ch3loop:
+	.byte $00, $99, $84
+@song1ref145:
+	.byte $31, $99, $00, $99, $31, $99, $00, $99, $31, $8b, $31, $8b, $00, $99, $31, $99, $00, $99
+	.byte $41, $12
+	.word @song1ref145
+	.byte $41, $12
+	.word @song1ref145
+	.byte $41, $10
+	.word @song1ref145
+	.byte $42
+	.word @song1ch3loop
+@song1ch4:
+@song1ch4loop:
+	.byte $ff, $df, $ff, $df, $ff, $df, $ff, $df, $42
+	.word @song1ch4loop

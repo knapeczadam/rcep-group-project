@@ -14,6 +14,8 @@
 ; Private macro to play the music.
 ;===================================================================================================
 .macro __PLAY_MUSIC
+    jsr famistudio_music_stop
+    lda var_current_song
     jsr famistudio_music_play
 .endmacro
 
@@ -35,5 +37,6 @@
 ; A macro that toggles music by switching between __PLAY_MUSIC and __STOP_MUSIC.
 ;===================================================================================================
 .macro TOGGLE_MUSIC
-    FLIP_FLOP __PLAY_MUSIC, __STOP_MUSIC
+    CIRCULAR_INCREMENT var_current_song, 1
+    FLIP_FLOP __PLAY_MUSIC, __PLAY_MUSIC
 .endmacro
