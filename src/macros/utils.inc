@@ -72,15 +72,34 @@ flip_variable:
 ; max_value : 8-bit maximum value for the variable, inclusive
 ;===================================================================================================
 .macro CIRCULAR_INCREMENT variable, max_value
-.local zero_out, store
+.local reset, store
     lda variable
     cmp #max_value
-    beq zero_out
+    beq reset
     clc
     adc #1
     jmp store
-zero_out:
+reset:
     lda #0
+store:
+    sta variable
+.endmacro
+
+;===================================================================================================
+; Decrements an 8-bit variable and resets it to a specified maximum value if it goes below 0.
+; variable  : 8-bit variable to decrement
+; max_value : 8-bit maximum value for the variable, inclusive
+;===================================================================================================
+.macro CIRCULAR_DECREMENT variable, max_value
+.local reset, store
+    lda variable
+    cmp #0
+    beq reset
+    sec
+    sbc #1
+    jmp store
+reset:
+    lda #max_value
 store:
     sta variable
 .endmacro
