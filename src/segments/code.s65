@@ -113,7 +113,7 @@ while:
 exit_while:
 	ldy #0			; Clear the current line character index
 :
-	cmp #NULL_TERM		; stop at null terminator
+	cmp #NEXT_SLIDE		; stop at null terminator
 	beq :+
 	jmp text_loop
 :
