@@ -167,11 +167,15 @@ label:
     ; sta oam, x                          ; Set Y position of active bullet
     ; lda d_x                             ; Load X position
 	; inc
-    inc oam+3,x                         ; increase X position by one
 
 	pla									; Pull X back into A
 	tay									; Transfer it to Y
 	pha									; Push it back for later
+    
+	inc oam+3,x                         ; increase X position by one
+	jsr check_wall_collision			; Check if bullet collides with the wall
+
+    inc oam+3,x                         ; increase X position by one
 	jsr check_wall_collision			; Check if bullet collides with the wall
 
 	pla									; Pull back X
@@ -186,16 +190,18 @@ done:
 ;===================================================================================================
 .proc check_wall_collision
 ; If sprite moves out of screen disable bullet
+	lda var_bullets_arr, y				; Load the value at var_bullets_arr, x (Y has the value of X)
+	and #%00000100						; Check if it's valid
+	beq @return
 	lda oam+3, x       					; Get X position of the bullet
 	cmp #255           					; Check if sprite is out of screen
-	bne :+                				; If not skip ahead
-	
+	bne @return                			; If not skip ahead
 	lda var_bullets_arr, y				; Load the value at var_bullets_arr, x (Y has the value of X)
     and #%01111011                      ; Flip the active bit, set to inactive and reset collision as well
 	sta var_bullets_arr, y				; Store it back at var_bullets_arr, x
 	lda #$F0							; Reset the Y coord to be out of screen (just in case)
 	sta oam,x							; 
-:
+@return:
 	rts									; return
 .endproc
 
