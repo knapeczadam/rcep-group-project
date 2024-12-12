@@ -30,6 +30,9 @@
 	; Check whether we're ready to render, skip to end if not
 	lda var_nmi_ready
 	beq end
+
+	cmp #NMI_SIG_DISABLE_RENDERING
+	beq disable_rendering
     
 ;===================================================================================================
 
@@ -52,8 +55,17 @@
 	sta PPU_SCROLL
 	sta PPU_SCROLL
     
+	; Enable rendering
+	lda #%00011110
+	sta PPU_MASK
+
 	ldx #NMI_SIG_CLEAR
 	stx var_nmi_ready
+	jmp end
+
+disable_rendering:
+    lda #0
+	sta PPU_MASK
 
 end:
 	; pop registers
