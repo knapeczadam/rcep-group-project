@@ -2,5 +2,3 @@
 ; BSS is a memory segment for uninitialized global and static variables, defaulting to zero.
 ;===================================================================================================
 .segment "BSS"
-
-palette: .res 32
