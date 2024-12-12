@@ -72,8 +72,9 @@ end:
 .endproc
 
 .proc frame_count_cap
+    @fps = 50
 	lda var_frame_count
-	cmp #50
+	cmp #@fps
 	bne @return
 
 	lda #0
@@ -84,13 +85,20 @@ end:
 .endproc
 
 .proc update_background_color
+    @attr_count = 64
+	@start_index = 0
+	@color_palette_1 = 0   ; $00
+	@color_palette_2 = 85  ; $55
+	@color_palette_3 = 170 ; $AA
+	@color_palette_4 = 255 ; FF
+	
     SET_PPU_ADDRESS NT1_ATTR           ; Set the PPU address to the attribute table of the first nametable
-    ldx #64                            ; 64 bytes to update
-    ldy #0                             ; Index for the attribute table
-    CONDITIONAL_LOAD var_current_bg_state, 0, var_current_bg_color, 0    ; 0   = $00
-    CONDITIONAL_LOAD var_current_bg_state, 1, var_current_bg_color, 85   ; 85  = $55
-    CONDITIONAL_LOAD var_current_bg_state, 2, var_current_bg_color, 170  ; 170 = $AA
-    CONDITIONAL_LOAD var_current_bg_state, 3, var_current_bg_color, 255  ; 255 = $FF
+    ldx #@attr_count                            ; 64 bytes to update
+    ldy #@start_index                             ; Index for the attribute table
+    CONDITIONAL_LOAD var_current_bg_state, 0, var_current_bg_color, @color_palette_1
+    CONDITIONAL_LOAD var_current_bg_state, 1, var_current_bg_color, @color_palette_2
+    CONDITIONAL_LOAD var_current_bg_state, 2, var_current_bg_color, @color_palette_3
+    CONDITIONAL_LOAD var_current_bg_state, 3, var_current_bg_color, @color_palette_4
     lda var_current_bg_color           ; Load the color to write to the attribute table
 :
     sta PPU_DATA                       ; Write the color to the attribute table
