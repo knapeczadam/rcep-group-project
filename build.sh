@@ -1,2 +1,2 @@
-make all
+make clean && make all
 
