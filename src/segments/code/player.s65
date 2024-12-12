@@ -25,10 +25,10 @@ loop:
 ;===================================================================================================
 .proc handle_player_input
 ; Handle shooting and Up/Down
-    ON_BUTTON_RELEASED PAD_A, SHOOT_BULLET
+    ON_BUTTON_RELEASE PAD_A, SHOOT_BULLET
 
-    ON_BUTTON_PRESSED PAD_U, MOVE_UP
-    ON_BUTTON_PRESSED PAD_D, MOVE_DOWN
+    ON_BUTTON_PRESS PAD_U, MOVE_UP
+    ON_BUTTON_PRESS PAD_D, MOVE_DOWN
 
 ; Check if player controls are active first then move Left/Right
 
@@ -36,8 +36,8 @@ loop:
     and #%00000010                      ; Check if input is fun or not
     beq @return                         ; if not return
 
-    ON_BUTTON_PRESSED PAD_L, MOVE_LEFT
-    ON_BUTTON_PRESSED PAD_R, MOVE_RIGHT
+    ON_BUTTON_PRESS PAD_L, MOVE_LEFT
+    ON_BUTTON_PRESS PAD_R, MOVE_RIGHT
 
 @return:
     rts
