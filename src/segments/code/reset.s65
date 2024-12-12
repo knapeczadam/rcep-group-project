@@ -67,6 +67,9 @@ clear_ram:
     ; Clear the nametable
     jsr clear_nametable
 
+    ; Clear the attribute table
+    jsr clear_attribute_table
+
     ; Copy CHR tiles into CHR RAM
     jsr copy_chr_tiles
 
@@ -79,10 +82,6 @@ clear_ram:
 	; Set the default song and FX
     SELECT_SONG SONG_1
     SELECT_FX FX_1
-    
-	; Show both the background and the sprites in the leftmost 8 pixels of the screen and enable rendering for both the background and the sprites
-	lda #%00011110
-	sta PPU_MASK
 
 	; Enable VBlank NMIs
     lda #%10000000
@@ -115,15 +114,8 @@ loop:
 .endproc
 
 .proc clear_nametable
-	lda PPU_STATUS
+    SET_PPU_ADDRESS NT1_ADDRESS
 
-	; Set PPU address to first nametable address
-	lda #>NT1_ADDRESS
-	sta PPU_ADDRESS
-	lda #<NT1_ADDRESS
-	sta PPU_ADDRESS
-
-	; Clear the nametable
 	lda #0
 	ldy #30
 row_loop:
@@ -137,24 +129,27 @@ col_loop:
 	dey
 	bne row_loop
 
-	; Clear the attribute table
+	rts
+.endproc
+
+.proc clear_attribute_table
+    SET_PPU_ADDRESS NT1_ATTR
+
+    lda #0
 	ldx #64
-attribute_loop:
+loop:
 	sta PPU_DATA
 	dex
-	bne attribute_loop
+	bne loop
 
 	rts
 .endproc
 
 .proc copy_chr_tiles
 	STORE_ADDRESS tiles_chr, temp_00_ptr ; load the source address into a pointer in zero page
-	
-    lda PPU_STATUS
-	   
-    ldy #0                             ; starting index into the first page
-    sty PPU_ADDRESS              ; Set the destination address high byte
-    sty PPU_ADDRESS              ; Set the destination address low byte
+
+    SET_PPU_ADDRESS PT1_ADDRESS
+
     ldx #32                            ; number of 256-byte pages to copy
 loop:
     lda (temp_00_ptr),y                ; copy one byte
@@ -172,13 +167,8 @@ loop:
 .endproc
 
 .proc copy_palette
-    lda PPU_STATUS                     ; clear the PPU's internal W register used for tracking whether the following write is the first or the second one (high or low byte)
+    SET_PPU_ADDRESS PAL_ADDRESS
 
-    ; Set the high byte of the target address in the PPU
-    lda #$3F
-    sta PPU_ADDRESS
-
-    stx PPU_ADDRESS              ; Set the low byte of the target address in the PPU (the X register contains zero after the overflow in the TRANSFER_NAMETABLE_QUARTER_4+ loop)
 transfer_palette:
     lda default_palette,X
     sta PPU_DATA

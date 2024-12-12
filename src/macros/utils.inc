@@ -3,7 +3,7 @@
 ; button : 8-bit input constant found in input.inc
 ; macro  : macro to execute if the button is pressed
 ;===================================================================================================
-.macro ON_BUTTON_PRESSED button, macro
+.macro ON_BUTTON_PRESS button, macro
     lda var_gamepad                     ; Load var_gamepad state 
     and #button                         ; Check if the button is pressed
     beq :+                              ; If not, skip the next instruction
@@ -16,7 +16,7 @@
 ; button : 8-bit input constant found in input.inc
 ; macro  : macro to execute if the button is released
 ;===================================================================================================
-.macro ON_BUTTON_RELEASED button, macro
+.macro ON_BUTTON_RELEASE button, macro
     lda var_gamepad_released           ; Load var_gamepad state
     and #button                        ; Check if the button is released
     beq :+                             ; If not, skip the next instruction

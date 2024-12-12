@@ -3,6 +3,8 @@
 ;===================================================================================================
 .segment "CODE"
 
+.include "code/debug.s65"
+
 .include "code/sound.s65"
 
 .include "code/player.s65"
@@ -15,7 +17,9 @@
 .include "code/gamepad.s65"
 
 .proc main
-    jsr test_load_slide
+    ; Load the first slide
+    STORE_ADDRESS slides, next_slide_ptr
+	LOAD_NEXT_SLIDE
 
 main_loop:
 	lda var_nmi_ready
@@ -28,59 +32,19 @@ main_loop:
 	
 	jsr update_bullets
 
-    ON_BUTTON_RELEASED PAD_START, TOGGLE_MUSIC
-    ON_BUTTON_RELEASED PAD_SELECT, PLAY_FX
     jsr famistudio_update
 
-    ON_BUTTON_RELEASED PAD_B, UPDATE_BACKGROUND_STATE
+	ON_BUTTON_RELEASE PAD_A, LOAD_NEXT_SLIDE
+
+;===================================================================================================
+
+.if DEBUG
+	DEBUG_MAIN
+.endif
+
+;===================================================================================================
 
 	lda #1
 	sta var_nmi_ready
 	jmp main_loop
-.endproc
-
-
-
-.proc test_load_slide
-    lda #0
-	sta PPU_MASK
-    
-	lda PPU_STATUS
-	lda #>NT1_ADDRESS
-	sta PPU_ADDRESS
-	lda #<NT1_ADDRESS
-	sta PPU_ADDRESS
-
-	ldx #0
-	ldy #0			                   ; Character index on curent line
-text_loop:
-	lda slides, x
-	inx
-	cmp #NEWLINE
-	beq while_prepare	               ; Check if newline, if so, start newline logic.
-	sta PPU_DATA
-	iny			                       ; ++currentLineChar;
-	jmp :+
-
-while_prepare:
-	lda #' '		                   ; Load space into A for writing
-	; while (Y++ < MAX_LINE_CHARS - 1) write(' ');
-while:
-	cpy #MAX_LINE_CHARS
-	bcs exit_while		               ; Break out of while loop if Y >= MAX_LINE_CHARS - 1
-	sta PPU_DATA
-	iny
-	jmp while
-
-exit_while:
-	ldy #0			                   ; Clear the current line character index
-:
-	cmp #NEXT_SLIDE		               ; stop at null terminator
-	beq :+
-	jmp text_loop
-:
-    lda #%00011110
-	sta PPU_MASK
-
-	rts
 .endproc

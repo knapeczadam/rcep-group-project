@@ -15,3 +15,11 @@
 .macro UPDATE_BACKGROUND_STATE
     CIRCULAR_INCREMENT var_current_bg_state, 3
 .endmacro
+
+;===================================================================================================
+; Set the PPU state to NMI_SIG_CLEAR, NMI_SIG_READY or NMI_SIG_DISABLE_RENDERING
+;===================================================================================================
+.macro SET_PPU_STATE state
+    lda #state
+	sta var_nmi_ready
+.endmacro

@@ -1,5 +1,4 @@
 ;===================================================================================================
-; Defines constants for NMI signal states, used to sync the CPU with the PPU
+; Constants for debug mode
 ;===================================================================================================
-NMI_SIG_CLEAR             = 0
-NMI_SIG_READY             = 1
+.define DEBUG 0                        ; 0: disable debug mode, 1: enable debug mode
