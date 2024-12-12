@@ -5,3 +5,5 @@ NEXT_SLIDE     = 0
 NEWLINE        = $A
 
 MAX_LINE_CHARS = 32
+
+FIRE_RATE = 20

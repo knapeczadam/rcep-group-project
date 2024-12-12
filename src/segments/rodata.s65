@@ -4,32 +4,28 @@
 ;===================================================================================================
 .segment "RODATA"
 
-default_palette:
-.byte $0F,$15,$26,$37
-.byte $0F,$09,$19,$29
-.byte $0F,$01,$11,$21
-.byte $0F,$00,$10,$30
-.byte $0F,$2D,$36,$08
-.byte $0F,$06,$16,$10
-.byte $0F,$1B,$2B,$3B
-.byte $0F,$12,$22,$32
-
 slides:
-.byte NEWLINE
-.byte "ACCORDING TO ALL KNOWN LAWS", NEWLINE
-.byte "OF AVIATION, A BEE SHOULD NOT", NEWLINE
-.byte "BE ABLE TO FLY. ITS WINGS ARE", NEWLINE
-.byte "TOO SMALL TO GET ITS FAT BODY", NEWLINE
-.byte "OFF THE GROUND. THE BEE FLIES", NEWLINE
-.byte "ANYWAY BECAUSE BEES DON'T CARE", NEWLINE
-.byte "WHAT HUMANS THINK IS IMPOSSIBLE.", NEWLINE, NEXT_SLIDE
+    .byte NEWLINE
+    .byte "ACCORDING TO ALL KNOWN LAWS", NEWLINE
+    .byte "OF AVIATION, A BEE SHOULD NOT", NEWLINE
+    .byte "BE ABLE TO FLY. ITS WINGS ARE", NEWLINE
+    .byte "TOO SMALL TO GET ITS FAT BODY", NEWLINE
+    .byte "OFF THE GROUND. THE BEE FLIES", NEWLINE
+    .byte "ANYWAY BECAUSE BEES DON'T CARE", NEWLINE
+    .byte "WHAT HUMANS THINK IS IMPOSSIBLE.", NEWLINE, NEXT_SLIDE
+
+default_palette:
+    .byte $0F, $15, $26, $37
+    .byte $0F, $09, $19, $29
+    .byte $0F, $01, $11, $21
+    .byte $0F, $00, $10, $30
+    .byte $0F, $2D, $36, $08
+    .byte $0F, $06, $16, $10
+    .byte $0F, $1B, $2B, $3B
+    .byte $0F, $12, $22, $32
 
 group_table:
     .byte $0F, $07, $0B, $03
 
-tiles_chr: .incbin "../data/NESlides.chr"
-
-;===================================================================================================
-; Constants
-;===================================================================================================
-FIRE_RATE = 20
+tiles_chr:
+    .incbin "../data/NESlides.chr"
