@@ -50,6 +50,7 @@ var_bools:                  .res 1
 ; Temporary variables
 ;===================================================================================================
 temp_00_ptr:                .res 2
+temp_01_ptr:                .res 2
 temp_00:                    .res 1
 temp_01:                    .res 1
 temp_02:                    .res 1

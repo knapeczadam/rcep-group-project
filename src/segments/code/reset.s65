@@ -62,6 +62,9 @@ clear_ram:
     ; Clear the nametable
     jsr clear_nametable
 
+    ; Clear the attribute table
+    jsr clear_attribute_table
+
     ; Copy CHR tiles into CHR RAM
     jsr copy_chr_tiles
 
@@ -108,7 +111,6 @@ loop:
 .proc clear_nametable
     SET_PPU_ADDRESS NT1_ADDRESS
 
-	; Clear the nametable
 	lda #0
 	ldy #30
 row_loop:
@@ -122,12 +124,18 @@ col_loop:
 	dey
 	bne row_loop
 
-	; Clear the attribute table
+	rts
+.endproc
+
+.proc clear_attribute_table
+    SET_PPU_ADDRESS NT1_ATTR
+
+    lda #0
 	ldx #64
-attribute_loop:
+loop:
 	sta PPU_DATA
 	dex
-	bne attribute_loop
+	bne loop
 
 	rts
 .endproc

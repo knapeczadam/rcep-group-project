@@ -16,8 +16,21 @@
 .include "code/irq.s65"
 .include "code/gamepad.s65"
 
+.macro LOAD_NEXT_SLIDE
+	STORE_ADDRESS temp_00_ptr, temp_01_ptr
+    jsr load_slide
+.endmacro
+
+.macro LOAD_PREVIOUS_SLIDE
+    STORE_ADDRESS temp_01_ptr, temp_00_ptr
+    jsr load_slide
+.endmacro
+
 .proc main
-    jsr test_load_slide
+    ; Load the first slide
+    STORE_ADDRESS slides, temp_00_ptr
+	LOAD_NEXT_SLIDE
+	LOAD_NEXT_SLIDE
 
 main_loop:
 	lda var_nmi_ready
@@ -46,23 +59,18 @@ main_loop:
 .endproc
 
 
-
-.proc test_load_slide
+.proc load_slide
     SET_PPU_STATE NMI_SIG_DISABLE_RENDERING ; Disable rendering, as we are writing to the PPU
+
+	jsr clear_nametable                ; Clear the nametable
 
     SET_PPU_ADDRESS NT1_ADDRESS        ; Set the first nametable as the PPU target address
 
-	lda #MAX_SLIDE_COLUMNS             ; Load the initial amount of available columns left
+	lda #MAX_SLIDE_ROWS                ; Load the initial amount of available rows left
 	sta temp_00                        ; Store the former amount in temp_00, which will decrement with each row change
 
-    ; Load the base address of the slides into temp_00_ptr (this will change when a NEWLINE is encountered)
-	lda #<slides
-	sta temp_00_ptr
-	lda #>slides
-	sta temp_00_ptr + 1
-
 	; Reset the X and Y registers
-	ldx #0                             ; Used as the nametable column index in text_loop and as the amount of available columns left in go_to_next_row
+	ldx #0                             ; Used as the nametable column index in text_loop and as the amount of available rows left in go_to_next_row
 	ldy #0                             ; Used as the character index of our slides data
 
     ; Write characters to the nametable, row by row
@@ -74,9 +82,9 @@ text_loop:
 	cmp #NEWLINE
 	beq prepare_newline
 
-    ; Check for NEXT_SLIDE
+	 ; Check for NEXT_SLIDE
 	cmp #NEXT_SLIDE
-	beq end_slide
+	beq prepare_next_slide
 
     ; Write the character to the nametable
 	sta PPU_DATA
@@ -105,11 +113,9 @@ fill_after_newline:
 
     ; Go to the next row
 go_to_next_row:
-	ldx temp_00                        ; Load the amount of available columns left into X
-	dex                                ; Decrement the former
-	beq end_slide                      ; End the slide if no available columns are left
-    
-	; Add the character index to the the base address of the slides data stored in temp_00_ptr
+	ldx temp_00                        ; Load the amount of available rows left into X
+
+    ; Add the character index to the the base address of the slides data stored in temp_00_ptr
 	tya                                ; Transfer the character index into the accumulator
 	sta temp_00                        ; Store the former in temp_00
     lda temp_00_ptr                    ; Load the low byte of the base address
@@ -118,9 +124,12 @@ go_to_next_row:
 	sta temp_00_ptr                    ; Store the result in the low byte of the base address
 	lda temp_00_ptr + 1                ; Load the high byte of the base address
 	adc #0                             ; Add the carry to the high byte of the base address
-	sta temp_00_ptr + 1                ; Store the result in the high byte of the base address 
+	sta temp_00_ptr + 1                ; Store the result in the high byte of the base address
+	
+	dex                                ; Decrement the amount of available rows left
+	beq end_slide                      ; End the slide if no available rows are left with temp_00_ptr now pointing to the next slide
 
-	stx temp_00                        ; Store the amount of available columns left in temp_00, as we have overwritten it in the addition above
+	stx temp_00                        ; Store the amount of available rows left in temp_00, as we have overwritten it in the addition above
 
 	; Reset the X and Y registers
 	ldx #0                             ; Reset the nametable column index
@@ -129,6 +138,12 @@ go_to_next_row:
 	; Go to the next character
 	jmp text_loop
 
+    ; Prepare for the next slide by incrementing the base address to point to the character after NEXT_SLIDE
+prepare_next_slide:
+    inc temp_00_ptr                    ; Increment the low byte of the base address
+	bne end_slide                      ; End the slide if the low byte did not overflow
+	inc temp_00_ptr + 1                ; Increment the high byte of the base address
+	
     ; End the slide
 end_slide:
     SET_PPU_STATE NMI_SIG_CLEAR        ; Enable rendering 
