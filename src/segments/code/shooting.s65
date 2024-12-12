@@ -249,7 +249,9 @@ done:
 	lda PPU_DATA						; Load the tile
 	lda PPU_DATA						; Load it again, I think because each tile is 2bytes and we need to check the second byte. regardless it would often load 0 if I load it only once
 	and #$FF							; Check if the Tile is empty 
-	beq :+								; If it is do nothing so jump to end
+	beq :+								; If it is, do nothing so jump to end
+	and #$DF							; Check if the Tile is a Space (FF - 10)
+	beq :+								; If it is, do nothing so jump to end
 	lda var_bullets_arr, x				; Load the value at var_bullets_arr, x
     ora #%10000000                      ; Mark bullet as collided
 	sta var_bullets_arr, x				; 
