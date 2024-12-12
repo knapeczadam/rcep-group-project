@@ -2,3 +2,7 @@
 ; BSS is a memory segment for uninitialized global and static variables, defaulting to zero.
 ;===================================================================================================
 .segment "BSS"
+ 
+ loaded_slides_count: .res 1
+ current_slide_index: .res 1
+ slide_base_adresses: .res MAX_SLIDES*2

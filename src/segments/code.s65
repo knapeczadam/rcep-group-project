@@ -18,8 +18,13 @@
 
 .proc main
     ; Load the first slide
-    STORE_ADDRESS slides, next_slide_ptr
-	LOAD_NEXT_SLIDE
+    STORE_ADDRESS slides, slide_base_adresses
+	jsr load_slide
+	inc loaded_slides_count
+	lda temp_00_ptr
+	sta slide_base_adresses+2
+	lda temp_00_ptr+1
+	sta slide_base_adresses+3
 
 main_loop:
 	lda var_nmi_ready
@@ -35,6 +40,7 @@ main_loop:
     jsr famistudio_update
 
 	ON_BUTTON_RELEASE PAD_A, LOAD_NEXT_SLIDE
+	ON_BUTTON_RELEASE PAD_B, LOAD_PREVIOUS_SLIDE
 
 ;===================================================================================================
 
