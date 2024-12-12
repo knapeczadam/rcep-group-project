@@ -53,6 +53,12 @@
 ; macro_a : macro to execute if the flip-flop is 0
 ; macro_b : macro to execute if the flip-flop is 1
 ;===================================================================================================
+; Pseudo code:
+; if flip_flop == 0
+;     macro_a
+; else
+;     macro_b
+;===================================================================================================
 .macro FLIP_FLOP macro_a, macro_b
 .local flip_variable, execute_macro_b
     lda var_flip_flop
@@ -68,14 +74,21 @@ flip_variable:
 .endmacro
 
 ;===================================================================================================
-; Increments an 8-bit variable and resets it to 0 if it exceeds a specified maximum value.
+; Increments an 8-bit variable and resets it to 0 if it reaches a specified maximum value.
+; Pseudo code: variable = (variable + 1) % max_value
 ; variable  : 8-bit variable to increment
-; max_value : 8-bit maximum integer value for the variable, inclusive
+; max_value : 8-bit maximum integer value for the variable, exclusive
+;===================================================================================================
+; Pseudo code:
+; if variable == max_value - 1
+;     variable = 0;
+; else
+;     variable = variable + 1;
 ;===================================================================================================
 .macro CIRCULAR_INCREMENT variable, max_value
 .local reset, store
     lda variable
-    cmp #max_value
+    cmp #(max_value - 1)
     beq reset
     clc
     adc #1
@@ -87,9 +100,15 @@ store:
 .endmacro
 
 ;===================================================================================================
-; Decrements an 8-bit variable and resets it to a specified maximum value if it goes below 0.
+; Decrements an 8-bit variable and resets it to a specified maximum value - 1 if it goes below 0.
 ; variable  : 8-bit variable to decrement
-; max_value : 8-bit maximum integer value for the variable, inclusive
+; max_value : 8-bit maximum integer value for the variable, exclusive
+;===================================================================================================
+; Pseudo code:
+; if variable == 0
+;     variable = max_value - 1;
+; else
+;     variable = variable - 1;
 ;===================================================================================================
 .macro CIRCULAR_DECREMENT variable, max_value
 .local reset, store
@@ -100,18 +119,21 @@ store:
     sbc #1
     jmp store
 reset:
-    lda #max_value
+    lda #(max_value - 1)
 store:
     sta variable
 .endmacro
 
 ;===================================================================================================
 ; Loads an 8-bit value from a specified address and stores it in another address if a condition is met.
-; if *from_address == value_to_compare, *to_address = value_to_load.
 ; from_address     : 8-bit address to load a value from
 ; value_to_compare : 8-bit integer value to compare with the loaded value
 ; to_address       : 8-bit address to store the loaded value
 ; value_to_load    : 8-bit integer value to load if the comparison is true
+;===================================================================================================
+; Pseudo code:
+; if *from_address == value_to_compare
+;     *to_address = value_to_load;
 ;===================================================================================================
 .macro CONDITIONAL_LOAD from_address, value_to_compare, to_address, value_to_load
     lda from_address

@@ -3,10 +3,12 @@
 ; https://nesasm.com/sound/famistudio-music/
 ;===================================================================================================
 .macro INIT_SOUND_ENGINE
+    @region = 0
+
     ldx #.lobyte(music_data)
     ldy #.hibyte(music_data)
 
-    lda #0
+    lda @region
     jsr famistudio_init
 
     ldx #.lobyte(fx_data)
@@ -42,7 +44,8 @@
 ; A macro that toggles music by switching between __PLAY_MUSIC and __STOP_MUSIC.
 ;===================================================================================================
 .macro TOGGLE_MUSIC
-    CIRCULAR_INCREMENT var_current_song, 1
+    @song_count = 2
+    CIRCULAR_INCREMENT var_current_song, @song_count
     FLIP_FLOP __PLAY_MUSIC, __PLAY_MUSIC
 .endmacro
 
