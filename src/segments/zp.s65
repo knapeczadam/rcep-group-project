@@ -18,6 +18,8 @@ var_player_x:               .res 1
 var_player_y:               .res 1
 var_current_bg_state:       .res 1
 var_current_bg_color:       .res 1
+var_elapsed_sec:            .res 1
+var_elapsed_min:            .res 1
 
 ; var_bullets_arr Byte:
 ;-----------------------
