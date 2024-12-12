@@ -49,6 +49,11 @@ clear_ram:
 	ora #%00000011 						; Setting the boolean for firing to true by default bit 0/ Setting fun mode for controls bit 1
 	sta var_bools	
 
+@init_player_info:
+	lda var_player_info
+	ora #%00000101						; Setting the player to default right movement and Bool to fun mode
+	sta var_player_info
+
 	; Clear the local OAM
     jsr clear_oam
 

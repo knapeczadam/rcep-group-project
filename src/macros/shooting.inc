@@ -1,4 +1,4 @@
-.macro MULTIPLY_X_BY_4
+.macro MULTIPLY_X_BY_4 ;; TODO: rename this to GET_BULLET_SPRITE_ADDRESS (based on x)
     lda #$20                            ; Clear A (set start to second OAM line)
 	cpy #00                             ; if Y == 0
 	beq return                          ; Don't multiply
@@ -46,10 +46,11 @@ label:
     and #%11111110                      ; Set CanShoot to false
     sta var_bools
 
-;(also dont just overrite it just flip the bit because direction shouldnt be overwriteen)
-; I'm also adding a default move right mopvement but we can get parent movement and update accordingly
-    lda #5                              ; Flip bit 2
-    sta var_bullets_arr, x              ; Activate the bullet
+; Set direction of the bullet and acivate it
+    lda var_player_info                 ; Load player movement
+    and #%00000011                      ; Keep only movement info
+    ora #%00000100                      ; FLip bit 2 to activate bullet
+    sta var_bullets_arr, x              ; Store the info back into the correct bullet
 
 ; Change its position
 ; positionY = oam + x * 4
@@ -59,6 +60,30 @@ label:
 
     MULTIPLY_X_BY_4
 
+    @up_direction 		= %00000000
+	@right_direction 	= %00000001
+	@down_direction 	= %00000010
+	@left_direction 	= %00000011
+
+    lda var_player_info                 ; Load player movement
+	and #%00000011						; Only keep the direction
+	beq @rotate_sprite
+
+	; cmp #@right_direction
+	; beq @move_bullet_right
+
+	cmp #@down_direction
+	beq @rotate_sprite
+
+	; cmp #@left_direction
+	; beq @move_bullet_left
+    jmp @end_rotation
+@rotate_sprite:
+    lda #%01000000
+	eor oam + 2,x ; flip the flip vert bit
+	sta oam + 2,x
+
+@end_rotation:
     lda temp_00                         ; Load back Y position
     sta oam, x                          ; Set Y position of active bullet
     lda temp_01                         ; Load back X position
