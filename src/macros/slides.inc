@@ -5,7 +5,7 @@
 .macro LOAD_NEXT_SLIDE
     lda current_slide_index
 	cmp #MAX_SLIDE_INDEX
-    beq :+
+    beq @end_load_next_slide
 
 	inc current_slide_index
 	inc current_slide_index
@@ -14,7 +14,7 @@
 
     lda current_slide_index
 	cmp #MAX_SLIDE_INDEX
-    beq :+
+    beq @end_load_next_slide
 
 	ldx current_slide_index
     inx
@@ -23,7 +23,7 @@
 	sta slide_base_adresses,x
 	lda temp_00_ptr+1
 	sta slide_base_adresses+1, x
-:
+@end_load_next_slide:
 .endmacro
 
 ;===================================================================================================
@@ -32,12 +32,12 @@
 ;===================================================================================================
 .macro LOAD_PREVIOUS_SLIDE
     lda current_slide_index
-    beq :+
+    beq @end_load_previous_slide
 
     dec current_slide_index
     dec current_slide_index
     jsr load_slide
-:
+@end_load_previous_slide:
 .endmacro
 
 ;===================================================================================================
