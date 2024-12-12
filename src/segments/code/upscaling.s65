@@ -1,22 +1,3 @@
-.proc copy_tiles_chr
-  STORE_ADDRESS tiles_chr, temp_00_ptr ; load the source address into a pointer in zero page
-
-  ldy #0                                ; starting index into the first page
-  sty PPU_MASK                          ; Turn off rendering just in case
-  sty PPU_ADDRESS                 ; Set the destination address high byte
-  sty PPU_ADDRESS                 ; Set the destination address low byte
-  ldx #32                               ; number of 256-byte pages to copy
-loop:
-  lda (temp_00_ptr),y                   ; copy one byte
-  sta PPU_DATA
-  iny
-  bne loop                              ; repeat until we finish the page
-  inc temp_00_ptr+1                     ; go to the next page
-  dex
-  bne loop                              ; repeat until we've copied enough pages
-  rts
-.endproc
-
 .proc copy_lowercase_text
 ; This copies the lower case letters to the Second Pattern Table (actually it copies the two lines containing the letters because math is hard :cry:)
   lda #<tiles_chr                       ; load the source address into a pointer in zero page
