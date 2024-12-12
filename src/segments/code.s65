@@ -32,6 +32,8 @@ main_loop:
     ON_BUTTON_RELEASED PAD_SELECT, PLAY_FX
     jsr famistudio_update
 
+    ON_BUTTON_RELEASED PAD_B, UPDATE_BACKGROUND_STATE
+
 	lda #1
 	sta var_nmi_ready
 	jmp main_loop

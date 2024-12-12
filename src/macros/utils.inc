@@ -26,6 +26,7 @@
 
 ;===================================================================================================
 ; Stores a 16-bit address (in) into another 16-bit address (out) by handling low and high bytes.
+; First, the low byte is stored, then the high byte is stored.
 ; in  : 16-bit address
 ; out : 16-bit address
 ;===================================================================================================
@@ -69,7 +70,7 @@ flip_variable:
 ;===================================================================================================
 ; Increments an 8-bit variable and resets it to 0 if it exceeds a specified maximum value.
 ; variable  : 8-bit variable to increment
-; max_value : 8-bit maximum value for the variable, inclusive
+; max_value : 8-bit maximum integer value for the variable, inclusive
 ;===================================================================================================
 .macro CIRCULAR_INCREMENT variable, max_value
 .local reset, store
@@ -88,7 +89,7 @@ store:
 ;===================================================================================================
 ; Decrements an 8-bit variable and resets it to a specified maximum value if it goes below 0.
 ; variable  : 8-bit variable to decrement
-; max_value : 8-bit maximum value for the variable, inclusive
+; max_value : 8-bit maximum integer value for the variable, inclusive
 ;===================================================================================================
 .macro CIRCULAR_DECREMENT variable, max_value
 .local reset, store
@@ -102,4 +103,21 @@ reset:
     lda #max_value
 store:
     sta variable
+.endmacro
+
+;===================================================================================================
+; Loads an 8-bit value from a specified address and stores it in another address if a condition is met.
+; if *from_address == value_to_compare, *to_address = value_to_load.
+; from_address     : 8-bit address to load a value from
+; value_to_compare : 8-bit integer value to compare with the loaded value
+; to_address       : 8-bit address to store the loaded value
+; value_to_load    : 8-bit integer value to load if the comparison is true
+;===================================================================================================
+.macro CONDITIONAL_LOAD from_address, value_to_compare, to_address, value_to_load
+    lda from_address
+    cmp #value_to_compare
+    bne :+
+    lda #value_to_load
+    sta to_address
+:
 .endmacro
