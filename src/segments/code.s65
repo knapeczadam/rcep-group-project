@@ -3,6 +3,8 @@
 ;===================================================================================================
 .segment "CODE"
 
+.include "code/debug.s65"
+
 .include "code/sound.s65"
 
 .include "code/player.s65"
@@ -28,11 +30,15 @@ main_loop:
 	
 	jsr update_bullets
 
-    ON_BUTTON_RELEASE PAD_START, TOGGLE_MUSIC
-    ON_BUTTON_RELEASE PAD_SELECT, PLAY_FX
     jsr famistudio_update
 
-    ON_BUTTON_RELEASE PAD_B, UPDATE_BACKGROUND_STATE
+;===================================================================================================
+
+.if DEBUG
+	DEBUG_MAIN
+.endif
+
+;===================================================================================================
 
 	lda #1
 	sta var_nmi_ready

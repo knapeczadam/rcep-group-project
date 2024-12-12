@@ -1,0 +1,17 @@
+;===================================================================================================
+; When DEBUG is enabled, this macro will be expanded in the main loop.
+; To enable DEBUG, set the DEBUG constant to 1 in constants/debug.inc
+;===================================================================================================
+.macro DEBUG_MAIN 
+    ON_BUTTON_RELEASE PAD_START, TOGGLE_MUSIC
+    ON_BUTTON_RELEASE PAD_SELECT, PLAY_FX
+    ON_BUTTON_RELEASE PAD_B, UPDATE_BACKGROUND_STATE
+.endmacro
+
+;===================================================================================================
+; When DEBUG is enabled, this macro will be expanded in the NMI.
+; To enable DEBUG, set the DEBUG constant to 1 in constants/debug.inc
+;===================================================================================================
+.macro DEBUG_NMI
+    jsr update_background_color
+.endmacro
