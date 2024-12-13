@@ -206,6 +206,10 @@ label:
 	sta oam,x							; 
 	pla									; We're jumping back so pull back X
 	tax									; 
+	; Play collision sound
+	SELECT_FX 0
+    PLAY_FX
+
 	jmp label							; Go to next bullet
 :
 

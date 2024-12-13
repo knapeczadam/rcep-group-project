@@ -46,7 +46,7 @@ return:
     and #%11111110                      ; Set CanShoot to false
     sta var_bools
 
-; Set direction of the bullet and acivate it
+; Set direction of the bullet and activate it
     lda var_player_info                 ; Load player movement
     and #%00000011                      ; Keep only movement info
     ora #%00000100                      ; FLip bit 2 to activate bullet
@@ -66,5 +66,9 @@ return:
     sta oam, x                          ; Set Y position of active bullet
     lda temp_01                         ; Load back X position
     sta oam+3,x                         ; Set X position of active bullet
+
+; Play a sound when firing
+    SELECT_FX 1
+    PLAY_FX
 end:
 .endmacro
