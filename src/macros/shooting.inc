@@ -31,13 +31,13 @@ return:
 
 ; Loop through the bullets
     ldx #$FF                            ; Reset X
-label:
+@loop_bullets:
     inx                                 ; ++x
     cpx #6                              ; If x == 6 we checked all 6 bullets
     beq end                             ; Skip ahead (If I do my math correctly we shouldn't be able to shoot more than 6 bullets anyways)
     lda var_bullets_arr, x              ; Load the value at var_bullets_arr, x
     and #%00000100                      ; Mask out all bits except bit 2
-    bne label                           ; If bit 2 is 1 (result is 1), branch (means bullet is already active we dont want to touch it)
+    bne @loop_bullets                   ; If bit 2 is 1 (result is 1), branch (means bullet is already active we dont want to touch it)
 
 ; If bullet is not active 
     lda #FIRE_RATE                      ; Load fire rate
@@ -60,30 +60,8 @@ label:
 
     MULTIPLY_X_BY_4
 
-    @up_direction 		= %00000000
-	@right_direction 	= %00000001
-	@down_direction 	= %00000010
-	@left_direction 	= %00000011
+    jsr rotate_bullet                   ; Rotate the bullet to correct direction
 
-    lda var_player_info                 ; Load player movement
-	and #%00000011						; Only keep the direction
-	beq @rotate_sprite
-
-	; cmp #@right_direction
-	; beq @move_bullet_right
-
-	cmp #@down_direction
-	beq @rotate_sprite
-
-	; cmp #@left_direction
-	; beq @move_bullet_left
-    jmp @end_rotation
-@rotate_sprite:
-    lda #%01000000
-	eor oam + 2,x ; flip the flip vert bit
-	sta oam + 2,x
-
-@end_rotation:
     lda temp_00                         ; Load back Y position
     sta oam, x                          ; Set Y position of active bullet
     lda temp_01                         ; Load back X position

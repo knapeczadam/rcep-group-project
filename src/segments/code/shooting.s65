@@ -10,7 +10,7 @@
 
 bullet_data:
 ;      Y   tile#   attribs     X
-.byte $F0,  $2D,  %00000011,  $50           ; OAM sprite 1 at (x: 16, y: 16)
+.byte $F0,  $03,  %00000001,  $50           ; Horizontal bullet
 
 ;===================================================================================================
 ; Subroutine to load Bullet Sprites into OAM-RAM starting at $0200. 
@@ -101,6 +101,69 @@ multiply_loop:                              ; Else loop multiply
 .endproc
 
 ;===================================================================================================
+; Subroutine to rotate the bullet to the correct direction.
+;===================================================================================================
+.proc rotate_bullet
+	@right_direction 	    = %00000001
+	@down_direction 	    = %00000010
+	@left_direction 	    = %00000011
+    ; Hard coding the bullet location, not sure if there is another way
+    @bullet_horizontal_tile = $03
+    @bullet_vertical_tile   = $04
+    @bullet_tile_location   = oam + 1
+    @bullet_attribute       = oam + 2
+
+    
+	lda #%00111111                      ; First reset whatever rotation the bullet might have
+	and @bullet_attribute, x            ; Change the attribute 
+	sta @bullet_attribute, x
+
+	lda var_player_info                 ; Load player info
+	and #%00000011						; Only keep the direction
+	beq @set_up					        ; If bullet is direction up (%00000000) rotate 
+
+	cmp #@right_direction				; If bullet is direction right, rotate 
+	beq @set_right
+
+	cmp #@down_direction				; If bullet is direction down, rotate 
+	beq @set_dowm
+
+	cmp #@left_direction				; If bullet is direction left, rotate 
+	beq @set_left
+
+
+@set_up:
+    lda #@bullet_vertical_tile          ; Load the corresponding tile
+    sta @bullet_tile_location, x        ; Store it as the tile location
+
+    jmp @end_rotation                   ; Return
+@set_right:
+    lda #@bullet_horizontal_tile
+    sta @bullet_tile_location, x
+
+    jmp @end_rotation
+@set_dowm:
+    lda #@bullet_vertical_tile
+    sta @bullet_tile_location, x
+
+	lda #%11000000                      ; Set the vertical/horizontal flip accordingly
+	ora @bullet_attribute, x            ; Change the attribute 
+	sta @bullet_attribute, x
+
+    jmp @end_rotation 
+@set_left:
+    lda #@bullet_horizontal_tile
+    sta @bullet_tile_location, x    
+	
+	lda #%01000000 
+	ora @bullet_attribute, x           
+	sta @bullet_attribute, x
+
+@end_rotation:
+	rts
+.endproc
+
+;===================================================================================================
 ; Subroutine to update the bullets.
 ; Checks if bullet is active --> check if it collided, else --> move it
 ;===================================================================================================
@@ -151,8 +214,6 @@ label:
 	pla									; Pull back X
 	tax									;
 	jmp label							; Jump back to loop the rest
-; done:
-	; rts									; return
 .endproc
 
 ;===================================================================================================
@@ -169,37 +230,38 @@ label:
 
 	lda var_bullets_arr, y				; Load the value at var_bullets_arr, x
 	and #%00000011						; Only keep the direction
-	beq @move_bullet_up
+	beq @move_bullet_up					; If bullet is direction up (%00000000) move up
 
-	cmp #@right_direction
+	cmp #@right_direction				; If bullet is direction right, move right
 	beq @move_bullet_right
 
-	cmp #@down_direction
+	cmp #@down_direction				; If bullet is direction down, move down
 	beq @move_bullet_down
 
-	cmp #@left_direction
+	cmp #@left_direction				; If bullet is direction left, move left
 	beq @move_bullet_left
 
+; All four movements work the same
 @move_bullet_up:
-	lda #@up_direction
-	sta @direction
+	lda #@up_direction					; Load the direction
+	sta @direction						; Set the temporary direction to the movement direction
 
-	dec @movement_y,x	
+	dec @movement_y,x					; Move bullet one pixel
 	jsr check_wall_collision			; Check if bullet collides with the wall
 
-	dec @movement_y,x
+	dec @movement_y,x					; Move it one more pixel
 	jsr check_wall_collision			; Check if bullet collides with the wall
 
-	jmp @return
+	jmp @return							; return
 @move_bullet_right:
 	lda #@right_direction
 	sta @direction
 
-	inc @movement_x,x                         ; increase X position by one
-	jsr check_wall_collision			; Check if bullet collides with the wall
+	inc @movement_x,x  
+	jsr check_wall_collision
 
-    inc @movement_x,x                         ; increase X position by one
-	jsr check_wall_collision			; Check if bullet collides with the wall
+    inc @movement_x,x
+	jsr check_wall_collision
 
 	jmp @return
 @move_bullet_down:
@@ -207,10 +269,10 @@ label:
 	sta @direction
 
 	inc @movement_y,x
-	jsr check_wall_collision			; Check if bullet collides with the wall
+	jsr check_wall_collision	
 
 	inc @movement_y,x
-	jsr check_wall_collision			; Check if bullet collides with the wall
+	jsr check_wall_collision
 
 	jmp @return
 @move_bullet_left:
@@ -218,10 +280,10 @@ label:
 	sta @direction
 
 	dec @movement_x,x  
-	jsr check_wall_collision			; Check if bullet collides with the wall
+	jsr check_wall_collision
 
 	dec @movement_x,x  
-	jsr check_wall_collision			; Check if bullet collides with the wall
+	jsr check_wall_collision
 @return:
 	rts
 .endproc
@@ -234,47 +296,48 @@ label:
 ; First check if the bullet is still valid has a previous check may have disabled it
 	lda var_bullets_arr, y				; Load the value at var_bullets_arr, x (Y has the value of X)
 	and #%00000100						; Check if it's valid
-	beq @return
+	beq @return							; If not return
 
 	@right_direction 	= %00000001
 	@down_direction 	= %00000010
 	@left_direction 	= %00000011
 	@movement_x			= oam+3
 	@movement_y			= oam
-	@bullet_direction = temp_00
+	@bullet_direction 	= temp_00
 
-	lda @bullet_direction
-	beq @check_up
+	lda @bullet_direction				; Load the direction we saved previously
+	beq @check_up						; If direction is up check upper bound
 
-	cmp #@right_direction
-	beq @check_right
+	cmp #@right_direction				; Check if direction is right
+	beq @check_right					; If so, check right bound
 
-	cmp #@down_direction
-	beq @check_down
+	cmp #@down_direction				; Check if direction is down
+	beq @check_down						; If so, check down bound
 
-	cmp #@left_direction
-	beq @check_left 
+	cmp #@left_direction				; Check if direction is left
+	beq @check_left 					; If so, check left bound
 
+; Again all checks work similarily
 @check_up:
-	lda @movement_y, x
+	lda @movement_y, x					; Load the corresponding movement
 	cmp #255           					; Check if sprite is out of screen
-	bne @return                			; If not skip ahead
-	jmp @disable_bullet
+	bne @return                			; If not return
+	jmp @disable_bullet					; If so, jump to disable bullet code
 
 @check_right:
 	lda @movement_x, x
-	cmp #255           					; Check if sprite is out of screen
-	bne @return                			; If not skip ahead
+	cmp #255           					
+	bne @return                			
 	jmp @disable_bullet
 
 @check_down:
 	lda @movement_y, x
-	bne @return                			; If not skip ahead
+	bne @return                			
 	jmp @disable_bullet
 
 @check_left:
 	lda @movement_x, x
-	bne @return                			; If not skip ahead
+	bne @return                			
 	jmp @disable_bullet
 
 @disable_bullet:
