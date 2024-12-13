@@ -207,7 +207,7 @@ label:
 	pla									; We're jumping back so pull back X
 	tax									; 
 	; Play collision sound
-	SELECT_FX 0
+	SELECT_FX FX_1
     PLAY_FX
 
 	jmp label							; Go to next bullet

@@ -68,7 +68,7 @@ return:
     sta oam+3,x                         ; Set X position of active bullet
 
 ; Play a sound when firing
-    SELECT_FX 1
+    SELECT_FX FX_2
     PLAY_FX
 end:
 .endmacro
