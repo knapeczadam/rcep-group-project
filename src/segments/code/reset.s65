@@ -8,21 +8,17 @@
 	sta PPU_MASK                       ; disable all the PPU rendering settings
 	sta APU_DM_CONTROL                 ; disable DMC IRQs
 
-	; disable APU frame IRQs
-	lda #$40
+	lda #$40                           ; disable APU frame IRQs
 	sta JOYPAD2
+	
+	cld                                ; Disable decimal mode
 
-	; Disable decimal mode
-	cld
-
-    ; Initialise the stack
 	ldx #$FF
-	txs
+	txs                                ; Initialise the stack
 
-    ; Clear the RAM (cannot be a subroutine as it clears the stack as well)
     lda #0
 	ldx #0
-clear_ram:
+clear_ram:                             ; Clear the RAM (cannot be a subroutine as it clears the stack as well)
 	sta $0000, x
 	sta $0100, x
 	sta $0200, x
@@ -35,61 +31,47 @@ clear_ram:
 	bne clear_ram
 
 @init_player_pos:
-	ldx #4								; load 4 in X (position of the top left sprite of the player)
-	lda player_data, x					; Check player position y in raw data
-	sta var_player_y					; Set player position y variable
-	inx									;
-	inx									; x+3 to go to X position of sprite in the raw data
-	inx									;
-	lda player_data, x					; Load player position x variable
-	sta var_player_x					; Set player position x variable
+	ldx #4                             ; load 4 in X (position of the top left sprite of the player)
+	lda player_data, x                 ; Check player position y in raw data
+	sta var_player_y                   ; Set player position y variable
+	inx                                ;
+	inx                                ; x+3 to go to X position of sprite in the raw data
+	inx                                ;
+	lda player_data, x                 ; Load player position x variable
+	sta var_player_x                   ; Set player position x variable
 
 @init_bools:
 	lda var_bools
-	ora #%00000011 						; Setting the boolean for firing to true by default bit 0/ Setting fun mode for controls bit 1
+	ora #%00000011                     ; Setting the boolean for firing to true by default bit 0/ Setting fun mode for controls bit 1
 	sta var_bools	
 
 @init_player_info:
 	lda var_player_info
-	ora #%00000101						; Setting the player to default right movement and Bool to fun mode
+	ora #%00000101                     ; Setting the player to default right movement and Bool to fun mode
 	sta var_player_info
 
 @init_gamestate:
 	lda #0
 	sta var_gamestate					; Setting game state to MENU
 
-	; Clear the local OAM
-    jsr clear_oam
+    jsr clear_oam                      ; Clear the local OAM
 
-	; Wait for the first 2 VBlanks to let the PPU stabilise before writing to it
 	ldy #2
-	jsr wait_vblank_y_times
+	jsr wait_vblank_y_times            ; Wait for the first 2 VBlanks to let the PPU stabilise before writing to it
 
-	; Transfer the local, now cleared, OAM data into the PPU to reduce the visible artifacts at start
-    jsr transfer_oam
+    jsr transfer_oam                   ; Transfer the local, now cleared, OAM data into the PPU to reduce the visible artifacts at start
+    jsr clear_nametable                ; Clear the nametable
+    jsr clear_attribute_table          ; Clear the attribute table
+    jsr copy_chr_tiles                 ; Copy CHR tiles into CHR RAM
+    jsr copy_palette                   ; Copy the palette to the PPU
 
-    ; Clear the nametable
-    jsr clear_nametable
-
-    ; Clear the attribute table
-    jsr clear_attribute_table
-
-    ; Copy CHR tiles into CHR RAM
-    jsr copy_chr_tiles
-
-	; Copy the palette to the PPU
-    jsr copy_palette
-
-    ; Intialise the sound engine (doing this late to take advantage of the PPU stabilisation time; we let the APU stabilise as well)
-    INIT_SOUND_ENGINE
-
-	; Set the default song and FX
-    SELECT_SONG SONG_1
+    INIT_SOUND_ENGINE                  ; Intialise the sound engine (doing this late to take advantage of the PPU stabilisation time; we let the APU stabilise as well)
+	
+    SELECT_SONG SONG_1                 ; Set the default song and FX
     SELECT_FX FX_1
 
-	; Enable VBlank NMIs
     lda #%10000000
-    sta PPU_CONTROL
+    sta PPU_CONTROL                    ; Enable VBlank NMIs
 
 	jmp main
 .endproc
