@@ -13,11 +13,12 @@
 .include "code/slides.s65"
 .include "code/menu.s65"
 .include "code/inputs.s65"
+.include "code/gamepad.s65"
+.include "code/sprites.s65"
 
 .include "code/nmi.s65"
 .include "code/reset.s65"
 .include "code/irq.s65"
-.include "code/gamepad.s65"
 
 .proc main
     ; Load the menu
