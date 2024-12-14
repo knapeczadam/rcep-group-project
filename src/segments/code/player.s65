@@ -78,9 +78,20 @@ loop:
 .endproc
 
 .proc animate_player
+    jsr animate_movement
+    jsr animate_cigar
+    rts
+.endproc
+
+.proc animate_movement
     ON_BUTTON_PRESS PAD_L, ANIMATE_WALK
     ON_BUTTON_PRESS PAD_R, ANIMATE_WALK
     ON_BUTTON_PRESS PAD_U, ANIMATE_WALK
     ON_BUTTON_PRESS PAD_D, ANIMATE_WALK
+    rts
+.endproc
+
+.proc animate_cigar
+    TIMED_FLIP_FLOP CIGAR_LEFT, CIGAR_RIGHT, CIGAR_SPEED
     rts
 .endproc

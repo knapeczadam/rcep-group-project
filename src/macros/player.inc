@@ -97,3 +97,27 @@
     lda #@stand_tile                   ; Load standing tile index
     sta @body_right                    ; Store it in the right body tile
 .endmacro
+
+;===================================================================================================
+; Macro to change the player sprite to the cigar left animation.
+;===================================================================================================
+.macro CIGAR_LEFT
+.local @cigar, @cigar_left_tile
+    @cigar  = oam + 1                  ; Cigar sprite in OAM (see player_data)
+    @cigar_left_tile = $03             ; Cigar tile index in pattern table
+    
+    lda #@cigar_left_tile              ; Load cigar tile index
+    sta @cigar                         ; Store it in the cigar sprite
+.endmacro
+
+;===================================================================================================
+; Macro to change the player sprite to the cigar right animation.
+;===================================================================================================
+.macro CIGAR_RIGHT
+.local @cigar, @cigar_right_tile
+    @cigar  = oam + 1                  ; Cigar sprite in OAM (see player_data)
+    @cigar_right_tile  = $13           ; Cigar tile index in pattern table
+    
+    lda #@cigar_right_tile             ; Load cigar tile index
+    sta @cigar                         ; Store it in the cigar sprite
+.endmacro
