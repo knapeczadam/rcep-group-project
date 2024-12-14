@@ -7,7 +7,7 @@
     lda var_gamepad                     ; Load var_gamepad state 
     and #button                         ; Check if the button is pressed
     beq :+                              ; If not, skip the next instruction
-    macro                               ; Execute the macro
+      macro                            ; Execute the macro
 :
 .endmacro
 
@@ -20,7 +20,7 @@
     lda var_gamepad_released           ; Load var_gamepad state
     and #button                        ; Check if the button is released
     beq :+                             ; If not, skip the next instruction
-    macro                              ; Execute the macro
+      macro                          ; Execute the macro
 :
 .endmacro
 
@@ -60,17 +60,49 @@
 ;     macro_b
 ;===================================================================================================
 .macro FLIP_FLOP macro_a, macro_b
-.local flip_variable, execute_macro_b
     lda var_flip_flop
     and #%00000001
-    bne execute_macro_b
-    macro_a
-    jmp flip_variable
-execute_macro_b:
+    bne @execute_macro_b
+      macro_a
+      jmp @flip_variable
+@execute_macro_b:
     macro_b
-flip_variable:
+@flip_variable:
+    lda var_flip_flop
     eor #%00000001
     sta var_flip_flop
+.endmacro
+
+;===================================================================================================
+; Toggles a flip-flop variable and executes one of two macros based on a specified frame count.
+; macro_a : macro to execute if the flip-flop is 0
+; macro_b : macro to execute if the flip-flop is 1
+; frame   : 8-bit frame count to synchronize the flip-flop, must be a power of 2
+;===================================================================================================
+; Pseudo code:
+; if current_frame % frame == 0
+;     if flip_flop == 0
+;         macro_a
+;     else
+;         macro_b
+;===================================================================================================
+.macro TIMED_FLIP_FLOP macro_a, macro_b, frame
+.local @flip_variable, @execute_macro_b, @return
+    lda var_frame_count_unclamped
+    and #(frame - 1)
+    bne @return
+      lda var_flip_flop
+      and #%00000001
+      bne @execute_macro_b
+        macro_a
+        jmp @flip_variable
+@execute_macro_b:
+      macro_b
+@flip_variable:
+      lda var_flip_flop
+      eor #%00000001
+      sta var_flip_flop
+@return:
 .endmacro
 
 ;===================================================================================================

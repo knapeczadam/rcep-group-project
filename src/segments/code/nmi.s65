@@ -35,6 +35,7 @@
 
     ; Increase the frame count and cap it at 50
 	inc var_frame_count		 			
+	inc var_frame_count_unclamped
 	jsr frame_count_cap
 
     ; Check the background collision
@@ -94,12 +95,11 @@ end:
 	lda var_elapsed_sec                ; Load elapsed seconds
 	cmp #@sec                          ; Compare the time to 60 seconds
 	bne @return                        ; If the time is not 60 seconds, return
-
-	lda #0                             ; Reset the time to 0
-	sta var_elapsed_sec                ; Store the new seconds
-	ldx var_elapsed_min                ; Load elapsed minutes
-	inx                                ; Increment the time: minutes + 1
-	stx var_elapsed_min                ; Store the new time
+	  lda #0                           ; Reset the time to 0
+	  sta var_elapsed_sec              ; Store the new seconds
+	  ldx var_elapsed_min              ; Load elapsed minutes
+	  inx                              ; Increment the time: minutes + 1
+	  stx var_elapsed_min              ; Store the new time
 @return:
 	rts	
 .endproc

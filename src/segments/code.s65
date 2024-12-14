@@ -35,6 +35,7 @@ main_loop:
 	jsr check_can_shoot
 	jsr handle_player_input
     jsr update_player
+	jsr animate_player
 	
 	jsr update_bullets
 
