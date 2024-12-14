@@ -146,8 +146,8 @@ loop:
     dex
     bne loop                           ; repeat until we've copied enough pages
 
-    LOAD_SPRITE player_data, 5, 0
-    LOAD_SPRITE text_arrow, 1, 20
+    LOAD_SPRITE player_data, PLAYER_SPRITE_COUNT, PLAYER_OAM_OFFSET
+    LOAD_SPRITE text_arrow, TEXT_ARROW_SPRITE_COUNT, TEXT_ARROW_OAM_OFFSET
     jsr load_bullets                   ; Call load_bullet subroutine to load the bullet into OAM-RAM
 
 	rts

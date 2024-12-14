@@ -3,7 +3,7 @@
 ;===================================================================================================
 .macro MOVE_ARROW_UP
     lda #$87                            ; Load desired position
-    sta oam +20                         ; Set the sprite position
+    sta oam + TEXT_ARROW_OAM_OFFSET     ; Set the sprite position
 .endmacro
 
 ;===================================================================================================
@@ -11,14 +11,14 @@
 ;===================================================================================================
 .macro MOVE_ARROW_DOWN
     lda #$8F
-    sta oam + 20                    
+    sta oam + TEXT_ARROW_OAM_OFFSET
 .endmacro
 
 ;===================================================================================================
 ; Set the first slide and according variables for fun/not fun mode.
 ;===================================================================================================
 .macro SELECT_MODE
-    lda oam + 20                        ; Get Y Position
+    lda oam + TEXT_ARROW_OAM_OFFSET     ; Get Y Position
     cmp #$8F                            ; Check if it's not fun mode
     bne @change_game_state              ; skip changing mode (default is fun mode)
 
@@ -41,7 +41,7 @@
 
 ; Disable the arrow
     lda #$F0							; Reset the Y coord to be out of screen
-	sta oam + 20						; 
+	sta oam + TEXT_ARROW_OAM_OFFSET     ; 
 
     ; TODO find out why that sprite is on the screen? remove whatever puts it on screen and remove the code below
     lda #0
