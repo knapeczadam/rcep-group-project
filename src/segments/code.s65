@@ -16,9 +16,9 @@
 .include "code/gamepad.s65"
 .include "code/sprites.s65"
 
-.include "code/nmi.s65"
-.include "code/reset.s65"
-.include "code/irq.s65"
+.include "code/vectors/nmi.s65"
+.include "code/vectors/reset.s65"
+.include "code/vectors/irq.s65"
 
 .proc main
     ; Load the menu
