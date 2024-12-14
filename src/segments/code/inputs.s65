@@ -1,0 +1,44 @@
+;===================================================================================================
+; Subroutine to handle inputs.
+;===================================================================================================
+.proc handle_inputs
+	jmp @begin							; Jump ahead, there's a lot of code int this function so there are two returns in this function
+@menu_input:
+    ON_BUTTON_RELEASE PAD_U, MOVE_ARROW_UP
+    ON_BUTTON_RELEASE PAD_D, MOVE_ARROW_DOWN
+
+	ON_BUTTON_RELEASE PAD_SELECT, SELECT_MODE
+@return:
+	rts
+
+@begin:
+	lda var_gamestate					; First check gamestate
+	beq @menu_input						; If its menu go to menu input and return
+
+	jmp @not_menu_controls				; If it's slides go to the other checks
+@not_fun_controls:
+	ON_BUTTON_RELEASE PAD_R, LOAD_NEXT_SLIDE
+	ON_BUTTON_RELEASE PAD_L, LOAD_PREVIOUS_SLIDE
+
+	jmp @return
+
+@not_menu_controls:
+	lda var_bools						;
+	and #%00000010						; Now Check if we are in fun mode or not
+	beq @not_fun_controls				; If not go back to not fun controls
+
+; Handle shooting and Player Movement
+    ON_BUTTON_RELEASE PAD_A, SHOOT_BULLET
+
+    ON_BUTTON_PRESS PAD_U, MOVE_UP
+    ON_BUTTON_PRESS PAD_D, MOVE_DOWN
+    ON_BUTTON_PRESS PAD_L, MOVE_LEFT
+    ON_BUTTON_PRESS PAD_R, MOVE_RIGHT
+
+	ON_BUTTON_RELEASE PAD_START, LOAD_NEXT_SLIDE
+	ON_BUTTON_RELEASE PAD_SELECT, LOAD_PREVIOUS_SLIDE
+
+
+@return:
+    rts
+.endproc
