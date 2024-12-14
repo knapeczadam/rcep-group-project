@@ -1,0 +1,89 @@
+text_arrow:
+;      Y   tile#   attribs     X
+.byte $87,  $11,  %00000001,  $45
+
+;===================================================================================================
+; Subroutine to load text_arrow Sprites into OAM-RAM starting at $0200. 
+;===================================================================================================
+.proc load_arrow
+    @player_oam_location = oam + 20
+    ldx #0
+@loop:
+    lda text_arrow, x                   ; We fetch bytes from player_data
+    sta @player_oam_location, x         ; We store the bytes starting at OAM address oam
+    inx                                 ; ++x
+    cpx #4
+    bne @loop                           ; Loop 4 times (1 hardware sprites, 4 bytes each)
+    rts
+.endproc
+
+;===================================================================================================
+; Subroutine to load the menu screen and prepare the pointer for the first slide. 
+;===================================================================================================
+.proc load_menu
+    jsr initialize_slide_ptr			; Initialize the slide ptr for loading the info
+    
+    lda #30                 			; Load the initial amount of available rows left
+	sta temp_00                         ; Store the former amount in temp_00, which will decrement with each row change
+	
+    ldx #0                             	; Used as the nametable column index in text_loop and as the amount of available rows left in go_to_next_row
+	ldy #0                             	; Used as the character index of our slides data
+
+text_loop:
+	lda (temp_00_ptr),y                	; Load the character
+	iny                                	; Increment the character index
+
+	cmp #NEWLINE						; Check for NEWLINE
+	beq prepare_newline
+
+	cmp #NEXT_SLIDE					 	; Check for NEXT_SLIDE
+	beq end_slide
+
+	sta PPU_DATA						; Write the character to the nametable
+	inx                                	; Increment the nametable column index
+
+	cpx #MAX_SLIDE_COLUMNS				; If the current row has reached MAX_SLIDE_COLUMNS, go to the next row
+	beq go_to_next_row					
+
+	jmp text_loop						; Go to the next character
+
+; Prepare for the NEWLINE by loading a space into the accumulator
+prepare_newline:
+	jsr fill_empty_line					;
+
+go_to_next_row:
+    POINT_TO_NEXT_LINE		
+	
+	dex                                	; Decrement the amount of available rows left
+	beq end_slide                      	; End the slide if no available rows are left with temp_00_ptr now pointing to the next slide
+
+	stx temp_00                        	; Store the amount of available rows left in temp_00, as we have overwritten it in the addition above
+
+	ldx #0                             	; Reset the nametable column index
+	ldy #0                             	; Reset the character index
+	
+	jmp text_loop						; Go to the next character
+
+end_slide:
+	; Enable rendering
+	lda #%00011110
+	sta PPU_MASK
+
+	rts
+.endproc
+
+;===================================================================================================
+; Fill in an empty line
+;===================================================================================================
+.proc fill_empty_line
+	ldx #0								; Reset X
+	lda #0								; Reset to Background
+@loop:
+	sta PPU_DATA						; Write to nametable
+	inx                                	; Increment the nametable column index
+
+	cpx #MAX_SLIDE_COLUMNS				; If the current row has not reached MAX_SLIDE_COLUMNS, loop
+	bne @loop
+@return:
+	rts									; return
+.endproc

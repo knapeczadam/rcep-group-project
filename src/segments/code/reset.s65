@@ -54,6 +54,10 @@ clear_ram:
 	ora #%00000101						; Setting the player to default right movement and Bool to fun mode
 	sta var_player_info
 
+@init_gamestate:
+	lda #0
+	sta var_gamestate					; Setting game state to MENU
+
 	; Clear the local OAM
     jsr clear_oam
 
@@ -161,6 +165,7 @@ loop:
     bne loop                           ; repeat until we've copied enough pages
 
     jsr load_player                    ; Call load_player subroutine to load the player into OAM-RAM
+    jsr load_arrow                     ; Call load_arrow subroutine to load the player into OAM-RAM
     jsr load_bullets                   ; Call load_bullet subroutine to load the bullet into OAM-RAM
 
 	rts

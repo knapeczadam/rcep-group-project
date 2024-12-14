@@ -4,6 +4,38 @@
 ;===================================================================================================
 .segment "RODATA"
 
+menu:
+    ; .byte "3333333333333333 3333333333333333"
+    .byte NEWLINE
+    .byte NEWLINE
+    .byte NEWLINE
+    .byte NEWLINE
+    .byte NEWLINE
+    .byte NEWLINE
+    .byte "            NESLIDES            "
+    .byte NEWLINE
+    .byte NEWLINE
+    .byte NEWLINE
+    .byte NEWLINE
+    .byte NEWLINE
+    .byte NEWLINE
+    .byte "          PLAY SELECT           "
+    .byte NEWLINE
+    .byte NEWLINE
+    .byte NEWLINE
+    .byte "            FUN MODE            "
+    .byte "          NOT FUN MODE          "
+    .byte NEWLINE
+    .byte NEWLINE
+    .byte NEWLINE
+    .byte NEWLINE
+    .byte NEWLINE
+    .byte "            MADE BY             "
+    .byte NEWLINE
+    .byte " BURGISSER DYLAN,FRATCZAK JAKUB "
+    .byte "    KNAPECZ ADAM,MARTENS TUUR   "
+    .byte NEXT_SLIDE
+    
 slides:
     .byte "ACCORDING TO ALL KNOWN LAWS", NEWLINE
     .byte "OF AVIATION, A BEE SHOULD NOT", NEWLINE

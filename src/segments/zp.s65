@@ -22,6 +22,13 @@ var_current_bg_color:       .res 1
 var_elapsed_sec:            .res 1
 var_elapsed_min:            .res 1
 
+; var_gamestate Byte:
+;-----------------------
+; using game state as a sort of enmurator
+; 0 = MENU
+; 1 = SLIDES
+var_gamestate:              .res 1
+
 ; var_bullets_arr Byte:
 ;-----------------------
 ; 76543210
@@ -40,7 +47,7 @@ var_bullets_arr:            .res 6 ; we can shoot up to 6 bullets
 ; 76543210
 ; ||||||||
 ; |||||||+- CanShootBullet?
-; ||||||+-- UsePlayerMovement?
+; ||||||+-- FunMode?
 ; |||||+--- IsSlideOver?
 ; ||||+----
 ; |||+-----

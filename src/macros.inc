@@ -7,3 +7,4 @@
 .include "macros/shooting.inc"
 .include "macros/utils.inc"
 .include "macros/player.inc"
+.include "macros/inputs.inc"
