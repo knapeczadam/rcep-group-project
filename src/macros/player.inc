@@ -63,9 +63,7 @@
 ; Animates the player sprite walking left and right.
 ;===================================================================================================
 .macro ANIMATE_WALK
-.local @walk_speed
-    @walk_speed = 16                   ; 8-bit speed value to control the animation speed, must be power of 2
-    TIMED_FLIP_FLOP WALK_LEFT, WALK_RIGHT, @walk_speed
+    TIMED_FLIP_FLOP WALK_LEFT, WALK_RIGHT, WALK_SPEED
 .endmacro
 
 ;===================================================================================================
