@@ -32,10 +32,10 @@ menu:
     .byte NEWLINE
     .byte "            MADE BY             "
     .byte NEWLINE
-    .byte " BURGISSER DYLAN,FRATCZAK JAKUB "
-    .byte "    KNAPECZ ADAM,MARTENS TUUR   "
+    .byte " DYLAN BURGISSER,JAKUB FRATCZAK "
+    .byte "    ADAM KNAPECZ,TUUR MARTENS   "
     .byte NEXT_SLIDE
-    
+
 slides:
     .byte "ACCORDING TO ALL KNOWN LAWS", NEWLINE
     .byte "OF AVIATION, A BEE SHOULD NOT", NEWLINE
