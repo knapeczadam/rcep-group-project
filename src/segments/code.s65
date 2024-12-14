@@ -41,8 +41,8 @@ main_loop:
 
     jsr famistudio_update
 
-	ON_BUTTON_RELEASE PAD_A, LOAD_NEXT_SLIDE
-	ON_BUTTON_RELEASE PAD_B, LOAD_PREVIOUS_SLIDE
+	ON_BUTTON_RELEASE PAD_START, LOAD_NEXT_SLIDE
+	ON_BUTTON_RELEASE PAD_SELECT, LOAD_PREVIOUS_SLIDE
 
 ;===================================================================================================
 
