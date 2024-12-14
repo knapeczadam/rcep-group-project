@@ -39,3 +39,79 @@ ____           _                       ^
 
 **END OF FILE**
 - empty line
+
+**USING LOCAL LABELS**
+
+`@label:` creates a local label. To understand its scope better:
+
+```
+.proc example
+begin:
+  lda #0
+@label:
+  lda #0
+  jmp @label ; this will jump up
+end:
+  
+  jmp @label ; this will jump down
+@label:
+  lda #0
+
+.endproc
+```
+a more thourough example would look like this:
+
+```
+.proc load_borders                      ; Start of the first codeblock
+begin:                                  ; End of the first codeblock and Start the second codeblock
+	tya
+	bne @reset_x
+
+	lda #0
+@border_loop:                           ; border_loop is now available within the second codeblock
+	sta PPU_DATA
+	inx
+
+	cpx #MAX_SLIDE_COLUMNS
+	beq @reset_x
+
+    ; Go to the next character
+	jmp @border_loop
+
+@reset_x:
+	ldx #0
+	lda #0
+end:                                    ; End of second codeblock and start of the third codeblock
+@border_loop:                           ; border_loop is now available within the third codeblock
+	@border_hor 		= $09
+	@left_corner		= temp_01
+	@right_corner		= temp_02
+	sta PPU_DATA
+	inx
+
+	cpx #MAX_SLIDE_COLUMNS
+	beq @return
+
+	cpx #2
+	beq @load_top_left_corner
+
+	cpx #3
+	beq @load_border
+
+	cpx #29
+	beq @load_top_right_corner
+
+	cpx #30
+	bne @border_loop
+
+	lda #0
+	jmp @border_loop
+@load_top_left_corner:
+	lda @left_corner
+
+	jmp @border_loop
+
+@return:
+	rts
+.endproc
+```

@@ -27,7 +27,7 @@ var_elapsed_min:            .res 1
 ; ||||||||
 ; ||||||++- Direction the bullet is travelling, going clock wise starting at the top or 12 o'clock we have 00 == UP / 01 == RIGHT / 10 == DOWN / 11 == LEFT
 ; |||||+--- Bool to check if bullet is Active
-; ||||+----
+; ||||+---- 
 ; |||+-----
 ; ||+------ 
 ; |+------- 
@@ -40,7 +40,7 @@ var_bullets_arr:            .res 6 ; we can shoot up to 6 bullets
 ; ||||||||
 ; |||||||+- CanShootBullet?
 ; ||||||+-- UsePlayerMovement?
-; |||||+--- 
+; |||||+--- IsSlideOver?
 ; ||||+----
 ; |||+-----
 ; ||+------ 

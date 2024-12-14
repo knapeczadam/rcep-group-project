@@ -1,0 +1,280 @@
+
+;===================================================================================================
+; Loads a slide from the base address stored in temp_00_ptr
+;===================================================================================================
+.proc load_slide
+	jsr initialize_slide_ptr			; Initialize the slide ptr for loading the info
+        
+	ldx #0
+	LOAD_BORDER 1						; Load the top border in
+
+	; Reset the X and Y registers
+	ldx #0                             	; Used as the nametable column index in text_loop and as the amount of available rows left in go_to_next_row
+	ldy #0                             	; Used as the character index of our slides data
+    ; Write characters to the nametable, row by row
+text_loop:
+	@padding 			= 3
+	@padding_right 		= MAX_SLIDE_COLUMNS - @padding
+	@border_start 		= @padding - 1
+	@border_tile_vert 	= $0A
+; First check if we are within the first 3 tiles, if so change the background accordingly
+	txa									; Put X in A
+	sec									;
+	sbc #@padding						; Remove 3 from X
+	bpl @check_right_padding			; If it's positive we are not within the padding
+	lda #0								; Load $00
+	cpx #@border_start					; Check if X is the border
+	bne @write_to_ppu					; If it's not we want to load tile 0
+	lda #@border_tile_vert				; If it is load tile 10
+	jmp @write_to_ppu
+
+; If not in the left padding, check if we are in the right one
+@check_right_padding:
+
+	txa									; Put X in A
+	sec									;
+	sbc #@padding_right 				; Remove (MAX_COL (32) - PADDING) => 32 - padding
+	bmi @load_text						; if negative we are not in the right padding zone
+	lda #0								; 
+	cpx #@padding_right					; Check if we are on the border tile 
+	bne @write_to_ppu					; If not we write #$00
+	lda #@border_tile_vert				; Otherwise load the border
+
+	jmp	@write_to_ppu					; Go to write to ppu
+
+@load_text:
+	lda (temp_00_ptr),y                	; Load the character
+	iny                                	; Increment the character index
+@write_to_ppu:
+	cmp #NEWLINE						; Check for NEWLINE
+	beq prepare_newline
+
+	cmp #NEXT_SLIDE					 	; Check for NEXT_SLIDE
+	beq prepare_next_slide
+
+	sta PPU_DATA						; Write the character to the nametable
+	inx                                	; Increment the nametable column index
+
+	cpx #MAX_SLIDE_COLUMNS				; If the current row has reached MAX_SLIDE_COLUMNS, go to the next row
+	beq go_to_next_row					
+
+	jmp text_loop						; Go to the next character
+
+; Prepare for the NEWLINE by loading a space into the accumulator
+prepare_newline:
+	jsr fill_new_line_ending			;
+
+go_to_next_row:
+    POINT_TO_NEXT_LINE		; Check what happens NEXT_SLIDE is on the current line and not next one			
+	
+	dex                                	; Decrement the amount of available rows left
+	beq end_slide                      	; End the slide if no available rows are left with temp_00_ptr now pointing to the next slide
+
+	stx temp_00                        	; Store the amount of available rows left in temp_00, as we have overwritten it in the addition above
+
+	ldx #0                             	; Reset the nametable column index
+	ldy #0                             	; Reset the character index
+	
+	jmp text_loop						; Go to the next character
+
+prepare_next_slide: ;check what happens if slide is filled and end on the last possible lines
+	txa									; First save X (current column)
+	pha
+
+	POINT_TO_NEXT_LINE					; Jakub this cost me 2 hours :angry_face:
+
+	dex									; Decrement the amount of available rows left
+	stx temp_00							;
+
+	pla									; Get X back (current column)
+	tax
+
+	cpx #MAX_SLIDE_COLUMNS				; Check if we are already at the end the column
+	beq @loop_fill_rest						
+
+	jsr fill_new_line_ending
+@loop_fill_rest:
+	ldx temp_00							; Load current_row
+	beq @end_loop						; If 0 fuck off
+	jsr fill_empty_space				; Otherwise put an empty line there
+	dec temp_00							; Decrease current row
+	bne @loop_fill_rest					; Repeat
+
+	; jsr check_next_slide_edge_case		; Check if current character is also last character of slide
+@end_loop:
+    inc temp_00_ptr                 	; Increment the low byte of the base address
+	bne end_slide                      	; End the slide if the low byte did not overflow
+	inc temp_00_ptr + 1             	; Increment the high byte of the base address
+
+end_slide:
+	LOAD_BORDER 0						; Load the lower border
+    
+	; Enable rendering
+	lda #%00011110
+	sta PPU_MASK
+
+	rts
+.endproc
+
+;===================================================================================================
+; Check if the last character + 1 in a slide is NEXT_SLIDE, if so skip over, otherwise nex slide will be empty
+;===================================================================================================
+.proc check_next_slide_edge_case; TODO:: Need to check if on last slide as well otherwise we can point to outside the array
+	; iny									; increase character by one
+	ldy #0
+	
+	lda (temp_00_ptr),y					; Load the current character + 1 at the end of the slide
+	cmp #NEXT_SLIDE						; If it's not a NEXT_SLIDE
+	bne @return							; return
+	inc temp_00_ptr						; Otherwise increase the pointer by one
+	bne @return                      	; End the slide if the low byte did not overflow
+	inc temp_00_ptr + 1             	; Increment the high byte of the base address
+@return:
+	rts									; return
+.endproc
+
+;===================================================================================================
+; Initialize the nametable and pointer to the text for current slide
+;===================================================================================================
+.proc initialize_slide_ptr
+    ; Disable rendering
+	lda #0
+	sta PPU_MASK
+
+	jsr clear_nametable                ; Clear the nametable
+
+    SET_PPU_ADDRESS NT1_ADDRESS        ; Set the first nametable as the PPU target address
+
+	lda #MAX_SLIDE_ROWS                ; Load the initial amount of available rows left
+	sta temp_00                        ; Store the former amount in temp_00, which will decrement with each row change
+
+    ldx current_slide_index
+    lda slide_base_adresses, x
+	sta temp_00_ptr
+    lda slide_base_adresses + 1, x
+	sta temp_00_ptr + 1
+
+	rts
+.endproc
+
+;===================================================================================================
+; Fill the remaining rows on the slide with background or with border
+;===================================================================================================
+.proc fill_empty_space
+	@padding 			= 3
+	@padding_right 		= MAX_SLIDE_COLUMNS - @padding
+	@border_start 		= @padding - 1
+	@border_tile_vert 	= $0A
+
+	ldx #0								; Reset X
+@loop:
+	lda #0								; Reset to Background
+
+	cpx #@border_start					; If left border
+	beq @load_border					; Load border tile
+
+	cpx #@padding_right					; Else if border right
+	beq @load_border					; Load border tile
+										; Else
+@write_to_ppu:							
+	sta PPU_DATA						; Write to nametable
+	inx                                	; Increment the nametable column index
+
+	cpx #MAX_SLIDE_COLUMNS				; If the current row has not reached MAX_SLIDE_COLUMNS, loop
+	bne @loop
+
+	jmp @return							; If we completed the line return
+
+@load_border:
+	lda #@border_tile_vert				; Load the border_tile
+
+	jmp @write_to_ppu					; Go back to writing it in VRAM
+@return:
+	rts									; return
+.endproc
+
+;===================================================================================================
+; Fill the remaining columns on the current row with background or with border
+;===================================================================================================
+.proc fill_new_line_ending
+	@padding 			= 3
+	@padding_right 		= MAX_SLIDE_COLUMNS - @padding
+	@border_tile_vert 	= $0A
+
+@begin:
+; Same as before, check if are on in the padding or not
+	lda #0
+	cpx #@padding_right
+	bne @write_to_ppu
+	lda #@border_tile_vert
+
+@write_to_ppu:
+	sta PPU_DATA
+	inx                                	; Increment the nametable column index
+
+	cpx #MAX_SLIDE_COLUMNS				; If the current row has not reached MAX_SLIDE_COLUMNS, loop
+	bne @begin
+
+@return:
+	rts
+.endproc
+
+;===================================================================================================
+; Loads the top or bottom border based on bool input
+;===================================================================================================
+.proc load_borders
+	@border_hor 		= $09
+	@left_corner		= temp_01
+	@right_corner		= temp_02
+
+	tya									; Transfer Y to A to check the bool set previously
+	bne @reset_x						; If doing the Top border we want to add one empty line first
+
+	lda #0
+@empty_line:							; Fill the first line with Background or whatever you want to load in A
+	sta PPU_DATA						; Write info to Nametable
+	inx									; x++
+
+	cpx #MAX_SLIDE_COLUMNS				; Check if we wrote 32 tiles
+	bne @empty_line						; if not keep going
+@reset_x:
+	ldx #0
+	lda #0								; Also reset Y in case we don't create an empty line it now has 1
+
+@create_border:
+	sta PPU_DATA
+	inx
+
+	cpx #MAX_SLIDE_COLUMNS
+	beq @return
+
+	cpx #2								; Check if we are at position 2
+	beq @load_top_left_corner			; If so change the tile to left corner tile
+
+	cpx #3								; Check if we are at position 3 
+	beq @load_border					; If so load a border line
+
+	cpx #29								; Check if we are at position 29
+	beq @load_top_right_corner			; If so load the right corner tile
+
+	cpx #30								; Check if we after the right corner
+	bne @create_border					; If not we are not on a special tile but rather the padding on left or right of the border
+
+	lda #0								; So reload tile $00
+	jmp @create_border
+@load_top_left_corner:
+	lda @left_corner
+
+	jmp @create_border
+@load_border:
+	lda #@border_hor
+
+	jmp @create_border
+@load_top_right_corner:
+	lda @right_corner
+
+	jmp @create_border
+
+@return:
+	rts
+.endproc

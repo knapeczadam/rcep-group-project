@@ -10,6 +10,7 @@
 .include "code/player.s65"
 .include "code/shooting.s65"
 .include "code/upscaling.s65"
+.include "code/slides.s65"
 
 .include "code/nmi.s65"
 .include "code/reset.s65"
