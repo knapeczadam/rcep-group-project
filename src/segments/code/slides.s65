@@ -23,7 +23,10 @@ text_loop:
 	sbc #@padding						; Remove 3 from X
 	bpl @check_right_padding			; If it's positive we are not within the padding
 
-
+	lda var_bools
+	and #%00000010
+	beq :+
+	
 	jsr build_left_door
 
 	cmp #$02							; If not on door location make the border instead
@@ -34,8 +37,6 @@ text_loop:
 
 	jmp text_loop						; Go to the next character
 :
-
-
 	lda #0								; Load $00
 	cpx #@border_start					; Check if X is the border
 	bne @write_to_ppu					; If it's not we want to load tile 0
@@ -50,6 +51,10 @@ text_loop:
 	sbc #@padding_right 				; Remove (MAX_COL (32) - PADDING) => 32 - padding
 	bmi @load_text						; if negative we are not in the right padding zone
 
+	lda var_bools
+	and #%00000010
+	beq @continue
+	
 	jsr build_right_door				; Build right door
 
 	cmp #$02							; If not on door location make the border instead
@@ -331,6 +336,10 @@ end_slide:
 
 	ldx #0								; Reset X
 @loop:
+	lda var_bools
+	and #%00000010
+	beq @continue
+
 	txa									; Put X in A
 	sec									;
 	sbc #@padding						; Remove 3 from X
@@ -359,7 +368,7 @@ end_slide:
 	cpx #MAX_SLIDE_COLUMNS				; If the current row has reached MAX_SLIDE_COLUMNS, go to the next row
 	beq @return					
 
-	jmp @loop						; Go to the next character
+	jmp @loop							; Go to the next character
 @continue:
 	lda #0								; Reset to Background
 
@@ -396,6 +405,10 @@ end_slide:
 
 @begin:
 ; Same as before, check if we are on in the padding or not
+	lda var_bools
+	and #%00000010
+	beq @continue
+
 	txa									; Put X in A
 	sec									;
 	sbc #@padding_right 				; Remove (MAX_COL (32) - PADDING) => 32 - padding
