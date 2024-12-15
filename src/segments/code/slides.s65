@@ -22,6 +22,20 @@ text_loop:
 	sec									;
 	sbc #@padding						; Remove 3 from X
 	bpl @check_right_padding			; If it's positive we are not within the padding
+
+
+	jsr build_left_door
+
+	cmp #$02							; If not on door location make the border instead
+	beq :+
+
+	cpx #MAX_SLIDE_COLUMNS				; If the current row has reached MAX_SLIDE_COLUMNS, go to the next row
+	beq go_to_next_row					
+
+	jmp text_loop						; Go to the next character
+:
+
+
 	lda #0								; Load $00
 	cpx #@border_start					; Check if X is the border
 	bne @write_to_ppu					; If it's not we want to load tile 0
@@ -35,11 +49,22 @@ text_loop:
 	sec									;
 	sbc #@padding_right 				; Remove (MAX_COL (32) - PADDING) => 32 - padding
 	bmi @load_text						; if negative we are not in the right padding zone
+
+	jsr build_right_door				; Build right door
+
+	cmp #$02							; If not on door location make the border instead
+	beq @continue
+
+	cpx #MAX_SLIDE_COLUMNS				; If the current row has reached MAX_SLIDE_COLUMNS, go to the next row
+	beq go_to_next_row					
+
+	jmp text_loop						; Go to the next character
+
+@continue:
 	lda #0								; 
 	cpx #@padding_right					; Check if we are on the border tile 
 	bne @write_to_ppu					; If not we write #$00
 	lda #@border_tile_vert				; Otherwise load the border
-
 	jmp	@write_to_ppu					; Go to write to ppu
 
 @load_text:
@@ -134,6 +159,144 @@ end_slide:
 .endproc
 
 ;===================================================================================================
+; Builds the right door
+;===================================================================================================
+.proc build_right_door					; I'm tired of writing comments nobody reads them i know what this does ask me or figure it out it's simple
+	jmp @begin
+@return:
+	lda #$02
+	rts
+@begin:
+	@padding 			= 3
+	@padding_right 		= MAX_SLIDE_COLUMNS - @padding
+
+	lda temp_00
+	cmp #15								
+	beq @door1
+
+	cmp #14
+	beq @door2
+
+	cmp #13
+	beq @door3
+
+	cmp #12
+	beq @door4
+
+	jmp @return
+@door1:
+	lda #$0B
+	cpx #@padding_right
+	beq @write_to_ppu
+	lda #$0C
+	cpx #@padding_right + 1
+	beq @write_to_ppu
+	lda #$0D
+	jmp	@write_to_ppu					; Go to write to ppu
+@door2:
+	lda #$0E
+	cpx #@padding_right
+	beq @write_to_ppu
+	lda #$00
+	cpx #@padding_right + 1
+	beq @write_to_ppu
+	lda #$0F
+	jmp	@write_to_ppu					; Go to write to ppu
+@door3:
+	lda #$1C
+	cpx #@padding_right
+	beq @write_to_ppu
+	lda #$00
+	cpx #@padding_right + 1
+	beq @write_to_ppu
+	lda #$1D
+	jmp	@write_to_ppu					; Go to write to ppu
+@door4:
+	lda #$1E
+	cpx #@padding_right
+	beq @write_to_ppu
+	lda #$00
+	cpx #@padding_right + 1
+	beq @write_to_ppu
+	lda #$1F
+
+@write_to_ppu:
+	sta PPU_DATA						; Write the character to the nametable
+	inx                                	; Increment the nametable column index
+
+	rts
+.endproc
+
+;===================================================================================================
+; Builds the left door
+;===================================================================================================
+.proc build_left_door					; I'm tired of writing comments nobody reads them i know what this does ask me or figure it out it's simple
+	jmp @begin
+@return:
+	lda #$02
+	rts
+@begin:
+	@padding 			= 3
+	@border_start 		= @padding - 1
+
+	lda temp_00
+	cmp #15								
+	beq @door1
+
+	cmp #14
+	beq @door2
+
+	cmp #13
+	beq @door3
+
+	cmp #12
+	beq @door4
+
+	jmp @return
+@door1:
+	lda #$F2
+	cpx #@border_start
+	beq @write_to_ppu
+	lda #$F1
+	cpx #@border_start - 1
+	beq @write_to_ppu
+	lda #$F0
+	jmp	@write_to_ppu					; Go to write to ppu
+@door2:
+	lda #$F4
+	cpx #@border_start
+	beq @write_to_ppu
+	lda #$00
+	cpx #@border_start - 1
+	beq @write_to_ppu
+	lda #$F3
+	jmp	@write_to_ppu					; Go to write to ppu
+@door3:
+	lda #$F6
+	cpx #@border_start
+	beq @write_to_ppu
+	lda #$00
+	cpx #@border_start - 1
+	beq @write_to_ppu
+	lda #$F5
+	jmp	@write_to_ppu					; Go to write to ppu
+@door4:
+	lda #$F8
+	cpx #@border_start
+	beq @write_to_ppu
+	lda #$00
+	cpx #@border_start - 1
+	beq @write_to_ppu
+	lda #$F7
+
+@write_to_ppu:
+	sta PPU_DATA						; Write the character to the nametable
+	inx                                	; Increment the nametable column index
+
+	rts
+.endproc
+
+;===================================================================================================
 ; Initialize the nametable and pointer to the text for current slide
 ;===================================================================================================
 .proc initialize_slide_ptr
@@ -168,6 +331,36 @@ end_slide:
 
 	ldx #0								; Reset X
 @loop:
+	txa									; Put X in A
+	sec									;
+	sbc #@padding						; Remove 3 from X
+	bpl :+								; If it's positive we are not within the padding
+
+	jsr build_left_door
+
+	cmp #$02							; If not on door location make the border instead
+	beq :+
+
+	cpx #MAX_SLIDE_COLUMNS				; If the current row has reached MAX_SLIDE_COLUMNS, go to the next row
+	beq @return					
+
+	jmp @loop							; Go to the next character
+:
+	txa									; Put X in A
+	sec									;
+	sbc #@padding_right 				; Remove (MAX_COL (32) - PADDING) => 32 - padding
+	bmi @continue						; if negative we are not in the right padding zone
+
+	jsr build_right_door
+
+	cmp #$02
+	beq @continue
+
+	cpx #MAX_SLIDE_COLUMNS				; If the current row has reached MAX_SLIDE_COLUMNS, go to the next row
+	beq @return					
+
+	jmp @loop						; Go to the next character
+@continue:
 	lda #0								; Reset to Background
 
 	cpx #@border_start					; If left border
@@ -202,8 +395,24 @@ end_slide:
 	@border_tile_vert 	= $0A
 
 @begin:
-; Same as before, check if are on in the padding or not
+; Same as before, check if we are on in the padding or not
+	txa									; Put X in A
+	sec									;
+	sbc #@padding_right 				; Remove (MAX_COL (32) - PADDING) => 32 - padding
+	bmi @continue						; if negative we are not in the right padding zone
+
+	jsr build_right_door
+
+	cmp #$02
+	beq @continue
+
+	cpx #MAX_SLIDE_COLUMNS				; If the current row has reached MAX_SLIDE_COLUMNS, go to the next row
+	beq @return					
+
+	jmp @begin						; Go to the next character
+@continue:
 	lda #0
+
 	cpx #@padding_right
 	bne @write_to_ppu
 	lda #@border_tile_vert
