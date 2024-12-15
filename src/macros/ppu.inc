@@ -44,3 +44,12 @@
     lda #state
 	sta var_nmi_ready
 .endmacro
+
+;===================================================================================================
+; https://www.nesdev.org/wiki/PPU_scrolling#:~:text=Set%20the%20scroll%20last,overwrite%20the%20scroll%20position.
+;===================================================================================================
+.macro RESET_SCROLL
+	lda #$00
+	sta PPU_SCROLL
+	sta PPU_SCROLL
+.endmacro

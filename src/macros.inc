@@ -9,3 +9,4 @@
 .include "macros/player.inc"
 .include "macros/menu.inc"
 .include "macros/sprites.inc"
+.include "macros/nmi.inc"
