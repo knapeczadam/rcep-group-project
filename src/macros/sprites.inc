@@ -1,8 +1,11 @@
 ;===================================================================================================
 ; Loads sprite data from the specified memory address into the OAM starting at offset.
+;---------------------------------------------------------------------------------------------------
 ; address : Base address of the sprite data in memory
 ; count   : Number of sprites to load
 ; offset  : Offset within the OAM to start storing the sprite data
+;---------------------------------------------------------------------------------------------------
+; Affected registers: A, X
 ;===================================================================================================
 .macro LOAD_SPRITE address, count, offset
 .local @loop, @oam_location, @idx
