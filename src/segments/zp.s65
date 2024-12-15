@@ -23,6 +23,8 @@ var_elapsed_sec:            .res 1
 var_elapsed_min:            .res 1
 var_slide_count:            .res 1
 var_slide_addresses:        .res 20    ; 10 slides * 2 bytes
+var_game_loop_count:        .res 1
+var_nmi_count:              .res 1
 
 var_test:                   .res 1
 ; var_gamestate Byte:

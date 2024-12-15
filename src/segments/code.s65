@@ -29,6 +29,8 @@
 main_loop:
 	lda var_nmi_ready
 	bne main_loop
+	
+    inc var_game_loop_count
 
  	jsr gamepad_poll ; read the gamepad
 	jsr check_can_shoot
