@@ -24,6 +24,7 @@ var_elapsed_min:            .res 1
 var_slide_count:            .res 1
 var_slide_addresses:        .res 20    ; 10 slides * 2 bytes
 
+var_test:                   .res 1
 ; var_gamestate Byte:
 ;-----------------------
 ; using game state as a sort of enmurator
@@ -52,7 +53,7 @@ var_bullets_arr:            .res 6 ; we can shoot up to 6 bullets
 ; ||||||+-- FunMode?
 ; |||||+--- IsSlideOver?
 ; ||||+---- CanPlayerMove?
-; |||+-----
+; |||+----- IsDoingTransition?
 ; ||+------ 
 ; |+------- 
 ; +--------

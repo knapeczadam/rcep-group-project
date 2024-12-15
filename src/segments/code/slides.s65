@@ -500,3 +500,38 @@ end_slide:
 @return:
 	rts
 .endproc
+
+
+.proc transition_test
+	lda var_bools
+	and #%00010000
+	beq @return
+
+	lda var_elapsed_sec   ; Load elapsed_sec into A
+	sec                   ; Set the Carry flag to 1
+	sbc var_test          ; Subtract test_var from A (A = A - test_var - (1 - C))
+	cmp #5                ; Compare A with 3
+	bcc @return            ; Branch if A < 3 (Carry = 0)
+
+	jsr load_slide
+
+    lda current_slide_index
+	cmp #MAX_SLIDE_INDEX
+    beq @return
+
+	ldx current_slide_index
+    inx
+	inx
+	lda temp_00_ptr
+	sta slide_base_adresses,x
+	lda temp_00_ptr+1
+	sta slide_base_adresses+1, x
+
+	lda var_bools
+	and #%11101111
+	sta var_bools
+	beq @return
+
+@return:
+	rts
+.endproc

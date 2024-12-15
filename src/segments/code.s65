@@ -38,6 +38,8 @@ main_loop:
 	
 	jsr update_bullets
 
+	; jsr transition_test
+
     jsr famistudio_update
 
 ;===================================================================================================
