@@ -15,6 +15,7 @@
 .include "code/inputs.s65"
 .include "code/gamepad.s65"
 .include "code/sprites.s65"
+.include "code/scrolling.s65"
 
 .include "code/vectors/nmi.s65"
 .include "code/vectors/reset.s65"

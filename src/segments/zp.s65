@@ -21,6 +21,8 @@ var_current_bg_state:       .res 1
 var_current_bg_color:       .res 1
 var_elapsed_sec:            .res 1
 var_elapsed_min:            .res 1
+var_slide_count:            .res 1
+var_slide_addresses:        .res 20    ; 10 slides * 2 bytes
 
 ; var_gamestate Byte:
 ;-----------------------
@@ -77,4 +79,5 @@ temp_00:                    .res 1
 temp_01:                    .res 1
 temp_02:                    .res 1
 temp_03:                    .res 1
+temp_04:                    .res 1
 temp_64_arr:                .res 64

@@ -1,0 +1,92 @@
+.proc calculate_slide_addresses
+	@char_count   = temp_00            ; Keeps track of characters in the current line
+	@line_count   = temp_01            ; Keeps track of lines in the current slide
+	@slide_count  = temp_02            ; Number of slides counted so far
+	@save_address = temp_03            ; Flag to indicate when to save a slide address
+	@current_char = temp_04            ; Current character being processed
+	@current_address = temp_00_ptr     ; Current memory address pointer
+	@max_char     = 26                 ; Max characters per line
+	@max_line     = 26                 ; Max lines per slide
+
+	STORE_ADDRESS slides, @current_address ; Pointer to store slide start addresses
+
+	lda #0
+	tax                                ; x = 0, outer loop counter
+	tay                                ; y = 0, inner loop counter
+	sta @slide_count                   ; slide_count = 0
+	sta @line_count                    ; line_count = 0
+	sta @char_count                    ; char_count = 0
+	                                   ; Save the first slide address immediately
+	lda @current_address               ; Load the low byte of the current address
+	sta var_slide_addresses, x         ; Save the low byte of the address
+	lda @current_address + 1           ; Load the high byte
+	sta var_slide_addresses + 1, x     ; Save the high byte
+	inx
+	inx
+	inc @slide_count                   ; Increment the slide count
+	sta var_slide_count                ; Save slide count
+
+@loop:
+	ldy #0
+	lda (@current_address), y          ; Load the current character
+	sta @current_char
+	                                   ; Check if we reached the end of the slides
+	cmp #LAST_SLIDE                    ; Check for end of all slides marker
+	beq @return
+	                                   ; Handle the end of a slide
+	cmp #NEXT_SLIDE                    ; Check for slide delimiter
+	beq @save_new_slide
+	                                   ; Handle a new line
+	cmp #NEWLINE                       ; Check for line delimiter
+	beq @new_line
+	                                   ; Handle character limit per line
+	inc @char_count                    ; Increment character count
+	lda @char_count
+	cmp #@max_char
+	bne @increment_address
+	                                   ; Max characters reached, start a new line
+	  lda #0
+	  sta @char_count                  ; Reset character count
+	  inc @line_count                  ; Increment line count
+
+@check_line_limit:
+	lda @line_count
+	cmp #@max_line
+	bne @increment_address
+	                                   ; Max lines reached, start a new slide
+	  jmp @save_new_slide
+
+@increment_address:
+	                                   ; Move to the next memory address
+	INCREMENT_VALUE @current_address
+	jmp @loop
+
+@new_line:
+	                                   ; Handle new line
+	inc @line_count                    ; Increment line count
+	lda #0
+	sta @char_count                    ; Reset character count
+	jmp @check_line_limit
+
+@save_new_slide:
+	                                   ; Move to the next memory address
+	INCREMENT_VALUE @current_address
+	                                   ; Save the start address of the new slide
+	lda @current_address               ; Load the low byte of the current address
+	sta var_slide_addresses, x         ; Save the low byte
+	lda @current_address + 1           ; Load the high byte
+	sta var_slide_addresses + 1, x     ; Save the high byte
+	inx
+	inx
+	inc @slide_count                   ; Increment slide count
+	lda @slide_count
+	sta var_slide_count                ; Save the slide count
+	                                   ; Reset counters for the new slide
+	lda #0
+	sta @char_count                    ; Reset character count
+	sta @line_count                    ; Reset line count
+	jmp @loop
+
+@return:
+	rts                                ; Return from subroutine
+.endproc
