@@ -21,13 +21,7 @@
 .proc nmi
 ;===================================================================================================
 
-	; Save the registers
-	pha
-	txa
-	pha
-	tya
-	pha
-	php
+	PUSH_REGISTERS
 	
 ;===================================================================================================
 
@@ -53,25 +47,18 @@
     
 	jsr transfer_oam                   ; Transfer the local OAM data into the PPU
 
-	; Reset the scroll (https://www.nesdev.org/wiki/PPU_scrolling#:~:text=Set%20the%20scroll%20last,overwrite%20the%20scroll%20position.)
-	lda #$00
-	sta PPU_SCROLL
-	sta PPU_SCROLL
+	RESET_SCROLL
 
 	ldx #NMI_SIG_CLEAR
 	stx var_nmi_ready
+	
 	jmp end
 	
 ;===================================================================================================
 
 end:
-	; pop registers
-	plp
-	pla
-	tay
-	pla
-	tax
-	pla
+	POP_REGISTERS
+	
 	rti
 .endproc
 
