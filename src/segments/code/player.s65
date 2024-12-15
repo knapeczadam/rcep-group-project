@@ -70,6 +70,7 @@
     sbc #112
     bmi @continue ; if y < 112
 
+    lda var_player_y
     sec
     sbc #128
     bpl @continue   ; if y >= 128
@@ -89,7 +90,8 @@
     sec
     sbc #112
     bmi @return ; if y < 112
-
+    
+    lda var_player_y
     sec
     sbc #128
     bpl @return   ; if y >= 128
