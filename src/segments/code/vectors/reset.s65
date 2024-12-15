@@ -60,8 +60,8 @@ clear_ram:                             ; Clear the RAM (cannot be a subroutine a
 	jsr wait_vblank_y_times            ; Wait for the first 2 VBlanks to let the PPU stabilise before writing to it
 
     jsr transfer_oam                   ; Transfer the local, now cleared, OAM data into the PPU to reduce the visible artifacts at start
-    jsr clear_nametable                ; Clear the nametable
-    jsr clear_attribute_table          ; Clear the attribute table
+    jsr clear_nametable                ; Clear the nametable 1
+    jsr clear_attribute_table          ; Clear the attribute table 1
     jsr copy_chr_tiles                 ; Copy CHR tiles into CHR RAM
     jsr copy_palette                   ; Copy the palette to the PPU
 
@@ -132,7 +132,7 @@ loop:
 .endproc
 
 .proc copy_chr_tiles
-	STORE_ADDRESS tiles_chr, temp_00_ptr ; load the source address into a pointer in zero page
+	TRANSFER_ADDRESS tiles_chr, temp_00_ptr ; load the source address into a pointer in zero page
 
     SET_PPU_ADDRESS PT1_ADDRESS
 
@@ -146,8 +146,8 @@ loop:
     dex
     bne loop                           ; repeat until we've copied enough pages
 
-    jsr load_player                    ; Call load_player subroutine to load the player into OAM-RAM
-    jsr load_arrow                     ; Call load_arrow subroutine to load the player into OAM-RAM
+    LOAD_SPRITE player_data, PLAYER_SPRITE_COUNT, PLAYER_OAM_OFFSET
+    LOAD_SPRITE text_arrow, TEXT_ARROW_SPRITE_COUNT, TEXT_ARROW_OAM_OFFSET
     jsr load_bullets                   ; Call load_bullet subroutine to load the bullet into OAM-RAM
 
 	rts

@@ -13,15 +13,17 @@
 .include "code/slides.s65"
 .include "code/menu.s65"
 .include "code/inputs.s65"
-
-.include "code/nmi.s65"
-.include "code/reset.s65"
-.include "code/irq.s65"
 .include "code/gamepad.s65"
+.include "code/sprites.s65"
+.include "code/scrolling.s65"
+
+.include "code/vectors/nmi.s65"
+.include "code/vectors/reset.s65"
+.include "code/vectors/irq.s65"
 
 .proc main
     ; Load the menu
-    STORE_ADDRESS menu, slide_base_adresses
+    TRANSFER_ADDRESS menu, slide_base_adresses
 	jsr load_menu
 
 main_loop:

@@ -71,10 +71,10 @@
 ;===================================================================================================
 .macro WALK_RIGHT
 .local @body_left, @body_right, @stand_tile, @walk_tile
-    @body_left  = oam + 13             ; Left body tile in OAM (see player_data)
-    @body_right = oam + 17             ; Right body tile in OAM (see player_data)
-    @stand_tile = $02                  ; Standing tile index in pattern table
-    @walk_tile  = $12                  ; Walking tile index in pattern table
+    @body_left  = oam + PLAYER_LEFT_BODY_TILE_OAM_OFFSET        ; Left body tile in OAM (see player_data)
+    @body_right = oam + PLAYER_RIGHT_BODY_TILE_OAM_OFFSET       ; Right body tile in OAM (see player_data)
+    @stand_tile = PLAYER_STAND_TILE_IDX                    ; Standing tile index in pattern table
+    @walk_tile  = PLAYER_WALK_TILE_IDX                     ; Walking tile index in pattern table
     
     lda #@stand_tile                   ; Load standing tile index
     sta @body_left                     ; Store it in the left body tile
@@ -87,10 +87,10 @@
 ;===================================================================================================
 .macro WALK_LEFT
 .local @body_left, @body_right, @stand_tile, @walk_tile
-    @body_left  = oam + 13             ; Left body tile in OAM (see player_data)
-    @body_right = oam + 17             ; Right body tile in OAM (see player_data)
-    @stand_tile = $02                  ; Standing tile index in pattern table
-    @walk_tile  = $12                  ; Walking tile index in pattern table
+    @body_left  = oam + PLAYER_LEFT_BODY_TILE_OAM_OFFSET        ; Left body tile in OAM (see player_data)
+    @body_right = oam + PLAYER_RIGHT_BODY_TILE_OAM_OFFSET       ; Right body tile in OAM (see player_data)
+    @stand_tile = PLAYER_STAND_TILE_IDX                    ; Standing tile index in pattern table
+    @walk_tile  = PLAYER_WALK_TILE_IDX                     ; Walking tile index in pattern table
     
     lda #@walk_tile                    ; Load walking tile index
     sta @body_left                     ; Store it in the left body tile
@@ -103,8 +103,8 @@
 ;===================================================================================================
 .macro CIGAR_LEFT
 .local @cigar, @cigar_left_tile
-    @cigar  = oam + 1                  ; Cigar sprite in OAM (see player_data)
-    @cigar_left_tile = $03             ; Cigar tile index in pattern table
+    @cigar  = oam + PLAYER_CIGAR_TILE_OAM_OFFSET                ; Cigar sprite in OAM (see player_data)
+    @cigar_left_tile = PLAYER_CIGAR_LEFT_TILE_IDX          ; Cigar tile index in pattern table
     
     lda #@cigar_left_tile              ; Load cigar tile index
     sta @cigar                         ; Store it in the cigar sprite
@@ -115,8 +115,8 @@
 ;===================================================================================================
 .macro CIGAR_RIGHT
 .local @cigar, @cigar_right_tile
-    @cigar  = oam + 1                  ; Cigar sprite in OAM (see player_data)
-    @cigar_right_tile  = $13           ; Cigar tile index in pattern table
+    @cigar  = oam + PLAYER_CIGAR_TILE_OAM_OFFSET                ; Cigar sprite in OAM (see player_data)
+    @cigar_right_tile  = PLAYER_CIGAR_RIGHT_TILE_IDX       ; Cigar tile index in pattern table
     
     lda #@cigar_right_tile             ; Load cigar tile index
     sta @cigar                         ; Store it in the cigar sprite

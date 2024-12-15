@@ -1,5 +1,6 @@
 ;===================================================================================================
 ; BSS is a memory segment for uninitialized global and static variables, defaulting to zero.
+; BSS stands for Block Started by Symbol.
 ;===================================================================================================
 .segment "BSS"
  

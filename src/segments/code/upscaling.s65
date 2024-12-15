@@ -210,7 +210,7 @@ loop:
   sta temp_03                           ; Store the value of the tile for mapping later
   jsr get_tile_position                 ; Jump to subroutine to Get X and Y of the tile
 
-  STORE_ADDRESS tiles_chr, temp_00_ptr  ; Load the source address of tiles_chr into a temporary pointer in zero-page
+  TRANSFER_ADDRESS tiles_chr, temp_00_ptr  ; Load the source address of tiles_chr into a temporary pointer in zero-page
 
 set_tile_row:                           ; Move the pointer to point to the correct Y location (simple for loop)
   cpx #$00                              ; if x == 0

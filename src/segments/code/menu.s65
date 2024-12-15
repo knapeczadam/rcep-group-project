@@ -1,22 +1,3 @@
-text_arrow:
-;      Y   tile#   attribs     X
-.byte $87,  $11,  %00000001,  $45
-
-;===================================================================================================
-; Subroutine to load text_arrow Sprites into OAM-RAM starting at $0200. 
-;===================================================================================================
-.proc load_arrow
-    @player_oam_location = oam + 20
-    ldx #0
-@loop:
-    lda text_arrow, x                   ; We fetch bytes from player_data
-    sta @player_oam_location, x         ; We store the bytes starting at OAM address oam
-    inx                                 ; ++x
-    cpx #4
-    bne @loop                           ; Loop 4 times (1 hardware sprites, 4 bytes each)
-    rts
-.endproc
-
 ;===================================================================================================
 ; Subroutine to load the menu screen and prepare the pointer for the first slide. 
 ;===================================================================================================

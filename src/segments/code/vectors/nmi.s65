@@ -19,6 +19,8 @@
 ; +--------- Vblank NMI enable (0: off, 1: on)
 
 .proc nmi
+;===================================================================================================
+
 	; Save the registers
 	pha
 	txa
@@ -26,20 +28,19 @@
 	tya
 	pha
 	php
+	
+;===================================================================================================
 
-	; Check whether we're ready to render, skip to end if not
-	lda var_nmi_ready
+	lda var_nmi_ready                  ; Check whether we're ready to render, skip to end if not
 	beq end
     
 ;===================================================================================================
 
-    ; Increase the frame count and cap it at 50
-	inc var_frame_count		 			
+	inc var_frame_count                ; Increase the frame count and cap it at 50
 	inc var_frame_count_unclamped
 	jsr frame_count_cap
 
-    ; Check the background collision
-	jsr check_background_collision
+	jsr check_background_collision     ; Check the background collision
 
 ;===================================================================================================
 
@@ -49,8 +50,7 @@
 
 ;===================================================================================================
     
-	; Transfer the local OAM data into the PPU
-	jsr transfer_oam
+	jsr transfer_oam                   ; Transfer the local OAM data into the PPU
 
 	; Reset the scroll (https://www.nesdev.org/wiki/PPU_scrolling#:~:text=Set%20the%20scroll%20last,overwrite%20the%20scroll%20position.)
 	lda #$00
@@ -60,6 +60,8 @@
 	ldx #NMI_SIG_CLEAR
 	stx var_nmi_ready
 	jmp end
+	
+;===================================================================================================
 
 end:
 	; pop registers
