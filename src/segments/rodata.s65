@@ -12,16 +12,13 @@ menu:
     .byte NEWLINE
     .byte NEWLINE
     .byte NEWLINE
-    ; .byte BIG_TEXT, "            NESLIDES            "
-    .byte "            NESLIDES            "
-    .byte NEWLINE
+    .byte BIG_TEXT, "       NESLIDES", NEWLINE
     .byte NEWLINE
     .byte NEWLINE
     .byte NEWLINE
     .byte NEWLINE
     .byte NEWLINE
     .byte "          PLAY SELECT           "
-    .byte NEWLINE
     .byte NEWLINE
     .byte NEWLINE
     .byte "            FUN MODE            "
@@ -38,6 +35,14 @@ menu:
     .byte NEXT_SLIDE
 
 slides:
+    .byte "ACCORDING TO ALL KNOWN LAWS", NEWLINE
+    .byte "OF AVIATION, A BEE SHOULD NOT", NEWLINE
+    .byte "BE ABLE TO FLY.", NEWLINE
+    .byte BIG_TEXT, "  TESTING  ", NEWLINE
+    .byte BIG_TEXT, "  BIG TEXT  ", NEWLINE
+    .byte "            SUGMA          "
+    .byte BIG_TEXT, "SUGMA", NEWLINE
+    .byte NEXT_SLIDE
     .byte "ACCORDING TO ALL KNOWN LAWS", NEWLINE
     .byte "OF AVIATION, A BEE SHOULD NOT", NEWLINE
     .byte "BE ABLE TO FLY. ITS WINGS ARE", NEWLINE

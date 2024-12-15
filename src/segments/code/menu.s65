@@ -14,6 +14,9 @@ text_loop:
 	lda (temp_00_ptr),y                	; Load the character
 	iny                                	; Increment the character index
 
+	cmp #BIG_TEXT						; Check for BIG_TEXT
+	beq big_text
+
 	cmp #NEWLINE						; Check for NEWLINE
 	beq prepare_newline
 
@@ -26,6 +29,10 @@ text_loop:
 	cpx #MAX_SLIDE_COLUMNS				; If the current row has reached MAX_SLIDE_COLUMNS, go to the next row
 	beq go_to_next_row					
 
+	jmp text_loop						; Go to the next character
+
+big_text:
+	jsr write_big_text
 	jmp text_loop						; Go to the next character
 
 ; Prepare for the NEWLINE by loading a space into the accumulator
@@ -67,4 +74,21 @@ end_slide:
 	bne @loop
 @return:
 	rts									; return
+.endproc
+
+;===================================================================================================
+; Fill in the rest of the line for the menu
+;===================================================================================================
+.proc fill_new_line_menu
+	lda #0
+@begin:
+
+	sta PPU_DATA
+	inx                                	; Increment the nametable column index
+
+	cpx #MAX_SLIDE_COLUMNS				; If the current row has not reached MAX_SLIDE_COLUMNS, loop
+	bne @begin
+
+@return:
+	rts
 .endproc
