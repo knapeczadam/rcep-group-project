@@ -51,7 +51,7 @@ clear_ram:                             ; Clear the RAM (cannot be a subroutine a
 	sta var_player_info
 
 @init_gamestate:
-	lda #0
+	lda #GAME_STATE::MENU
 	sta var_gamestate					; Setting game state to MENU
 
     jsr clear_oam                      ; Clear the local OAM

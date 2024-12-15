@@ -14,3 +14,8 @@ MAX_SLIDE_ROWS      = 26
 FIRE_RATE           = 20
 WALK_SPEED          = 8                  ; 8-bit speed value to control the animation speed, must be power of 2
 CIGAR_SPEED         = 32                 ; 8-bit speed value to control the animation speed, must be power of 2
+
+.enum GAME_STATE
+    MENU   = 0
+    SLIDES = 1
+.endenum

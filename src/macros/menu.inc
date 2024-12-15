@@ -27,7 +27,7 @@
     sta var_bools
 
 @change_game_state:
-    lda #1  
+    lda #GAME_STATE::SLIDES              ; change state  
     sta var_gamestate                   ; Set gamestate to slide
 
 ; Load the first slide
