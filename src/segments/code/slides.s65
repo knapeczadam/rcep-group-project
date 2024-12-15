@@ -1,4 +1,3 @@
-
 ;===================================================================================================
 ; Loads a slide from the base address stored in temp_00_ptr
 ;===================================================================================================
@@ -76,6 +75,9 @@ text_loop:
 	lda (temp_00_ptr),y                	; Load the character
 	iny                                	; Increment the character index
 @write_to_ppu:
+	; cmp #BIG_TEXT						; Check for BIG_TEXT
+	; beq big_text
+
 	cmp #NEWLINE						; Check for NEWLINE
 	beq prepare_newline
 
@@ -89,6 +91,9 @@ text_loop:
 	beq go_to_next_row					
 
 	jmp text_loop						; Go to the next character
+
+; big_text:
+; 	jsr write_big_text					; Write the big text to the nametable
 
 ; Prepare for the NEWLINE by loading a space into the accumulator
 prepare_newline:
@@ -501,6 +506,30 @@ end_slide:
 	rts
 .endproc
 
+;===================================================================================================
+; Writes two lines of big text to the nametable
+;===================================================================================================
+.proc write_big_text
+	iny
+@text_loop:
+	lda (temp_00_ptr),y                	; Load the character
+	iny                                	; Increment the character index
+
+@write_to_ppu:
+	; cmp #NEWLINE						; Check for NEWLINE
+	; beq prepare_newline
+
+	; cmp #NEXT_SLIDE					 	; Check for NEXT_SLIDE
+	; beq prepare_next_slide
+
+	sta PPU_DATA						; Write the character to the nametable
+	inx                                	; Increment the nametable column index
+
+	; cpx #MAX_SLIDE_COLUMNS + 1				; If the current row has reached MAX_SLIDE_COLUMNS, go to the next row
+	; beq go_to_next_row					
+
+	jmp @text_loop	
+.endproc
 
 .proc transition_test
 	lda var_bools

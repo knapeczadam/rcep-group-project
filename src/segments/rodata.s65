@@ -12,6 +12,7 @@ menu:
     .byte NEWLINE
     .byte NEWLINE
     .byte NEWLINE
+    ; .byte BIG_TEXT, "            NESLIDES            "
     .byte "            NESLIDES            "
     .byte NEWLINE
     .byte NEWLINE
