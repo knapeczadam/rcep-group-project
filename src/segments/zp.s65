@@ -51,7 +51,7 @@ var_bullets_arr:            .res 6 ; we can shoot up to 6 bullets
 ; |||||||+- CanShootBullet?
 ; ||||||+-- FunMode?
 ; |||||+--- IsSlideOver?
-; ||||+----
+; ||||+---- CanPlayerMove?
 ; |||+-----
 ; ||+------ 
 ; |+------- 

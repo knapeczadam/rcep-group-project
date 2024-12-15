@@ -28,6 +28,8 @@
     sta @player_bottom_left_y           ; Set the bottom sprites to y + 8   
     sta @player_bottom_right_y
 
+    jsr check_change_slide
+
 @return:
     rts                                 ; return
 .endproc
@@ -48,5 +50,55 @@
 
 .proc animate_cigar
     TIMED_FLIP_FLOP CIGAR_LEFT, CIGAR_RIGHT, CIGAR_SPEED
+    rts
+.endproc
+
+;===================================================================================================
+; Check if the player is within the door
+;===================================================================================================
+.proc check_change_slide
+; First right door
+    lda var_player_x
+    ; sec
+    ; sbc #240 
+    ; bmi @continue ; if x < 240  ; this does not work because 0 - 240 is smaller than (-128) which results in a positive number. The more you know
+    cmp #240      ; Compare A with 240
+    bcc @continue ; Branch if A < 240 (Carry = 0)
+
+    lda var_player_y
+    sec
+    sbc #112
+    bmi @continue ; if y < 112
+
+    sec
+    sbc #128
+    bpl @continue   ; if y >= 128
+
+    ;we are in the door trigger
+    lda #24
+    sta var_player_x
+    LOAD_NEXT_SLIDE
+
+@continue:
+; Now The left door
+    lda var_player_x
+    cmp #8
+    bcs @return
+
+    lda var_player_y
+    sec
+    sbc #112
+    bmi @return ; if y < 112
+
+    sec
+    sbc #128
+    bpl @return   ; if y >= 128
+
+    ;we are in the door trigger
+    lda #216
+    sta var_player_x
+    LOAD_PREVIOUS_SLIDE
+
+@return:
     rts
 .endproc
