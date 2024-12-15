@@ -31,7 +31,7 @@
     sta var_gamestate                   ; Set gamestate to slide
 
 ; Load the first slide
-    STORE_ADDRESS slides, slide_base_adresses
+    TRANSFER_ADDRESS slides, slide_base_adresses
 	jsr load_slide
 	inc loaded_slides_count
 	lda temp_00_ptr

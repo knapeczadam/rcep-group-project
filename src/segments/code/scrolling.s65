@@ -8,7 +8,7 @@
 	@max_char     = 26                 ; Max characters per line
 	@max_line     = 26                 ; Max lines per slide
 
-	STORE_ADDRESS slides, @current_address ; Pointer to store slide start addresses
+	TRANSFER_ADDRESS slides, @current_address ; Pointer to store slide start addresses
 
 	lda #0
 	tax                                ; x = 0, outer loop counter

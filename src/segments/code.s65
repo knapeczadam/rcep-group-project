@@ -23,7 +23,7 @@
 
 .proc main
     ; Load the menu
-    STORE_ADDRESS menu, slide_base_adresses
+    TRANSFER_ADDRESS menu, slide_base_adresses
 	jsr load_menu
 
 main_loop:

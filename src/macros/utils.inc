@@ -31,19 +31,18 @@
 .endmacro
 
 ;===================================================================================================
-; Stores a 16-bit address (in) into another 16-bit address (out) by handling low and high bytes.
-; First, the low byte is stored, then the high byte is stored.
+; Transfers a 16-bit address from src_addr to dest_addr.
 ;---------------------------------------------------------------------------------------------------
-; in  : 16-bit address
-; out : 16-bit address
+; src_addr : The 16-bit source address to be transferred.
+; dst_addr : The 16-bit destination where the address is stored.
 ;---------------------------------------------------------------------------------------------------
 ; Affected registers: A
 ;===================================================================================================
-.macro STORE_ADDRESS in, out
-    lda #.lobyte(in)
-    sta out
-    lda #.hibyte(in)
-    sta out + 1
+.macro TRANSFER_ADDRESS src_addr, dest_addr
+    lda #.lobyte(src_addr)
+    sta dest_addr
+    lda #.hibyte(src_addr)
+    sta dest_addr + 1
 .endmacro
 
 ;===================================================================================================
@@ -54,13 +53,26 @@
 ; Affected registers: A
 ;===================================================================================================
 .macro INCREMENT_VALUE address
+    ADD_VALUE address, 1
+.endmacro
+
+;===================================================================================================
+; Adds an 8-bit value to a 16-bit address while handling carry propagation. 
+;---------------------------------------------------------------------------------------------------
+; address : The 16-bit address where the addition operation is performed.
+; value   : The 8-bit value to be added to the contents of the 16-bit target address.
+;---------------------------------------------------------------------------------------------------
+; Affected registers: A
+;===================================================================================================
+.macro ADD_VALUE address, value
 .local @end_increment_value
-    inc address
+    clc
     lda address
-    cmp #0
-    bne @end_increment_value
-    inc address + 1
-@end_increment_value:
+    adc #value
+    sta address
+    lda address + 1
+    adc #0
+    sta address + 1
 .endmacro
 
 ;===================================================================================================

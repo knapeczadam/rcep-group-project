@@ -132,7 +132,7 @@ loop:
 .endproc
 
 .proc copy_chr_tiles
-	STORE_ADDRESS tiles_chr, temp_00_ptr ; load the source address into a pointer in zero page
+	TRANSFER_ADDRESS tiles_chr, temp_00_ptr ; load the source address into a pointer in zero page
 
     SET_PPU_ADDRESS PT1_ADDRESS
 
