@@ -42,7 +42,7 @@ clear_ram:                             ; Clear the RAM (cannot be a subroutine a
 
 @init_bools:
 	lda var_bools
-	ora #%00100011                     ; Setting the boolean for firing to true by default bit 0/ Setting fun mode for controls bit 1
+	ora #%01100011                     ; Setting the boolean for firing to true by default bit 0/ Setting fun mode for controls bit 1
 	sta var_bools	
 
 @init_player_info:
@@ -53,6 +53,10 @@ clear_ram:                             ; Clear the RAM (cannot be a subroutine a
 @init_gamestate:
 	lda #GAME_STATE::MENU
 	sta var_gamestate					; Setting game state to MENU
+
+@init_blink_text:
+	lda #0
+	sta var_blinking_text_count			; Setting the blinking text count to 0
 
     jsr clear_oam                      ; Clear the local OAM
 
