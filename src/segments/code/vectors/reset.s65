@@ -73,7 +73,7 @@ clear_ram:                             	; Clear the RAM (cannot be a subroutine 
     SELECT_SONG SONG_1                 	; Set the default song and FX
     SELECT_FX FX_1
 
-    lda #%10000000
+    lda #%10001000
     sta PPU_CONTROL                    	; Enable VBlank NMIs
 
 	jmp main

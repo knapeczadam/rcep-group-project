@@ -19,7 +19,7 @@ player_data:
 .byte $F0,  $02,  %01000000,  $08      ; body right
 
 text_arrow:
-.byte $87,  $11,  %00000001,  $45
+.byte $87,  $00,  %00000001,  $45
 
 bullet_data:
 .byte $F0,  $03,  %00000001,  $50      ; Horizontal bullet
