@@ -386,7 +386,7 @@ label:
 	pla									; Load X from the stack
 	tax
 
-	jsr clear_background_tile			; Check if the background tile is empty or not, if not delete it and mark bullet as collided
+	jsr clear_background_tile			; Check if the background tile can be collided with
 
 	jmp label							; Jump back to loop the rest
 done:
@@ -394,18 +394,32 @@ done:
 .endproc
 
 ;===================================================================================================
-; Subroutine to clear the background tile the bullet collided with.
+; Subroutine to check and clear the background tile the bullet collided with.
 ;===================================================================================================
 .proc clear_background_tile
 ; Define the target nametable address
 	SET_PPU_VRAM_ADRESS temp_00_ptr
 
+
 	lda PPU_DATA						; Load the tile
 	lda PPU_DATA						; Load it again, I think because each tile is 2bytes and we need to check the second byte. regardless it would often load 0 if I load it only once
 	and #$FF							; Check if the Tile is empty 
 	beq :+								; If it is, do nothing so jump to end
-	and #$DF							; Check if the Tile is a Space (FF - 10)
+	and #$DF							; Check if the Tile is a Space (FF - 20) ;
 	beq :+								; If it is, do nothing so jump to end
+	@border_tile	= temp_00
+	ldy #$FB
+	sty temp_00
+;loop to skip over border tiles
+	ldy #5
+@loop:
+	and temp_00
+	beq :+
+	dec temp_00
+	dey
+	bne @loop
+
+
 	lda var_bullets_arr, x				; Load the value at var_bullets_arr, x
     ora #%10000000                      ; Mark bullet as collided
 	sta var_bullets_arr, x				; 
@@ -414,7 +428,7 @@ done:
 
 	lda #$00							; 
 	sta PPU_DATA						; Delete the background tile that was collided
-	:
+:
 
 	rts									; return
 .endproc
