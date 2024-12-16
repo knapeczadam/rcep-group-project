@@ -1,0 +1,25 @@
+;===================================================================================================
+; Sprite Attribute Byte:
+;-----------------------
+; 76543210
+; |||   ||
+; |||   ++- Color Palette of sprite. Choose which set of 4 from the 16 colors to use
+; |||
+; ||+------ Priority (0: in front of background; 1: behind background)
+; |+------- Flip sprite horizontally
+; +-------- Flip sprite vertically
+;===================================================================================================
+
+;      Y   tile#   attribs     X
+player_data:
+.byte $F0,  $03,  %00000001,  $08      ; cigar
+.byte $F0,  $01,  %00000000,  $00      ; head left
+.byte $F0,  $01,  %01000000,  $08      ; head right
+.byte $F0,  $02,  %00000000,  $00      ; body left
+.byte $F0,  $02,  %01000000,  $08      ; body right
+
+text_arrow:
+.byte $87,  $11,  %00000001,  $45
+
+bullet_data:
+.byte $F0,  $03,  %00000001,  $50      ; Horizontal bullet

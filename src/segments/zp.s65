@@ -21,6 +21,19 @@ var_current_bg_state:       .res 1
 var_current_bg_color:       .res 1
 var_elapsed_sec:            .res 1
 var_elapsed_min:            .res 1
+var_slide_count:            .res 1
+var_slide_addresses:        .res 20    ; 10 slides * 2 bytes
+var_game_loop_count:        .res 1
+var_nmi_count:              .res 1
+var_blinking_text_count:    .res 1
+
+var_test:                   .res 1
+; var_gamestate Byte:
+;-----------------------
+; using game state as a sort of enmurator
+; 0 = MENU
+; 1 = SLIDES
+var_gamestate:              .res 1
 
 ; var_bullets_arr Byte:
 ;-----------------------
@@ -40,12 +53,12 @@ var_bullets_arr:            .res 6 ; we can shoot up to 6 bullets
 ; 76543210
 ; ||||||||
 ; |||||||+- CanShootBullet?
-; ||||||+-- UsePlayerMovement?
+; ||||||+-- FunMode?
 ; |||||+--- IsSlideOver?
-; ||||+----
-; |||+-----
-; ||+------ 
-; |+------- 
+; ||||+---- CanPlayerMove?
+; |||+----- IsDoingTransition?
+; ||+------ UseRLECompression?
+; |+------- IsTextDisplayed?
 ; +--------
 var_bools:                  .res 1
 
@@ -54,8 +67,8 @@ var_bools:                  .res 1
 ; 76543210
 ; ||||||||
 ; ||||||++- Last direction the player was going (default to right), going clock wise starting at the top or 12 o'clock we have 00 == UP / 01 == RIGHT / 10 == DOWN / 11 == LEFT
-; |||||+--- Bool to check if should use player direction for bullets or not
-; ||||+----
+; |||||+--- 
+; ||||+---- IsEnabled?
 ; |||+-----
 ; ||+------ 
 ; |+------- 
@@ -70,4 +83,5 @@ temp_00:                    .res 1
 temp_01:                    .res 1
 temp_02:                    .res 1
 temp_03:                    .res 1
+temp_04:                    .res 1
 temp_64_arr:                .res 64

@@ -1,4 +1,3 @@
-
 ;===================================================================================================
 ; Loads a slide from the base address stored in temp_00_ptr
 ;===================================================================================================
@@ -22,6 +21,21 @@ text_loop:
 	sec									;
 	sbc #@padding						; Remove 3 from X
 	bpl @check_right_padding			; If it's positive we are not within the padding
+
+	lda var_bools
+	and #%00000010
+	beq :+
+	
+	jsr build_left_door
+
+	cmp #$02							; If not on door location make the border instead
+	beq :+
+
+	cpx #MAX_SLIDE_COLUMNS				; If the current row has reached MAX_SLIDE_COLUMNS, go to the next row
+	beq go_to_next_row					
+
+	jmp text_loop						; Go to the next character
+:
 	lda #0								; Load $00
 	cpx #@border_start					; Check if X is the border
 	bne @write_to_ppu					; If it's not we want to load tile 0
@@ -35,17 +49,35 @@ text_loop:
 	sec									;
 	sbc #@padding_right 				; Remove (MAX_COL (32) - PADDING) => 32 - padding
 	bmi @load_text						; if negative we are not in the right padding zone
+
+	lda var_bools
+	and #%00000010
+	beq @continue
+	
+	jsr build_right_door				; Build right door
+
+	cmp #$02							; If not on door location make the border instead
+	beq @continue
+
+	cpx #MAX_SLIDE_COLUMNS				; If the current row has reached MAX_SLIDE_COLUMNS, go to the next row
+	beq go_to_next_row					
+
+	jmp text_loop						; Go to the next character
+
+@continue:
 	lda #0								; 
 	cpx #@padding_right					; Check if we are on the border tile 
 	bne @write_to_ppu					; If not we write #$00
 	lda #@border_tile_vert				; Otherwise load the border
-
 	jmp	@write_to_ppu					; Go to write to ppu
 
 @load_text:
 	lda (temp_00_ptr),y                	; Load the character
 	iny                                	; Increment the character index
 @write_to_ppu:
+	cmp #BIG_TEXT						; Check for BIG_TEXT
+	beq big_text
+
 	cmp #NEWLINE						; Check for NEWLINE
 	beq prepare_newline
 
@@ -60,6 +92,9 @@ text_loop:
 
 	jmp text_loop						; Go to the next character
 
+big_text:
+	jsr write_big_text					; Write the big text to the nametable
+	jmp text_loop						; Go to the next character
 ; Prepare for the NEWLINE by loading a space into the accumulator
 prepare_newline:
 	jsr fill_new_line_ending			;
@@ -134,6 +169,144 @@ end_slide:
 .endproc
 
 ;===================================================================================================
+; Builds the right door
+;===================================================================================================
+.proc build_right_door					; I'm tired of writing comments nobody reads them i know what this does ask me or figure it out it's simple
+	jmp @begin
+@return:
+	lda #$02
+	rts
+@begin:
+	@padding 			= 3
+	@padding_right 		= MAX_SLIDE_COLUMNS - @padding
+
+	lda temp_00
+	cmp #15								
+	beq @door1
+
+	cmp #14
+	beq @door2
+
+	cmp #13
+	beq @door3
+
+	cmp #12
+	beq @door4
+
+	jmp @return
+@door1:
+	lda #$0B
+	cpx #@padding_right
+	beq @write_to_ppu
+	lda #$0C
+	cpx #@padding_right + 1
+	beq @write_to_ppu
+	lda #$0D
+	jmp	@write_to_ppu					; Go to write to ppu
+@door2:
+	lda #$0E
+	cpx #@padding_right
+	beq @write_to_ppu
+	lda #$00
+	cpx #@padding_right + 1
+	beq @write_to_ppu
+	lda #$0F
+	jmp	@write_to_ppu					; Go to write to ppu
+@door3:
+	lda #$1C
+	cpx #@padding_right
+	beq @write_to_ppu
+	lda #$00
+	cpx #@padding_right + 1
+	beq @write_to_ppu
+	lda #$1D
+	jmp	@write_to_ppu					; Go to write to ppu
+@door4:
+	lda #$1E
+	cpx #@padding_right
+	beq @write_to_ppu
+	lda #$00
+	cpx #@padding_right + 1
+	beq @write_to_ppu
+	lda #$1F
+
+@write_to_ppu:
+	sta PPU_DATA						; Write the character to the nametable
+	inx                                	; Increment the nametable column index
+
+	rts
+.endproc
+
+;===================================================================================================
+; Builds the left door
+;===================================================================================================
+.proc build_left_door					; I'm tired of writing comments nobody reads them i know what this does ask me or figure it out it's simple
+	jmp @begin
+@return:
+	lda #$02
+	rts
+@begin:
+	@padding 			= 3
+	@border_start 		= @padding - 1
+
+	lda temp_00
+	cmp #15								
+	beq @door1
+
+	cmp #14
+	beq @door2
+
+	cmp #13
+	beq @door3
+
+	cmp #12
+	beq @door4
+
+	jmp @return
+@door1:
+	lda #$F2
+	cpx #@border_start
+	beq @write_to_ppu
+	lda #$F1
+	cpx #@border_start - 1
+	beq @write_to_ppu
+	lda #$F0
+	jmp	@write_to_ppu					; Go to write to ppu
+@door2:
+	lda #$F4
+	cpx #@border_start
+	beq @write_to_ppu
+	lda #$00
+	cpx #@border_start - 1
+	beq @write_to_ppu
+	lda #$F3
+	jmp	@write_to_ppu					; Go to write to ppu
+@door3:
+	lda #$F6
+	cpx #@border_start
+	beq @write_to_ppu
+	lda #$00
+	cpx #@border_start - 1
+	beq @write_to_ppu
+	lda #$F5
+	jmp	@write_to_ppu					; Go to write to ppu
+@door4:
+	lda #$F8
+	cpx #@border_start
+	beq @write_to_ppu
+	lda #$00
+	cpx #@border_start - 1
+	beq @write_to_ppu
+	lda #$F7
+
+@write_to_ppu:
+	sta PPU_DATA						; Write the character to the nametable
+	inx                                	; Increment the nametable column index
+
+	rts
+.endproc
+
+;===================================================================================================
 ; Initialize the nametable and pointer to the text for current slide
 ;===================================================================================================
 .proc initialize_slide_ptr
@@ -168,6 +341,40 @@ end_slide:
 
 	ldx #0								; Reset X
 @loop:
+	lda var_bools
+	and #%00000010
+	beq @continue
+
+	txa									; Put X in A
+	sec									;
+	sbc #@padding						; Remove 3 from X
+	bpl :+								; If it's positive we are not within the padding
+
+	jsr build_left_door
+
+	cmp #$02							; If not on door location make the border instead
+	beq :+
+
+	cpx #MAX_SLIDE_COLUMNS				; If the current row has reached MAX_SLIDE_COLUMNS, go to the next row
+	beq @return					
+
+	jmp @loop							; Go to the next character
+:
+	txa									; Put X in A
+	sec									;
+	sbc #@padding_right 				; Remove (MAX_COL (32) - PADDING) => 32 - padding
+	bmi @continue						; if negative we are not in the right padding zone
+
+	jsr build_right_door
+
+	cmp #$02
+	beq @continue
+
+	cpx #MAX_SLIDE_COLUMNS				; If the current row has reached MAX_SLIDE_COLUMNS, go to the next row
+	beq @return					
+
+	jmp @loop							; Go to the next character
+@continue:
 	lda #0								; Reset to Background
 
 	cpx #@border_start					; If left border
@@ -202,8 +409,28 @@ end_slide:
 	@border_tile_vert 	= $0A
 
 @begin:
-; Same as before, check if are on in the padding or not
+; Same as before, check if we are on in the padding or not
+	lda var_bools
+	and #%00000010
+	beq @continue
+
+	txa									; Put X in A
+	sec									;
+	sbc #@padding_right 				; Remove (MAX_COL (32) - PADDING) => 32 - padding
+	bmi @continue						; if negative we are not in the right padding zone
+
+	jsr build_right_door
+
+	cmp #$02
+	beq @continue
+
+	cpx #MAX_SLIDE_COLUMNS				; If the current row has reached MAX_SLIDE_COLUMNS, go to the next row
+	beq @return					
+
+	jmp @begin						; Go to the next character
+@continue:
 	lda #0
+
 	cpx #@padding_right
 	bne @write_to_ppu
 	lda #@border_tile_vert
@@ -274,6 +501,188 @@ end_slide:
 	lda @right_corner
 
 	jmp @create_border
+
+@return:
+	rts
+.endproc
+
+;===================================================================================================
+; Writes two lines of big text to the nametable
+;===================================================================================================
+; Potential bugs to test:
+; -> if we end line on a space
+; -> if we end line on a big text and the following is not an NEWLINE
+; -> if the END_SLIDE is on a big text line it will not read it?
+; BIG TEXT DOES NOT SUPPORT WARPING TO NEXT LINE
+.proc write_big_text 
+	lda #0
+	sta temp_03							; using temp_03 as a flag to know if we are on the first or second line of the big text	
+text_loop:
+	lda var_gamestate							; Check if we are on the first or second line
+	beq @load_text
+	
+	lda temp_03
+	beq @load_text
+
+	@padding 			= 3
+	@padding_right 		= MAX_SLIDE_COLUMNS - @padding
+	@border_start 		= @padding - 1
+	@border_tile_vert 	= $0A
+; First check if we are within the first 3 tiles, if so change the background accordingly
+	txa									; Put X in A
+	sec									;
+	sbc #@padding						; Remove 3 from X
+	bpl @load_text			; If it's positive we are not within the padding
+
+	lda var_bools
+	and #%00000010
+	beq :+
+	
+	jsr build_left_door
+
+	cmp #$02							; If not on door location make the border instead
+	beq :+
+
+	; cpx #MAX_SLIDE_COLUMNS +2 				; If the current row has reached MAX_SLIDE_COLUMNS, go to the next row
+	; beq prepare_newline			
+	jmp text_loop						; Go to the next character
+:
+	lda #0								; Load $00
+	cpx #@border_start					; Check if X is the border
+	bne @space					; If it's not we want to load tile 0
+	lda #@border_tile_vert				; If it is load tile 10
+	jmp @space
+
+@load_text:
+; #$60 + (tile value - #$41) x 4, equation used for mapping the big text
+	lda (temp_00_ptr),y                	; Load the character
+
+	cmp #NEWLINE						; Check for NEWLINE
+	beq prepare_newline
+
+	cmp #BIG_TEXT						; Check for BIG_TEXT
+	bne :+
+	
+	iny									; ignore it
+	jmp text_loop
+:
+
+	cmp #$20							; Check for space
+	bne :+								; If it is write it and go to the next character
+	iny										
+@space:
+	sta PPU_DATA						; Write the character to the nametable
+	inx
+	cpx #MAX_SLIDE_COLUMNS 				; If the current row has reached MAX_SLIDE_COLUMNS, go to the next row
+	beq prepare_newline	
+
+	jmp text_loop
+:
+	; We are putting a big letter in the nametable so map it using the equation
+	sec            						; Ensure carry is set for subtraction
+  	sbc #$41         					; Subtract #$41 from the tile value
+  	asl              					; Multiply by 2 (shift left once)
+  	asl              					; Multiply by 4 (shift left again)
+  	clc              					; Clear carry for addition
+  	adc #$60         					; Add #$60 to the result
+	
+	iny                                	; Increment the character index
+	pha									; Save the character to the stack
+	lda temp_03							; Check if we are on the first or second line
+	cmp #1								
+	bne @first_line						
+	
+	pla									; If we are not on the first line, load the character from the stack
+	clc									; Clear carry
+	adc #1								; Add 1 to the character
+	jmp @write_to_ppu					; Go to write to ppu
+@first_line:
+	pla									; If we are on the first line, load the character from the stack
+@write_to_ppu:
+
+	; cmp #NEXT_SLIDE					 	; Check for NEXT_SLIDE
+	; beq prepare_next_slide
+
+	sta PPU_DATA						; Write the character to the nametable
+	inx                                	; Increment the nametable column index
+
+	clc									; Clear carry
+	adc #2								; Add 2 to the character because that's how I mapped it (I know i'm goated)
+
+	sta PPU_DATA						; Write the character to the nametable
+	inx                                	; Increment the nametable column index
+
+	cpx #MAX_SLIDE_COLUMNS				; If the current row has reached MAX_SLIDE_COLUMNS, go to the next row
+	bne text_loop					
+
+prepare_newline:
+	; Check if we are doing big text in menu or in slide
+	lda var_gamestate
+	beq :+
+	jsr fill_new_line_ending			; If we are in a slide, fill the rest of the line with background
+	jmp @continue
+:
+	jsr fill_new_line_menu					;
+@continue:
+
+	lda temp_03							; Check if we are on the first or second line
+	cmp #1
+	beq @new_line						; If we are on the second line, go to the next line
+
+	ldx temp_00                        	; Load the amount of available rows left into X
+	dex
+	stx temp_00                        	; Store the amount of available rows left in temp_00, as we have overwritten it in the addition above
+	
+	lda #1								; If we are on the first line, set temp_03 to 1 to tell we are on the second line
+	sta temp_03
+	ldx #0                             	; Reset the nametable column index
+	ldy #0                             	; Reset the character index
+	jmp text_loop						; Restart the loop for the second line
+
+@new_line:
+    POINT_TO_NEXT_LINE		
+	
+	dex                                	; Decrement the amount of available rows left
+	; beq end_slide                      	; End the slide if no available rows are left with temp_00_ptr now pointing to the next slide
+
+	stx temp_00                        	; Store the amount of available rows left in temp_00, as we have overwritten it in the addition above
+
+	ldx #0                             	; Reset the nametable column index
+	ldy #0                             	; Reset the character index
+	
+@return:
+	rts
+.endproc
+
+.proc transition_test
+	lda var_bools
+	and #%00010000
+	beq @return
+
+	lda var_elapsed_sec   ; Load elapsed_sec into A
+	sec                   ; Set the Carry flag to 1
+	sbc var_test          ; Subtract test_var from A (A = A - test_var - (1 - C))
+	cmp #5                ; Compare A with 3
+	bcc @return            ; Branch if A < 3 (Carry = 0)
+
+	jsr load_slide
+
+    lda current_slide_index
+	cmp #MAX_SLIDE_INDEX
+    beq @return
+
+	ldx current_slide_index
+    inx
+	inx
+	lda temp_00_ptr
+	sta slide_base_adresses,x
+	lda temp_00_ptr+1
+	sta slide_base_adresses+1, x
+
+	lda var_bools
+	and #%11101111
+	sta var_bools
+	beq @return
 
 @return:
 	rts

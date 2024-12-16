@@ -1,3 +1,6 @@
+;===================================================================================================
+; Get the X offset in oam for the target bullet.
+;===================================================================================================
 .macro MULTIPLY_X_BY_4 ;; TODO: rename this to GET_BULLET_SPRITE_ADDRESS (based on x)
     lda #$20                            ; Clear A (set start to second OAM line)
 	cpy #00                             ; if Y == 0
@@ -12,22 +15,15 @@ return:
     tax                                 ; Store A back into X so that X = X * 4
 .endmacro
 
+;===================================================================================================
+; Shoots a bullet duh.
+;===================================================================================================
 .macro SHOOT_BULLET
 ; Check if we can shoot first, then shoot
     lda var_bools                       ; Load bools
     and #%00000001                      ; Check canShoot
     beq end                             ; if not return
 ; Don't reset shoot timer yet we don't know if we have an available bullet yet
-
-    @player_y_pos = oam + 16
-    @player_x_pos = oam + 19
-
-    lda @player_y_pos                  ; Get Y position of the player sprite
-    sta temp_00                        ; Store it
-    lda @player_x_pos                  ; Get X position of the player sprite
-    clc 
-    adc #$08                           ; Add 8 to X (don't want to spawn on the player)
-    sta temp_01                        ; Store it
 
 ; Loop through the bullets
     ldx #$FF                            ; Reset X
@@ -47,6 +43,8 @@ return:
     sta var_bools
 
 ; Set direction of the bullet and activate it
+    jsr load_bullet_position
+
     lda var_player_info                 ; Load player movement
     and #%00000011                      ; Keep only movement info
     ora #%00000100                      ; FLip bit 2 to activate bullet

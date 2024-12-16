@@ -36,6 +36,13 @@
 	inc current_slide_index
 	inc current_slide_index
 
+; animation test
+	; lda var_elapsed_sec
+	; sta var_test
+	; lda var_bools
+	; ora #%00010000
+	; sta var_bools
+	
     jsr load_slide
 
     lda current_slide_index
@@ -64,6 +71,15 @@
     dec current_slide_index
     jsr load_slide
 @end_load_previous_slide:
+.endmacro
+
+;===================================================================================================
+; Reload Current Slide
+;===================================================================================================
+.macro RELOAD_SLIDE
+    lda current_slide_index
+
+    jsr load_slide
 .endmacro
 
 ;===================================================================================================

@@ -163,7 +163,7 @@ third_check_d_flag_clear:
 ; Set the target PPU VRAM address, we currently calculate the mapping as such lower case stay the same so uppcase letter are like so: #$60 + (tile value - #$41) x 4
 ; That way we start above the lower case text and account for the the 4tiles they each take
 ;*********************************************************************************************
-; NEED TO ADD A CHECK FOR NON-ALPHABET TILES, THIS MAPPER ONLY COMPATIBLE FOR UPSCALED LETTERS
+; NEED TO ADD A CHECK FOR NON-ALPHABET TILES, THIS MAPPER ONLY COMPATIBLE FOR UPSCALED LETTERS ;idk who wrote this but no, it will work for some ascii and not others
 ;*********************************************************************************************
   lda temp_03                           ; Load the original value of the tile
   sec                                   ; Ensure carry is set for subtraction
@@ -180,8 +180,8 @@ third_check_d_flag_clear:
   lsr                                   ; Repeat
   lsr                                   ; Repeat
   lsr                                   ; Repeat
-  ora #$10                              ; Combine with #$10 to write to the high byte of PPU address
-  sta PPU_ADDRESS                 ; Write high byte to PPU address register
+  ; ora #$10                              ; Combine with #$10 to write to the high byte of PPU address ; the #$10 is just to point to the second pattern table cuh
+  sta PPU_ADDRESS                       ; Write high byte to PPU address register
 
   tya                                   ; Reload the full result from Y
   and #$0F                              ; Isolate the low nibble
@@ -189,13 +189,13 @@ third_check_d_flag_clear:
   asl                                   ; Repeat
   asl                                   ; Repeat
   asl                                   ; Repeat
-  sta PPU_ADDRESS                 ; Write low byte to PPU address register
+  sta PPU_ADDRESS                       ; Write low byte to PPU address register
 
   ldx #$40                              ; How many bits we need to transfer from ZP to VRAM
   ldy #$00                              ; Offset
 loop:  
   lda temp_64_arr,y                     ; Load the upscaled info from ZP into accumulator
-  sta PPU_DATA                       ; Write it to the VRAM (this one is will automatically increment which is why the weird chunk division was done, because I don't know how to change the exact byte I want in VRAM without the automatic inrement)
+  sta PPU_DATA                          ; Write it to the VRAM (this one is will automatically increment which is why the weird chunk division was done, because I don't know how to change the exact byte I want in VRAM without the automatic inrement)
   iny                                   ; Increment offset
   dex                                   ; Decrease X
   cpx #$00                              ; Check if X == 0
@@ -210,7 +210,7 @@ loop:
   sta temp_03                           ; Store the value of the tile for mapping later
   jsr get_tile_position                 ; Jump to subroutine to Get X and Y of the tile
 
-  STORE_ADDRESS tiles_chr, temp_00_ptr  ; Load the source address of tiles_chr into a temporary pointer in zero-page
+  TRANSFER_ADDRESS tiles_chr, temp_00_ptr  ; Load the source address of tiles_chr into a temporary pointer in zero-page
 
 set_tile_row:                           ; Move the pointer to point to the correct Y location (simple for loop)
   cpx #$00                              ; if x == 0
@@ -273,7 +273,7 @@ copy_loop:
   cpx #$1A                              ; Is X = 26?
   bne :-                                ; If not loop back
 
-  jsr copy_lowercase_text               ; Copy the lower case letters to the table
+  ; jsr copy_lowercase_text               ; Copy the lower case letters to the table
 
   rts
 .endproc

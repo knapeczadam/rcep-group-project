@@ -1,17 +1,3 @@
-; Sprite Attribute Byte:
-;-----------------------
-; 76543210
-; |||   ||
-; |||   ++- Color Palette of sprite. Choose which set of 4 from the 16 colors to use
-; |||
-; ||+------ Priority (0: in front of background; 1: behind background)
-; |+------- Flip sprite horizontally
-; +-------- Flip sprite vertically
-
-bullet_data:
-;      Y   tile#   attribs     X
-.byte $F0,  $03,  %00000001,  $50           ; Horizontal bullet
-
 ;===================================================================================================
 ; Subroutine to load Bullet Sprites into OAM-RAM starting at $0200. 
 ; The function will load one sprite then loop back to load the next one until 6 bullets are loaded in OAM
@@ -168,6 +154,10 @@ multiply_loop:                              ; Else loop multiply
 ; Checks if bullet is active --> check if it collided, else --> move it
 ;===================================================================================================
 .proc update_bullets
+	lda var_bools
+	and #%00000010						; Check if we're in fun mode
+	beq done							; If not return
+	
 	jmp :+
 done:
 	rts
@@ -375,6 +365,9 @@ label:
 ; Erase the letter and mark bullet has collided.
 ;===================================================================================================
 .proc check_background_collision
+	lda var_bools
+	and #%00000010						; Check if we're in fun mode
+	beq done							; If not return
 ; Loop through every bullet, check if it's active. If so check the tile at the center 
 ; (for simplicity otherwise we can use the tip of the bullet but that requires calculating it based on the direction etc.. or use a bounding box)
 ; if the center of the sprite is in a tile that is not #$00 or whatever background color, set its colliding flag and then loop next bullet
@@ -400,7 +393,7 @@ label:
 	pla									; Load X from the stack
 	tax
 
-	jsr clear_background_tile			; Check if the background tile is empty or not, if not delete it and mark bullet as collided
+	jsr clear_background_tile			; Check if the background tile can be collided with
 
 	jmp label							; Jump back to loop the rest
 done:
@@ -408,18 +401,51 @@ done:
 .endproc
 
 ;===================================================================================================
-; Subroutine to clear the background tile the bullet collided with.
+; Subroutine to check and clear the background tile the bullet collided with.
 ;===================================================================================================
 .proc clear_background_tile
 ; Define the target nametable address
 	SET_PPU_VRAM_ADRESS temp_00_ptr
 
+
 	lda PPU_DATA						; Load the tile
 	lda PPU_DATA						; Load it again, I think because each tile is 2bytes and we need to check the second byte. regardless it would often load 0 if I load it only once
 	and #$FF							; Check if the Tile is empty 
 	beq :+								; If it is, do nothing so jump to end
-	and #$DF							; Check if the Tile is a Space (FF - 10)
+	cmp #$20							; Check if the Tile is a Space (FF - 20) ;
 	beq :+								; If it is, do nothing so jump to end
+
+;loop to skip over border tiles and doors
+	ldy #$05							; border start
+	sty temp_00
+	ldy #11
+@loop:
+	cmp temp_00
+	beq :+
+	inc temp_00
+	dey
+	bne @loop
+
+	ldy #$1C
+	sty temp_00
+	ldy #4
+@loop2:									; Could macro this but need to figure out if the beq :+ will work
+	cmp temp_00
+	beq :+
+	inc temp_00
+	dey
+	bne @loop2
+
+	ldy #$F0
+	sty temp_00
+	ldy #9
+@loop3:									; Could macro this but need to figure out if the beq :+ will work
+	cmp temp_00
+	beq :+
+	inc temp_00
+	dey
+	bne @loop3
+
 	lda var_bullets_arr, x				; Load the value at var_bullets_arr, x
     ora #%10000000                      ; Mark bullet as collided
 	sta var_bullets_arr, x				; 
@@ -428,11 +454,69 @@ done:
 
 	lda #$00							; 
 	sta PPU_DATA						; Delete the background tile that was collided
-	:
+:
 
 	rts									; return
 .endproc
 
+;===================================================================================================
+; Subroutine to position the bullet in the right place when shooting.
+;===================================================================================================
+.proc load_bullet_position
+	@player_y_pos = oam + 16
+    @player_x_pos = oam + 19
+
+    lda var_player_info                 ; Load player info
+	and #%00000011                      ; Only keep the direction
+	beq @set_up                         ; If bullet is direction up (%00000000) set up
+
+	cmp #%00000001                      ; If bullet is direction right, set right
+	beq @set_right
+
+	cmp #%00000010                      ; If bullet is direction down, set down
+	beq @set_down
+
+	cmp #%00000011                      ; If bullet is direction left, set left
+	beq @set_left
+
+@set_up:
+	lda @player_y_pos                   ; Get Y position of the player sprite
+	sec
+	sbc #$08                            ;
+	sta temp_00                         ; Store it 
+
+	lda @player_x_pos
+	sta temp_01
+
+	jmp @return
+@set_right:
+	lda @player_y_pos
+	sta temp_00
+
+	lda @player_x_pos
+	sta temp_01
+
+	jmp @return
+@set_down:
+	lda @player_y_pos
+	sta temp_00
+
+	lda @player_x_pos
+	sta temp_01
+
+	jmp @return
+@set_left:
+	lda @player_y_pos
+	sta temp_00
+
+	lda @player_x_pos
+	sec
+	sbc #$08
+	sta temp_01
+
+@return:
+	rts
+.endproc
 
 ;===================================================================================================
 ; Legacy code to reuse or throw away later.

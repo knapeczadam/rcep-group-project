@@ -1,7 +1,10 @@
 ;===================================================================================================
 ; Executes a macro if a specified button is pressed by checking the var_gamepad input state.
+;---------------------------------------------------------------------------------------------------
 ; button : 8-bit input constant found in input.inc
 ; macro  : macro to execute if the button is pressed
+;---------------------------------------------------------------------------------------------------
+; Affected registers: A
 ;===================================================================================================
 .macro ON_BUTTON_PRESS button, macro
     lda var_gamepad                     ; Load var_gamepad state 
@@ -13,8 +16,11 @@
 
 ;===================================================================================================
 ; Executes a macro if a specified button is released by checking the var_gamepad input state.
+;---------------------------------------------------------------------------------------------------
 ; button : 8-bit input constant found in input.inc
 ; macro  : macro to execute if the button is released
+;---------------------------------------------------------------------------------------------------
+; Affected registers: A
 ;===================================================================================================
 .macro ON_BUTTON_RELEASE button, macro
     lda var_gamepad_released           ; Load var_gamepad state
@@ -25,39 +31,63 @@
 .endmacro
 
 ;===================================================================================================
-; Stores a 16-bit address (in) into another 16-bit address (out) by handling low and high bytes.
-; First, the low byte is stored, then the high byte is stored.
-; in  : 16-bit address
-; out : 16-bit address
+; Transfers a 16-bit address from src_addr to dest_addr.
+;---------------------------------------------------------------------------------------------------
+; src_addr : The 16-bit source address to be transferred.
+; dst_addr : The 16-bit destination where the address is stored.
+;---------------------------------------------------------------------------------------------------
+; Affected registers: A
 ;===================================================================================================
-.macro STORE_ADDRESS in, out
-    lda #.lobyte(in)
-    sta out
-    lda #.hibyte(in)
-    sta out+1
+.macro TRANSFER_ADDRESS src_addr, dest_addr
+    lda #.lobyte(src_addr)
+    sta dest_addr
+    lda #.hibyte(src_addr)
+    sta dest_addr + 1
 .endmacro
 
 ;===================================================================================================
-; in  : 16-bit address
-; out : PPU_ADDRESS ($2006)
+; Increment a 16-bit variable at the specified address, handling carry to the high byte. 
+;---------------------------------------------------------------------------------------------------
+; address : 16-bit address of the variable to increment
+;---------------------------------------------------------------------------------------------------
+; Affected registers: A
 ;===================================================================================================
-.macro SET_PPU_VRAM_ADRESS in
-    lda in
-    sta PPU_ADDRESS
-    lda in+1
-    sta PPU_ADDRESS
+.macro INCREMENT_VALUE address
+    ADD_VALUE address, 1
+.endmacro
+
+;===================================================================================================
+; Adds an 8-bit value to a 16-bit address while handling carry propagation. 
+;---------------------------------------------------------------------------------------------------
+; address : The 16-bit address where the addition operation is performed.
+; value   : The 8-bit value to be added to the contents of the 16-bit target address.
+;---------------------------------------------------------------------------------------------------
+; Affected registers: A
+;===================================================================================================
+.macro ADD_VALUE address, value
+.local @end_increment_value
+    clc
+    lda address
+    adc #value
+    sta address
+    lda address + 1
+    adc #0
+    sta address + 1
 .endmacro
 
 ;===================================================================================================
 ; Toggles a flip-flop variable and executes macro_a if the flip-flop is 0, or macro_b if it is 1.
+;---------------------------------------------------------------------------------------------------
 ; macro_a : macro to execute if the flip-flop is 0
 ; macro_b : macro to execute if the flip-flop is 1
-;===================================================================================================
+;---------------------------------------------------------------------------------------------------
 ; Pseudo code:
 ; if flip_flop == 0
 ;     macro_a
 ; else
 ;     macro_b
+;---------------------------------------------------------------------------------------------------
+; Affected registers: A
 ;===================================================================================================
 .macro FLIP_FLOP macro_a, macro_b
     lda var_flip_flop
@@ -75,16 +105,19 @@
 
 ;===================================================================================================
 ; Toggles a flip-flop variable and executes one of two macros based on a specified frame count.
+;---------------------------------------------------------------------------------------------------
 ; macro_a : macro to execute if the flip-flop is 0
 ; macro_b : macro to execute if the flip-flop is 1
 ; frame   : 8-bit frame count to synchronize the flip-flop, must be a power of 2
-;===================================================================================================
+;---------------------------------------------------------------------------------------------------
 ; Pseudo code:
 ; if current_frame % frame == 0
 ;     if flip_flop == 0
 ;         macro_a
 ;     else
 ;         macro_b
+;---------------------------------------------------------------------------------------------------
+; Affected registers: A
 ;===================================================================================================
 .macro TIMED_FLIP_FLOP macro_a, macro_b, frame
 .local @flip_variable, @execute_macro_b, @return
@@ -107,15 +140,17 @@
 
 ;===================================================================================================
 ; Increments an 8-bit variable and resets it to 0 if it reaches a specified maximum value.
-; Pseudo code: variable = (variable + 1) % max_value
+;---------------------------------------------------------------------------------------------------
 ; variable  : 8-bit variable to increment
 ; max_value : 8-bit maximum integer value for the variable, exclusive
-;===================================================================================================
+;---------------------------------------------------------------------------------------------------
 ; Pseudo code:
 ; if variable == max_value - 1
 ;     variable = 0;
 ; else
 ;     variable = variable + 1;
+;---------------------------------------------------------------------------------------------------
+; Affected registers: A
 ;===================================================================================================
 .macro CIRCULAR_INCREMENT variable, max_value
 .local reset, store
@@ -133,14 +168,17 @@ store:
 
 ;===================================================================================================
 ; Decrements an 8-bit variable and resets it to a specified maximum value - 1 if it goes below 0.
+;---------------------------------------------------------------------------------------------------
 ; variable  : 8-bit variable to decrement
 ; max_value : 8-bit maximum integer value for the variable, exclusive
-;===================================================================================================
+;---------------------------------------------------------------------------------------------------
 ; Pseudo code:
 ; if variable == 0
 ;     variable = max_value - 1;
 ; else
 ;     variable = variable - 1;
+;---------------------------------------------------------------------------------------------------
+; Affected registers: A
 ;===================================================================================================
 .macro CIRCULAR_DECREMENT variable, max_value
 .local reset, store
@@ -158,6 +196,7 @@ store:
 
 ;===================================================================================================
 ; Loads an 8-bit value from a specified address and stores it in another address if a condition is met.
+;---------------------------------------------------------------------------------------------------
 ; from_address     : 8-bit address to load a value from
 ; value_to_compare : 8-bit integer value to compare with the loaded value
 ; to_address       : 8-bit address to store the loaded value
@@ -166,6 +205,8 @@ store:
 ; Pseudo code:
 ; if *from_address == value_to_compare
 ;     *to_address = value_to_load;
+;---------------------------------------------------------------------------------------------------
+; Affected registers: A
 ;===================================================================================================
 .macro CONDITIONAL_LOAD from_address, value_to_compare, to_address, value_to_load
     lda from_address

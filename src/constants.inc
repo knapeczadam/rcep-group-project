@@ -7,3 +7,4 @@
 .include "constants/misc.inc"
 .include "constants/nmi.inc"
 .include "constants/ppu.inc"
+.include "constants/sprites.inc"

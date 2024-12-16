@@ -19,56 +19,47 @@
 ; +--------- Vblank NMI enable (0: off, 1: on)
 
 .proc nmi
-	; Save the registers
-	pha
-	txa
-	pha
-	tya
-	pha
-	php
+;===================================================================================================
 
-	; Check whether we're ready to render, skip to end if not
-	lda var_nmi_ready
+	PUSH_REGISTERS
+	
+;===================================================================================================
+
+    inc var_nmi_count
+	lda var_nmi_ready                  ; Check whether we're ready to render, skip to end if not
 	beq end
     
 ;===================================================================================================
 
-    ; Increase the frame count and cap it at 50
-	inc var_frame_count		 			
+	inc var_frame_count                ; Increase the frame count and cap it at 50
 	inc var_frame_count_unclamped
 	jsr frame_count_cap
 
-    ; Check the background collision
-	jsr check_background_collision
+	jsr check_background_collision     ; Check the background collision
 
+	jsr update_blinking_text		   ; Update the blinking text
 ;===================================================================================================
 
 .if DEBUG
-    DEBUG_NMI
+    DEBUG_NMI							; This enforces the color palette every frame, it should be changed to only update on button press
 .endif
 
 ;===================================================================================================
     
-	; Transfer the local OAM data into the PPU
-	jsr transfer_oam
+	jsr transfer_oam                   ; Transfer the local OAM data into the PPU
 
-	; Reset the scroll (https://www.nesdev.org/wiki/PPU_scrolling#:~:text=Set%20the%20scroll%20last,overwrite%20the%20scroll%20position.)
-	lda #$00
-	sta PPU_SCROLL
-	sta PPU_SCROLL
+	RESET_SCROLL
 
 	ldx #NMI_SIG_CLEAR
 	stx var_nmi_ready
+	
 	jmp end
+	
+;===================================================================================================
 
 end:
-	; pop registers
-	plp
-	pla
-	tay
-	pla
-	tax
-	pla
+	POP_REGISTERS
+	
 	rti
 .endproc
 
@@ -138,4 +129,91 @@ end:
     sta OAM_DMA      ; Set the high byte of the local OAM's address in the OAM_DMA, effectively triggering the DMA
 
     rts
+.endproc
+
+;===================================================================================================
+; Make the "play select" text blink
+;===================================================================================================
+.proc update_blinking_text
+	lda var_bools						; Check if the text is displayed
+	and #%01000000						;
+	beq :+								; If the text is not displayed, ignore the state of the game and display it
+
+	lda var_gamestate
+	cmp #GAME_STATE::MENU
+	bne @return
+:
+	@fps = 50
+	@blinking_speed = 25
+	
+	lda var_frame_count					; Load the elapsed frames
+@check_difference:
+	sec
+	sbc var_blinking_text_count			; Subtract last time to delta time (dt - t)
+
+	bpl @positive						; If positive, continue
+	lda var_frame_count					; Reload the elapsed frames
+	clc									;
+	adc #@fps							; Add 50 frames to the elapsed frames
+	jmp @check_difference				; Redo the substraction (will be positive this time)
+
+@positive:
+	sec
+	sbc #@blinking_speed				; Number of frames to wait before updating the blinking text
+	bmi @return							; If the elapsed frames are less than blinking_speed, return
+
+	lda var_frame_count					; Load the elapsed frames
+	sta var_blinking_text_count			; Store the elapsed seconds in the blinking text count
+
+    @attr_count = 64
+	@start_index = 26
+	@end_index = 30
+
+	@color_palette_1 = 00  
+	@color_palette_3 = 170
+	
+    SET_PPU_ADDRESS NT1_ATTR           	; Set the PPU address to the attribute table of the first nametable
+    ldx #@attr_count					; 64 bytes to update
+    ldy #0								; Index for the attribute table
+
+	lda var_bools						; Check if the text should be displayed
+	and #%01000000						;
+    bne :+								; If the text should not be displayed, switch palette to black
+	lda var_bools						; 
+    ora #%01000000						; Flip the bit
+	sta var_bools						;
+	lda #@color_palette_1				; Load the default color
+
+	jmp @test
+:
+	lda var_bools
+	and #%10111111						; FLip the bit
+	sta var_bools
+	lda #@color_palette_3				; Load the black(background) color
+
+@test:									; Now write the color to the attribute table
+    cpy #@start_index                   ; Check if Y is less than start index
+    bcc @do_nothing                     ; If Y < start, do nothing ; Change this to bcs for funny effect (trust bro)
+
+    cpy #@end_index                     ; Check if Y exceeds end index
+    beq @return                        	; If Y > end, quit the loop
+
+    sta PPU_DATA                       	; Write the color to the attribute table
+
+	iny									; Increment the index
+    dex                                	; Decrement the counter
+    bne @test                          	; Continue looping if X != 0
+
+	jmp @return
+
+@do_nothing:
+	iny									; Increment the index
+	dex									; Decrement the counter
+	pha									; Save the palette
+	lda PPU_DATA						; Read the PPU data to auto increment the address
+	pla									; Restore the palette
+	jmp @test							; Continue looping
+
+@return:
+	rts
 .endproc

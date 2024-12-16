@@ -1,49 +1,8 @@
-player_data:
-;      Y   tile#   attribs     X
-.byte $51,  $03,  %00000001,  $08      ; cigar
-.byte $50,  $01,  %00000000,  $00      ; head left
-.byte $50,  $01,  %01000000,  $08      ; head right
-.byte $58,  $02,  %00000000,  $00      ; body left
-.byte $58,  $02,  %01000000,  $08      ; body right
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Subroutine to load the player into OAM-RAM
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-.proc load_player
-    ldx #0
-loop:
-    lda player_data,x                   ; We fetch bytes from player_data
-    sta oam,x                           ; We store the bytes starting at OAM address oam
-    inx                                 ; ++x
-    cpx #28
-    bne loop                            ; Loop 16 times (4 hardware sprites, 4 bytes each)
-    rts
-.endproc
-
-;===================================================================================================
-; Subroutine to handle player inputs.
-;===================================================================================================
-.proc handle_player_input
-; Handle shooting and Up/Down
-    ON_BUTTON_RELEASE PAD_A, SHOOT_BULLET
-
-    ON_BUTTON_PRESS PAD_U, MOVE_UP
-    ON_BUTTON_PRESS PAD_D, MOVE_DOWN
-
-; Check if player controls are active first then move Left/Right
-
-    lda var_bools                       ; Load bools
-    and #%00000010                      ; Check if input is fun or not
-    beq @return                         ; if not return
-
-    ON_BUTTON_PRESS PAD_L, MOVE_LEFT
-    ON_BUTTON_PRESS PAD_R, MOVE_RIGHT
-
-@return:
-    rts
-.endproc
-
 .proc update_player
+    lda var_player_info
+    and #%00001000
+    beq @return
+
     @player_bottom_left_x     = oam + 15
     @player_bottom_left_y     = oam + 12
     @player_bottom_right_x    = oam + 19
@@ -73,14 +32,90 @@ loop:
     sta @player_bottom_left_y           ; Set the bottom sprites to y + 8   
     sta @player_bottom_right_y
 
+    jsr check_change_slide
+
 @return:
     rts                                 ; return
 .endproc
 
 .proc animate_player
+    lda var_player_info
+    and #%00001000
+    beq @return
+
+    jsr animate_movement
+    jsr animate_cigar
+@return:
+    rts
+.endproc
+
+.proc animate_movement
     ON_BUTTON_PRESS PAD_L, ANIMATE_WALK
     ON_BUTTON_PRESS PAD_R, ANIMATE_WALK
     ON_BUTTON_PRESS PAD_U, ANIMATE_WALK
     ON_BUTTON_PRESS PAD_D, ANIMATE_WALK
+    rts
+.endproc
+
+.proc animate_cigar
+    ; lda var_gamestate
+    ; sta GAME_STATE::MENU
+    ; beq @return
+
+    ; lda 
+    TIMED_FLIP_FLOP CIGAR_LEFT, CIGAR_RIGHT, CIGAR_SPEED
+@return:
+    rts
+.endproc
+
+;===================================================================================================
+; Check if the player is within the door
+;===================================================================================================
+.proc check_change_slide
+; First right door
+    lda var_player_x
+    ; sec
+    ; sbc #240 
+    ; bmi @continue ; if x < 240  ; this does not work because 0 - 240 is smaller than (-128) which results in a positive number. The more you know
+    cmp #240      ; Compare A with 240
+    bcc @continue ; Branch if A < 240 (Carry = 0)
+
+    lda var_player_y
+    sec
+    sbc #112
+    bmi @continue ; if y < 112
+
+    lda var_player_y
+    sec
+    sbc #128
+    bpl @continue   ; if y >= 128
+
+    ;we are in the door trigger
+    lda #24
+    sta var_player_x
+    LOAD_NEXT_SLIDE
+
+@continue:
+; Now The left door
+    lda var_player_x
+    cmp #8
+    bcs @return
+
+    lda var_player_y
+    sec
+    sbc #112
+    bmi @return ; if y < 112
+    
+    lda var_player_y
+    sec
+    sbc #128
+    bpl @return   ; if y >= 128
+
+    ;we are in the door trigger
+    lda #216
+    sta var_player_x
+    LOAD_PREVIOUS_SLIDE
+
+@return:
     rts
 .endproc
