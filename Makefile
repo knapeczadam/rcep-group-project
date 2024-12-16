@@ -20,10 +20,8 @@ endif
 
 # Create the output and object directory if they don't exist yet
 ifeq ($(OS),Windows_NT)
-	RM = rmdir /S /Q
 	MKDIR = mkdir
 else
-	RM = rm -rf
 	MKDIR = mkdir -p
 endif
 
@@ -50,7 +48,12 @@ $(TGT): $(OBJ_FILES) $(OUT_DIR)
 
 # Clean target
 clean:
-	$(RM) $(OBJ_DIR) $(OUT_DIR)
+ifeq ($(OS),Windows_NT)
+	cmd /c IF EXIST $(OBJ_DIR) rmdir /S /Q $(OBJ_DIR)
+	cmd /c IF EXIST $(OUT_DIR) rmdir /S /Q $(OUT_DIR)
+else
+	rm -rf $(OBJ_DIR) $(OUT_DIR)
+endif
 
 # Default target
 all: $(TGT)
