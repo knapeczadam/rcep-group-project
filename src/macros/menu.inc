@@ -20,13 +20,19 @@
 .macro SELECT_MODE
     lda oam + TEXT_ARROW_OAM_OFFSET     ; Get Y Position
     cmp #$8F                            ; Check if it's not fun mode
-    bne @change_game_state              ; skip changing mode (default is fun mode)
+    bne @load_player                    ; skip changing mode (default is fun mode)
 
     lda var_bools   
     and #%11111100                      ; disable shooting and fun mode
     sta var_bools
 
-@change_game_state:
+    jmp @change_game_state
+
+@load_player:
+    lda var_player_info
+    ora #%00001000                      ; Load the player
+    sta var_player_info
+@change_game_state:                     ; 
     lda #GAME_STATE::SLIDES              ; change state  
     sta var_gamestate                   ; Set gamestate to slide
 

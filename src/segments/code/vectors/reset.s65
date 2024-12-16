@@ -2,23 +2,23 @@
 ; RESET is the entry point where the program starts, triggered when the system is powered on or reset.
 ;===================================================================================================
 .proc reset
-	sei                                ; disable IRQs
+	sei                                	; disable IRQs
 	lda #0
-	sta PPU_CONTROL                    ; set all the PPU miscellaneous settings to 0
-	sta PPU_MASK                       ; disable all the PPU rendering settings
-	sta APU_DM_CONTROL                 ; disable DMC IRQs
+	sta PPU_CONTROL                    	; set all the PPU miscellaneous settings to 0
+	sta PPU_MASK                       	; disable all the PPU rendering settings
+	sta APU_DM_CONTROL                 	; disable DMC IRQs
 
-	lda #$40                           ; disable APU frame IRQs
+	lda #$40                           	; disable APU frame IRQs
 	sta JOYPAD2
 	
-	cld                                ; Disable decimal mode
+	cld                                	; Disable decimal mode
 
 	ldx #$FF
-	txs                                ; Initialise the stack
+	txs                                	; Initialise the stack
 
     lda #0
 	ldx #0
-clear_ram:                             ; Clear the RAM (cannot be a subroutine as it clears the stack as well)
+clear_ram:                             	; Clear the RAM (cannot be a subroutine as it clears the stack as well)
 	sta $0000, x
 	sta $0100, x
 	sta $0200, x
@@ -31,23 +31,19 @@ clear_ram:                             ; Clear the RAM (cannot be a subroutine a
 	bne clear_ram
 
 @init_player_pos:
-	ldx #4                             ; load 4 in X (position of the top left sprite of the player)
-	lda player_data, x                 ; Check player position y in raw data
-	sta var_player_y                   ; Set player position y variable
-	inx                                ;
-	inx                                ; x+3 to go to X position of sprite in the raw data
-	inx                                ;
-	lda player_data, x                 ; Load player position x variable
-	sta var_player_x                   ; Set player position x variable
+	lda #$51           					; Set default Y position for player
+	sta var_player_y                   	; Set player position y variable
+	lda #0				         		; Set default X position for player
+	sta var_player_x                   	; Set player position x variable
 
 @init_bools:
 	lda var_bools
-	ora #%01100011                     ; Setting the boolean for firing to true by default bit 0/ Setting fun mode for controls bit 1
+	ora #%01100011                     	; Setting the boolean for firing to true by default bit 0/ Setting fun mode for controls bit 1
 	sta var_bools	
 
 @init_player_info:
 	lda var_player_info
-	ora #%00000101                     ; Setting the player to default right movement and Bool to fun mode
+	ora #%00000001                     	; Setting the player to default right movement and disabled
 	sta var_player_info
 
 @init_gamestate:
@@ -58,27 +54,27 @@ clear_ram:                             ; Clear the RAM (cannot be a subroutine a
 	lda #0
 	sta var_blinking_text_count			; Setting the blinking text count to 0
 
-    jsr clear_oam                      ; Clear the local OAM
+    jsr clear_oam                      	; Clear the local OAM
 
 	ldy #2
-	jsr wait_vblank_y_times            ; Wait for the first 2 VBlanks to let the PPU stabilise before writing to it
+	jsr wait_vblank_y_times            	; Wait for the first 2 VBlanks to let the PPU stabilise before writing to it
 
-    jsr transfer_oam                   ; Transfer the local, now cleared, OAM data into the PPU to reduce the visible artifacts at start
+    jsr transfer_oam                   	; Transfer the local, now cleared, OAM data into the PPU to reduce the visible artifacts at start
     jsr init_oam
-	jsr clear_nametable                ; Clear the nametable 1
-    jsr clear_attribute_table          ; Clear the attribute table 1
-    jsr copy_chr_tiles                 ; Copy CHR tiles into CHR RAM
-    jsr copy_palette                   ; Copy the palette to the PPU
+	jsr clear_nametable                	; Clear the nametable 1
+    jsr clear_attribute_table          	; Clear the attribute table 1
+    jsr copy_chr_tiles                 	; Copy CHR tiles into CHR RAM
+    jsr copy_palette                   	; Copy the palette to the PPU
 
 	jsr write_data_to_chr
 
-    INIT_SOUND_ENGINE                  ; Intialise the sound engine (doing this late to take advantage of the PPU stabilisation time; we let the APU stabilise as well)
+    INIT_SOUND_ENGINE                  	; Intialise the sound engine (doing this late to take advantage of the PPU stabilisation time; we let the APU stabilise as well)
 	
-    SELECT_SONG SONG_1                 ; Set the default song and FX
+    SELECT_SONG SONG_1                 	; Set the default song and FX
     SELECT_FX FX_1
 
     lda #%10000000
-    sta PPU_CONTROL                    ; Enable VBlank NMIs
+    sta PPU_CONTROL                    	; Enable VBlank NMIs
 
 	jmp main
 .endproc

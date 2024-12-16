@@ -67,8 +67,8 @@ var_bools:                  .res 1
 ; 76543210
 ; ||||||||
 ; ||||||++- Last direction the player was going (default to right), going clock wise starting at the top or 12 o'clock we have 00 == UP / 01 == RIGHT / 10 == DOWN / 11 == LEFT
-; |||||+--- Bool to check if should use player direction for bullets or not
-; ||||+----
+; |||||+--- 
+; ||||+---- IsEnabled?
 ; |||+-----
 ; ||+------ 
 ; |+------- 

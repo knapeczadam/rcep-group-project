@@ -1,4 +1,8 @@
 .proc update_player
+    lda var_player_info
+    and #%00001000
+    beq @return
+
     @player_bottom_left_x     = oam + 15
     @player_bottom_left_y     = oam + 12
     @player_bottom_right_x    = oam + 19
@@ -35,8 +39,13 @@
 .endproc
 
 .proc animate_player
+    lda var_player_info
+    and #%00001000
+    beq @return
+
     jsr animate_movement
     jsr animate_cigar
+@return:
     rts
 .endproc
 
@@ -49,7 +58,13 @@
 .endproc
 
 .proc animate_cigar
+    ; lda var_gamestate
+    ; sta GAME_STATE::MENU
+    ; beq @return
+
+    ; lda 
     TIMED_FLIP_FLOP CIGAR_LEFT, CIGAR_RIGHT, CIGAR_SPEED
+@return:
     rts
 .endproc
 

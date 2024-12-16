@@ -12,11 +12,11 @@
 
 ;      Y   tile#   attribs     X
 player_data:
-.byte $51,  $03,  %00000001,  $08      ; cigar
-.byte $50,  $01,  %00000000,  $00      ; head left
-.byte $50,  $01,  %01000000,  $08      ; head right
-.byte $58,  $02,  %00000000,  $00      ; body left
-.byte $58,  $02,  %01000000,  $08      ; body right
+.byte $F0,  $03,  %00000001,  $08      ; cigar
+.byte $F0,  $01,  %00000000,  $00      ; head left
+.byte $F0,  $01,  %01000000,  $08      ; head right
+.byte $F0,  $02,  %00000000,  $00      ; body left
+.byte $F0,  $02,  %01000000,  $08      ; body right
 
 text_arrow:
 .byte $87,  $11,  %00000001,  $45
