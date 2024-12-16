@@ -243,6 +243,12 @@ label:
 	dec @movement_y,x					; Move bullet one pixel
 	jsr check_wall_collision			; Check if bullet collides with the wall
 
+	dec @movement_y,x					; Move bullet one pixel
+	jsr check_wall_collision			; Check if bullet collides with the wall
+
+	dec @movement_y,x					; Move bullet one pixel
+	jsr check_wall_collision			; Check if bullet collides with the wall
+
 	dec @movement_y,x					; Move it one more pixel
 	jsr check_wall_collision			; Check if bullet collides with the wall
 
@@ -250,6 +256,12 @@ label:
 @move_bullet_right:
 	lda #@right_direction
 	sta @direction
+
+	inc @movement_x,x  
+	jsr check_wall_collision
+
+	inc @movement_x,x  
+	jsr check_wall_collision
 
 	inc @movement_x,x  
 	jsr check_wall_collision
@@ -266,12 +278,24 @@ label:
 	jsr check_wall_collision	
 
 	inc @movement_y,x
+	jsr check_wall_collision	
+
+	inc @movement_y,x
+	jsr check_wall_collision	
+
+	inc @movement_y,x
 	jsr check_wall_collision
 
 	jmp @return
 @move_bullet_left:
 	lda #@left_direction
 	sta @direction
+
+	dec @movement_x,x  
+	jsr check_wall_collision
+
+	dec @movement_x,x  
+	jsr check_wall_collision
 
 	dec @movement_x,x  
 	jsr check_wall_collision
