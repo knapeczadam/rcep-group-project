@@ -1,3 +1,6 @@
+;===================================================================================================
+; Get the X offset in oam for the target bullet.
+;===================================================================================================
 .macro MULTIPLY_X_BY_4 ;; TODO: rename this to GET_BULLET_SPRITE_ADDRESS (based on x)
     lda #$20                            ; Clear A (set start to second OAM line)
 	cpy #00                             ; if Y == 0
@@ -12,6 +15,9 @@ return:
     tax                                 ; Store A back into X so that X = X * 4
 .endmacro
 
+;===================================================================================================
+; Shoots a bullet duh.
+;===================================================================================================
 .macro SHOOT_BULLET
 ; Check if we can shoot first, then shoot
     lda var_bools                       ; Load bools
