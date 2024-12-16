@@ -459,6 +459,64 @@ done:
 	rts									; return
 .endproc
 
+;===================================================================================================
+; Subroutine to position the bullet in the right place when shooting.
+;===================================================================================================
+.proc load_bullet_position
+	@player_y_pos = oam + 16
+    @player_x_pos = oam + 19
+
+    lda var_player_info                 ; Load player info
+	and #%00000011                      ; Only keep the direction
+	beq @set_up                         ; If bullet is direction up (%00000000) set up
+
+	cmp #%00000001                      ; If bullet is direction right, set right
+	beq @set_right
+
+	cmp #%00000010                      ; If bullet is direction down, set down
+	beq @set_down
+
+	cmp #%00000011                      ; If bullet is direction left, set left
+	beq @set_left
+
+@set_up:
+	lda @player_y_pos                   ; Get Y position of the player sprite
+	sec
+	sbc #$08                            ;
+	sta temp_00                         ; Store it 
+
+	lda @player_x_pos
+	sta temp_01
+
+	jmp @return
+@set_right:
+	lda @player_y_pos
+	sta temp_00
+
+	lda @player_x_pos
+	sta temp_01
+
+	jmp @return
+@set_down:
+	lda @player_y_pos
+	sta temp_00
+
+	lda @player_x_pos
+	sta temp_01
+
+	jmp @return
+@set_left:
+	lda @player_y_pos
+	sta temp_00
+
+	lda @player_x_pos
+	sec
+	sbc #$08
+	sta temp_01
+
+@return:
+	rts
+.endproc
 
 ;===================================================================================================
 ; Legacy code to reuse or throw away later.
