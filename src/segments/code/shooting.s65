@@ -94,8 +94,8 @@ multiply_loop:                              ; Else loop multiply
 	@down_direction 	    = %00000010
 	@left_direction 	    = %00000011
     ; Hard coding the bullet location, not sure if there is another way
-    @bullet_horizontal_tile = $03
-    @bullet_vertical_tile   = $04
+    @bullet_horizontal_tile = $04
+    @bullet_vertical_tile   = $14
     @bullet_tile_location   = oam + 1
     @bullet_attribute       = oam + 2
 
