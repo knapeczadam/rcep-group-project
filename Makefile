@@ -4,11 +4,17 @@ CFG_NAME := NESlides
 
 CFG_DIR := cfg
 SRC_DIR := src
-OUT_DIR := out
+ifndef OUT_DIR
+	OUT_DIR := out
+endif
 OBJ_DIR := obj
 
-CA65 := ca65
-LD65 := ld65
+ifndef CA65
+	CA65 := ca65
+endif
+ifndef LD65
+	LD65 := ld65
+endif
 
 #----------------------------------------------------------------
 
