@@ -137,9 +137,9 @@ prepare_next_slide: ;check what happens if slide is filled and end on the last p
 
 	; jsr check_next_slide_edge_case		; Check if current character is also last character of slide
 @end_loop:
-    inc temp_00_ptr                 	; Increment the low byte of the base address
+    inc temp_00_ptr + 2                	; Increment the low byte of the base address
 	bne end_slide                      	; End the slide if the low byte did not overflow
-	inc temp_00_ptr + 1             	; Increment the high byte of the base address
+	inc temp_00_ptr + 3             	; Increment the high byte of the base address
 
 end_slide:
 	LOAD_BORDER 0						; Load the lower border
