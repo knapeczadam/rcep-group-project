@@ -12,5 +12,6 @@
 .include "segments/oam.s65"
 .include "segments/bss.s65"
 .include "segments/rodata.s65"
+.include "segments/slides.s65"
 .include "segments/code.s65"
 .include "segments/vectors.s65"
