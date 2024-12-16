@@ -33,6 +33,9 @@ menu:
     .byte " DYLAN BURGISSER,JAKUB FRATCZAK "
     .byte "    ADAM KNAPECZ,TUUR MARTENS   "
     .byte NEXT_SLIDE
+    
+menu_rle:
+.incbin "../data/menu.rle"
 
 slides:
     .byte "ACCORDING TO ALL KNOWN LAWS", NEWLINE

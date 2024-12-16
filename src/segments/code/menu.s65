@@ -3,7 +3,11 @@
 ;===================================================================================================
 .proc load_menu
     jsr initialize_slide_ptr			; Initialize the slide ptr for loading the info
-    
+	
+	lda var_bools                       ; Load the bools
+	and #%00100000                      ; Check if the RLE is enabled
+	bne use_rle                         ; If it is, use the RLE data
+	
     lda #30                 			; Load the initial amount of available rows left
 	sta temp_00                         ; Store the former amount in temp_00, which will decrement with each row change
 	
@@ -57,6 +61,39 @@ end_slide:
 	lda #%00011110
 	sta PPU_MASK
 
+	rts
+	
+use_rle:	
+	jsr load_menu_rle					; Load the menu RLE data
+	jmp end_slide						; End the slide
+	
+.endproc
+
+.proc load_menu_rle    
+	TRANSFER_ADDRESS menu_rle, temp_00_ptr
+	
+    ldy #0                             ; Y = 0 (Y counts how many bytes we are reading)
+@loop:
+    lda (temp_00_ptr),y                ; Fetch new length
+    beq @return                        ; Stop looping if we find Length == 0
+      iny                              ; Y++
+      bne :+
+        inc temp_00_ptr + 1            ; Increment hi-byte if Y rolls off back to 0
+      :
+      tax                              ; Transfer length to X
+      lda (temp_00_ptr), y             ; Fetch new tile number
+      iny                              ; Y++
+      bne :+
+        inc temp_00_ptr + 1            ; Increment hi-byte if Y rolls off back to 0
+      :
+@tile_loop:
+	sta PPU_DATA                       ; Send tile number to PPU
+	dex                                ; X--
+	bne @tile_loop
+    
+    jmp @loop                          ; Proceed to read the next length
+  
+@return:    
 	rts
 .endproc
 
