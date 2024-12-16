@@ -42,7 +42,7 @@ clear_ram:                             ; Clear the RAM (cannot be a subroutine a
 
 @init_bools:
 	lda var_bools
-	ora #%00000011                     ; Setting the boolean for firing to true by default bit 0/ Setting fun mode for controls bit 1
+	ora #%00100011                     ; Setting the boolean for firing to true by default bit 0/ Setting fun mode for controls bit 1
 	sta var_bools	
 
 @init_player_info:

@@ -56,7 +56,7 @@ var_bullets_arr:            .res 6 ; we can shoot up to 6 bullets
 ; |||||+--- IsSlideOver?
 ; ||||+---- CanPlayerMove?
 ; |||+----- IsDoingTransition?
-; ||+------ 
+; ||+------ UseRLECompression?
 ; |+------- 
 ; +--------
 var_bools:                  .res 1
