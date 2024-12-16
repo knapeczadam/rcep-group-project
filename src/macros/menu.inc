@@ -20,7 +20,7 @@
 .macro SELECT_MODE
     lda oam + TEXT_ARROW_OAM_OFFSET     ; Get Y Position
     cmp #$8F                            ; Check if it's not fun mode
-    bne @load_player                    ; skip changing mode (default is fun mode)
+    bne @load_player                    ; skip changing mode (default is not fun mode)
 
     lda var_bools   
     and #%11111100                      ; disable shooting and fun mode
@@ -29,6 +29,10 @@
     jmp @change_game_state
 
 @load_player:
+    lda var_bools   
+    ora #%00000010                      ; enable fun mode
+    sta var_bools
+    
     lda var_player_info
     ora #%00001000                      ; Load the player
     sta var_player_info

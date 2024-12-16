@@ -135,6 +135,14 @@ end:
 ; Make the "play select" text blink
 ;===================================================================================================
 .proc update_blinking_text
+	lda var_bools						; Check if the text is displayed
+	and #%01000000						;
+	beq :+								; If the text is not displayed, ignore the state of the game and display it
+
+	lda var_gamestate
+	cmp #GAME_STATE::MENU
+	bne @return
+:
 	@fps = 50
 	@blinking_speed = 25
 	

@@ -154,6 +154,10 @@ multiply_loop:                              ; Else loop multiply
 ; Checks if bullet is active --> check if it collided, else --> move it
 ;===================================================================================================
 .proc update_bullets
+	lda var_bools
+	and #%00000010						; Check if we're in fun mode
+	beq done							; If not return
+	
 	jmp :+
 done:
 	rts
@@ -361,6 +365,9 @@ label:
 ; Erase the letter and mark bullet has collided.
 ;===================================================================================================
 .proc check_background_collision
+	lda var_bools
+	and #%00000010						; Check if we're in fun mode
+	beq done							; If not return
 ; Loop through every bullet, check if it's active. If so check the tile at the center 
 ; (for simplicity otherwise we can use the tip of the bullet but that requires calculating it based on the direction etc.. or use a bounding box)
 ; if the center of the sprite is in a tile that is not #$00 or whatever background color, set its colliding flag and then loop next bullet
