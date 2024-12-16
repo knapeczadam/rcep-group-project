@@ -19,7 +19,7 @@
 @not_fun_controls:
 	ON_BUTTON_RELEASE PAD_R, LOAD_NEXT_SLIDE
 	ON_BUTTON_RELEASE PAD_L, LOAD_PREVIOUS_SLIDE
-
+	; ON_BUTTON_RELEASE PAD_START, RELOAD_SLIDE	; Don't need this, no reason for not fun mode slide to need reset?
 	jmp @return
 
 @not_menu_controls:
@@ -27,6 +27,7 @@
 	and #%00000010						; Now Check if we are in fun mode or not
 	beq @not_fun_controls				; If not go back to not fun controls
 
+@fun_controls:
 ; Handle shooting and Player Movement
     ON_BUTTON_RELEASE PAD_A, SHOOT_BULLET
 
@@ -34,6 +35,8 @@
     ON_BUTTON_PRESS PAD_D, MOVE_DOWN
     ON_BUTTON_PRESS PAD_L, MOVE_LEFT
     ON_BUTTON_PRESS PAD_R, MOVE_RIGHT
+
+	ON_BUTTON_RELEASE PAD_START, RELOAD_SLIDE
 
 @return:
     rts
