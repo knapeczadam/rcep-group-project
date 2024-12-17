@@ -52,9 +52,12 @@
 ; A macro that toggles music by switching between __PLAY_MUSIC and __STOP_MUSIC.
 ;===================================================================================================
 .macro TOGGLE_MUSIC
-    @song_count = 2
-    CIRCULAR_INCREMENT var_current_song, @song_count
-    FLIP_FLOP __PLAY_MUSIC, __PLAY_MUSIC
+    FLIP_FLOP __PLAY_MUSIC, __STOP_MUSIC
+.endmacro
+
+.macro PLAY_NEXT_SONG
+    CIRCULAR_INCREMENT var_current_song, SONG_COUNT
+    __PLAY_MUSIC
 .endmacro
 
 ;===================================================================================================

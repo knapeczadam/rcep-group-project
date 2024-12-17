@@ -14,6 +14,7 @@ APU_SQ2_SWEEP  = $4005
 APU_SQ2_LO     = $4006
 APU_SQ2_HI     = $4007
 
+SONG_COUNT     = 4
 SONG_1         = 0
 SONG_2         = 1
 SONG_3         = 2

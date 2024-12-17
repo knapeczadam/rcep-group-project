@@ -3,9 +3,10 @@
 ; To enable DEBUG, set the DEBUG constant to 1 in constants/debug.inc
 ;===================================================================================================
 .macro DEBUG_MAIN 
-;    ON_BUTTON_RELEASE PAD_START, TOGGLE_MUSIC
-;    ON_BUTTON_RELEASE PAD_SELECT, PLAY_FX
+    ON_BUTTON_RELEASE PAD_B, PLAY_NEXT_SONG
     ON_BUTTON_RELEASE PAD_B, UPDATE_BACKGROUND_STATE
+    
+    ON_BUTTON_RELEASE PAD_SELECT, PLAY_FX
 .endmacro
 
 ;===================================================================================================
