@@ -29,8 +29,7 @@
 ; Increment the background color state variable and reset it to 0 if it exceeds 3.
 ;===================================================================================================
 .macro UPDATE_BACKGROUND_STATE
-    @color_count = 4
-    CIRCULAR_INCREMENT var_current_bg_state, @color_count
+    CIRCULAR_INCREMENT var_current_bg_state, BG_COLOR_COUNT
 .endmacro
 
 ;===================================================================================================

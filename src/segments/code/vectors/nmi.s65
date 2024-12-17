@@ -176,7 +176,7 @@ end:
 	@end_index = 30
 
 	@color_palette_1 = 00  
-	@color_palette_3 = 170
+	@color_palette_3 = 255
 	
     SET_PPU_ADDRESS NT1_ATTR           	; Set the PPU address to the attribute table of the first nametable
     ldx #@attr_count					; 64 bytes to update
