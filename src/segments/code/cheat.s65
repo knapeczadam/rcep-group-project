@@ -1,3 +1,6 @@
+;===================================================================================================
+; Checks for multiple cheat codes by handling button releases and calling verification routines.
+;===================================================================================================
 .macro CHECK_CHEAT
     ON_BUTTON_RELEASE PAD_U, CHECK_KONAMI_CODE
     ON_BUTTON_RELEASE PAD_D, CHECK_KONAMI_CODE
@@ -10,6 +13,9 @@
 end_check_cheat:
 .endmacro
 
+;===================================================================================================
+; https://en.wikipedia.org/wiki/Konami_Code
+;===================================================================================================
 .macro CHECK_KONAMI_CODE
 .local @reset_konami_code, @activate_cheat 
     lda var_gamepad_released
@@ -20,7 +26,7 @@ end_check_cheat:
       inc var_konami_code_index        ; Match found, increment index
     
       ldx var_konami_code_index
-      cpx #$0B                         ; Length of Konami Code sequence
+      cpx #$0A                         ; Length of Konami Code sequence
       beq @activate_cheat              ; Check if we've completed the full sequence
 
         jmp end_check_cheat

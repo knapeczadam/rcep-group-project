@@ -51,8 +51,8 @@ group_table:
     .byte $0F, $07, $0B, $03
     
 konami_code_sequence:
-    ; Konami Code: Up, Up, Down, Down, Left, Right, Left, Right, B, A, Start
-    .byte $08, $08, $04, $04, $02, $01, $02, $01, $40, $80, $10
+    ; Konami Code: Up, Up, Down, Down, Left, Right, Left, Right, B, A
+    .byte $08, $08, $04, $04, $02, $01, $02, $01, $40, $80
 
 tiles_chr:
     .incbin "../data/NESlides.chr"
