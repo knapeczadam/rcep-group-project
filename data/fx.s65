@@ -9,13 +9,10 @@ fx_data:
 	.word @ntsc
 	.word @ntsc
 @ntsc:
-	.word @sfx_ntsc_fx_1
 	.word @sfx_ntsc_zap
 	.word @sfx_ntsc_boom
 	.word @sfx_ntsc_big_boom
 
-@sfx_ntsc_fx_1:
-	.byte $8a,$0b,$89,$3f,$0a,$8a,$0f,$0a,$00
 @sfx_ntsc_zap:
 	.byte $81,$60,$82,$00,$80,$3f,$89,$f0,$01,$81,$6d,$01,$81,$79,$01,$81
 	.byte $86,$01,$81,$92,$01,$81,$9f,$01,$81,$ab,$01,$81,$b8,$01,$81,$c4

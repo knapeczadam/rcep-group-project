@@ -19,6 +19,7 @@ SONG_1         = 0
 SONG_2         = 1
 SONG_3         = 2
 
+FX_COUNT       = 3
 FX_1           = 0
 FX_2           = 1
 FX_3           = 2
