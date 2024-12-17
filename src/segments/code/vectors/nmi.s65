@@ -47,6 +47,7 @@
 ;===================================================================================================
     
 	jsr transfer_oam                   ; Transfer the local OAM data into the PPU
+	jsr update_background_color
 
 	RESET_SCROLL
 
@@ -103,6 +104,10 @@ end:
 	@color_palette_3 = 170 ; $AA
 	@color_palette_4 = 255 ; FF
 	
+	lda var_bools
+	and #%00000010                     ; Now Check if we are in fun mode or not
+	beq @return                        ; If not go back to not fun controls
+	
     SET_PPU_ADDRESS NT1_ATTR           ; Set the PPU address to the attribute table of the first nametable
     ldx #@attr_count                            ; 64 bytes to update
     ldy #@start_index                             ; Index for the attribute table
@@ -116,7 +121,8 @@ end:
     iny                                ; Increment the index
     dex                                ; Decrement the counter
     bne :-                             ; Loop until all 64 bytes are updated
-
+	
+@return:
     rts
 .endproc
 
