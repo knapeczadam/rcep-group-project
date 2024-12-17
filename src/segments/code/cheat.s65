@@ -1,0 +1,38 @@
+.macro CHECK_CHEAT
+    ON_BUTTON_RELEASE PAD_U, CHECK_KONAMI_CODE
+    ON_BUTTON_RELEASE PAD_D, CHECK_KONAMI_CODE
+    ON_BUTTON_RELEASE PAD_L, CHECK_KONAMI_CODE
+    ON_BUTTON_RELEASE PAD_R, CHECK_KONAMI_CODE
+    ON_BUTTON_RELEASE PAD_A, CHECK_KONAMI_CODE
+    ON_BUTTON_RELEASE PAD_B, CHECK_KONAMI_CODE
+    ON_BUTTON_RELEASE PAD_START, CHECK_KONAMI_CODE
+    ON_BUTTON_RELEASE PAD_SELECT, CHECK_KONAMI_CODE
+end_check_cheat:
+.endmacro
+
+.macro CHECK_KONAMI_CODE
+.local @reset_konami_code, @activate_cheat 
+    lda var_gamepad_released
+    ldx var_konami_code_index
+    cmp konami_code_sequence, x
+    bne @reset_konami_code
+
+      inc var_konami_code_index        ; Match found, increment index
+    
+      ldx var_konami_code_index
+      cpx #$0B                         ; Length of Konami Code sequence
+      beq @activate_cheat              ; Check if we've completed the full sequence
+
+        jmp end_check_cheat
+
+@reset_konami_code:
+    lda #$00
+    sta var_konami_code_index          ; Reset the code sequence if wrong button pressed
+    jmp end_check_cheat
+
+@activate_cheat:
+    lda #$00
+    sta var_konami_code_index          ; Reset the sequence after activation
+    ACTIVATE_SUNGLASSES
+    jmp end_check_cheat
+.endmacro

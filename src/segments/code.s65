@@ -16,6 +16,7 @@
 .include "code/gamepad.s65"
 .include "code/sprites.s65"
 .include "code/scrolling.s65"
+.include "code/cheat.s65"
 
 .include "code/vectors/nmi.s65"
 .include "code/vectors/reset.s65"
@@ -34,6 +35,7 @@ main_loop:
 
  	jsr gamepad_poll ; read the gamepad
 	jsr check_can_shoot
+	CHECK_CHEAT	
 	jsr handle_inputs
     jsr update_player
 	jsr animate_player

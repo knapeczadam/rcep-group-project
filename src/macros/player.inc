@@ -208,3 +208,16 @@ end_move_down:
     lda #@cigar_right_tile             ; Load cigar tile index
     sta @cigar                         ; Store it in the cigar sprite
 .endmacro
+
+.macro ACTIVATE_SUNGLASSES
+.local @left_head, @right_head, @sunglasses_tile
+    @left_head  = oam + PLAYER_LEFT_HEAD_TILE_OAM_OFFSET               
+    @right_head  = oam + PLAYER_RIGHT_HEAD_TILE_OAM_OFFSET            
+    @sunglasses_tile  = PLAYER_SUNGLASSES_TILE_IDX      
+    
+    lda #@sunglasses_tile
+    sta @left_head
+	
+    lda #@sunglasses_tile
+    sta @right_head
+.endmacro
