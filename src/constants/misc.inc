@@ -6,7 +6,7 @@ NEWLINE             = $02
 LAST_SLIDE          = $03
 BIG_TEXT            = $04
 
-MAX_SLIDES          = 6
+MAX_SLIDES          = 4
 MAX_SLIDE_INDEX     = (MAX_SLIDES-1)*2
 MAX_SLIDE_COLUMNS   = 32
 MAX_SLIDE_ROWS      = 26
