@@ -7,11 +7,11 @@
 
 .include "macros.inc"
 
-.include "segments/header.s65"
-.include "segments/zp.s65"
-.include "segments/oam.s65"
-.include "segments/bss.s65"
-.include "segments/rodata.s65"
-.include "segments/slides.s65"
-.include "segments/code.s65"
-.include "segments/vectors.s65"
+.include "segments/header.s65"         ; 
+.include "segments/zp.s65"             ; $0000-$00FF
+.include "segments/oam.s65"            ; $0200-$02FF
+.include "segments/bss.s65"            ; $0300-$500
+.include "segments/rodata.s65"         ; 
+.include "segments/slides.s65"         ;
+.include "segments/code.s65"           ; $8000-$FFFF
+.include "segments/vectors.s65"        ; $FFFA-$FFFF
