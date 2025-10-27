@@ -22,7 +22,7 @@ It’s a playful experiment that merges **low-level programming**, **hardware co
 **🗓️ Semester:** 2024 – Third semester  
 **🎓 Study load:** 6 credits  
 **⏱️ Total study time:** 180 hours  
-**👨‍🏫 Teacher:** tom.tesch@howest.be  
+**👨‍🏫 Teacher:** Tom Tesch
 
 **📄 Course page:**  
 [Digital Arts & Entertainment – Retro Console & Emulator Programming](https://www.digitalartsandentertainment.be/page/372/%5BElective%5D+Retro+Console+%26+Emulator+Programming)
