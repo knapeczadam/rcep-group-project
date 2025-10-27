@@ -1,11 +1,11 @@
-# 🎮 Retro Console & Emulator Programming – Howest DAE (2024)
+# 🎮 Retro Console & Emulator Programming – NESlides 
 
 Hey there, fellow DAE student, curious visitor, or retro enthusiast 👋  
-Welcome to our **Retro Console & Emulator Programming** repository — a showcase of what we built during the **third semester (2024)** at **Digital Arts & Entertainment**, **Howest University**, **Kortrijk, Belgium**.
+Welcome to our **Retro Console & Emulator Programming** repository — a showcase of what we built during the **third semester (2024)** at **DAE**.
 
 ---
 
-## 🗂️ About this repository
+## 🗄️ About this repository
 
 This repo contains our **NES homebrew project**, fully written in **6502 Assembly**.  
 The result is an interactive “presentation” app — **NESlides** — where the player can navigate between slides and shoot every tile on screen, completely erasing the slide if they wish.
@@ -14,18 +14,20 @@ It’s a playful experiment that merges **low-level programming**, **hardware co
 
 ---
 
-## 🧱 Course Information
+## 🔎 Course Information
 
-**📘 Course:** Retro Console & Emulator Programming  
-**🏫 University:** Howest DAE – Digital Arts & Entertainment  
+**📚 Course:** Retro Console & Emulator Programming  
+**🏫 University:** Howest University of Applied Sciences - Digital Arts and Entertainment   
 **📍 Location:** Kortrijk, Belgium  
-**🗓️ Semester:** 2024 – Third semester  
+**🗓️ Academic year:** 2024–25 | Third semester  
 **🎓 Study load:** 6 credits  
 **⏱️ Total study time:** 180 hours  
-**👨‍🏫 Teacher:** Tom Tesch
 
-**📄 Course page:**  
-[Digital Arts & Entertainment – Retro Console & Emulator Programming](https://www.digitalartsandentertainment.be/page/372/%5BElective%5D+Retro+Console+%26+Emulator+Programming)
+---
+
+## 👨‍🏫 Teaching Staff
+
+- **Co-ordinator:** Tom Tesch  
 
 ---
 
@@ -38,19 +40,41 @@ It’s a playful experiment that merges **low-level programming**, **hardware co
 
 ---
 
-## 🎯 Learning Goals (LR09)
+## 🎯 Learning Goals
 
-> *The student Bachelor Digital Arts & Entertainment works in a problem-solving way, using context-specific programming skills and technical knowledge of underlying game technology, taking the imposed directives and technical limitations into account.*
-
-- Understands the architecture and operation of vintage 8-bit hardware.  
-- Writes low-level code in Assembly for constrained environments.  
-- Applies debugging and optimization strategies at machine level.  
-- Develops tools and workflows for efficient data generation.  
-- Collaborates effectively in a technical group project.
+- Solves **technical problems** using a suitable programming language.  
+- Creates **prototypes** based on **mathematical algorithms** (specific to Game Development).  
+- Follows **programming conventions** to produce structured, readable, and maintainable code.  
+- Identifies and **debugs errors** in existing or newly written code.  
 
 ---
 
-## 🧩 Project Description – NESlides
+## 🧩 Course Content
+
+- **Understanding Vintage Consoles**  
+  - Study the architecture and design of classic **8-bit gaming consoles**.  
+  - Explore how **hardware components**, **memory management**, and **CPU limitations** shaped early game development.  
+  - Analyze historical **engineering trade-offs** and **system design decisions**.  
+
+- **Assembly Programming Project**  
+  - Develop a **small game or tool** in **assembly language** targeting the studied console.  
+  - Gain hands-on experience with **low-level programming**, **manual memory handling**, and **CPU cycles**.  
+  - Work collaboratively in teams to build efficient and functional software within strict hardware constraints.  
+
+- **Enter C++**  
+  - Transition from assembly to **C++**, exploring how higher-level languages interact with hardware.  
+  - Choose between:  
+    - Building a **C++ emulator** capable of running the previously developed assembly program.  
+    - Setting up a **toolchain** to generate identical binaries from C++ as from assembly.  
+  - Understand **abstraction layers** and how modern tools map back to low-level execution.  
+
+- **Outcome**  
+  - Gain **insight into hardware-level computation** and **low-level programming practices**.  
+  - Build a foundation for future work in **systems, engine, and GPU programming**.
+
+---
+
+## ⚙️ Project Description
 
 **NESlides** is a custom-built interactive slideshow for the **Nintendo Entertainment System**.  
 - Move between slides using a character.  
@@ -77,7 +101,7 @@ It’s one of those projects that teaches you to *respect every byte*.
 
 ---
 
-### 🪪 License
+### ⚖️ License
 This repository is licensed under the **MIT License** — feel free to explore, learn, or fork anything you find useful.
 
 ---
