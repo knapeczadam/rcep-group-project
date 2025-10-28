@@ -1,4 +1,4 @@
-# 🎮 Retro Console & Emulator Programming – NESlides 
+# 🕹️ Retro Console & Emulator Programming – NESlides 
 
 Hey there, fellow DAE student, curious visitor, or retro enthusiast 👋  
 Welcome to our **Retro Console & Emulator Programming** repository — a showcase of what we built during the **third semester (2024)** at **DAE**.
